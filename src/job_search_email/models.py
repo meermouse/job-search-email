@@ -27,3 +27,15 @@ class SearchPlan:
     exclusions: dict[str, list[str]]
     nhs_rules: dict[str, Any]
     evaluator_notes: list[str]
+
+
+@dataclass
+class JobListing:
+    title: str
+    company: str
+    location: str
+    salary_min: int | None
+    description: str
+    url: str
+    source: str
+    employment_type: str | None
