@@ -9,8 +9,9 @@ import yaml
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
 from .filter import filter_jobs
-from .models import FilteredResult, Profile, SearchPlan
+from .models import FilteredResult, Profile, SearchPlan, ScoredResult
 from .nhs_rules import get_nhs_rules
+from .scorer import score_jobs
 from .queries import generate_queries
 from .search_api.fetcher import fetch_all_jobs
 
@@ -20,6 +21,7 @@ CACHE_PATH = ROOT / "search_plan_cache.json"
 PLAN_PATH = ROOT / "search_plan.json"
 RESULTS_PATH = ROOT / "job_results.json"
 FILTERED_RESULTS_PATH = ROOT / "job_results_filtered.json"
+SCORED_RESULTS_PATH = ROOT / "job_results_scored.json"
 
 
 def load_profile(path: Path = PROFILE_PATH) -> Profile:
@@ -109,6 +111,32 @@ def write_filtered_results(results: list[FilteredResult], path: Path = FILTERED_
         json.dump(output, handle, indent=2)
 
 
+def write_scored_results(results: list[ScoredResult], path: Path = SCORED_RESULTS_PATH) -> None:
+    kept = [r for r in results if not r.rejected]
+    rejected = [r for r in results if r.rejected]
+    analysed = [r for r in kept if r.analysis is not None and "analysis_failed" not in r.flags]
+    unanalysed = [r for r in kept if r.analysis is None and "analysis_failed" not in r.flags]
+    failed = [r for r in kept if "analysis_failed" in r.flags]
+
+    kept_sorted = sorted(kept, key=lambda r: (r.analysis.score if r.analysis else 0), reverse=True)
+
+    output = {
+        "summary": {
+            "total": len(results),
+            "kept": len(kept),
+            "rejected": len(rejected),
+            "analysed": len(analysed),
+            "unanalysed": len(unanalysed),
+            "analysis_failed": len(failed),
+        },
+        "kept": [asdict(r) for r in kept_sorted],
+        "rejected": [asdict(r) for r in rejected],
+    }
+
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(output, handle, indent=2)
+
+
 def main() -> None:
     profile = load_profile()
     fingerprint = fingerprint_profile(profile)
@@ -139,6 +167,14 @@ def main() -> None:
     flagged = [r for r in kept if r.flags]
     print(f"- filtered: {len(kept)} kept, {len(filtered) - len(kept)} rejected ({len(flagged)} flagged unknown employment type)")
     print(f"- filtered results written to: {FILTERED_RESULTS_PATH}")
+
+    print("Scoring jobs...")
+    scored = score_jobs(filtered, profile)
+    write_scored_results(scored)
+    kept_scored = [r for r in scored if not r.rejected]
+    top_score = max((r.analysis.score for r in kept_scored if r.analysis), default="n/a")
+    print(f"- scored: {len(kept_scored)} kept, top score: {top_score}")
+    print(f"- scored results written to: {SCORED_RESULTS_PATH}")
 
 
 if __name__ == "__main__":

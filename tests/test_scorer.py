@@ -206,3 +206,94 @@ def test_score_jobs_sorts_kept_by_score_desc():
     scores = [r.analysis.score for r in kept]
     assert scores == sorted(scores, reverse=True)
     assert scores[0] == 9
+
+
+import json
+from pathlib import Path
+
+from job_search_email.main import write_scored_results
+from job_search_email.models import ScoredResult
+
+
+def make_scored_kept(score: int = 7, url: str = "https://example.com/1") -> ScoredResult:
+    return ScoredResult(
+        job=make_job(url=url), flags=[], rejected=False, reject_reason=None,
+        analysis=make_analysis(score=score),
+    )
+
+
+def make_scored_rejected() -> ScoredResult:
+    return ScoredResult(
+        job=make_job(), flags=[], rejected=True,
+        reject_reason="employment type: contract", analysis=None,
+    )
+
+
+def make_scored_unanalysed() -> ScoredResult:
+    return ScoredResult(
+        job=make_job(), flags=[], rejected=False, reject_reason=None, analysis=None,
+    )
+
+
+def test_write_scored_results_creates_file(tmp_path: Path):
+    results = [make_scored_kept(), make_scored_rejected()]
+    output_path = tmp_path / "job_results_scored.json"
+
+    write_scored_results(results, path=output_path)
+
+    assert output_path.exists()
+    data = json.loads(output_path.read_text(encoding="utf-8"))
+    assert "summary" in data
+    assert "kept" in data
+    assert "rejected" in data
+
+
+def test_write_scored_results_summary_counts(tmp_path: Path):
+    results = [
+        make_scored_kept(score=8, url="https://example.com/a"),
+        make_scored_kept(score=5, url="https://example.com/b"),
+        make_scored_rejected(),
+        make_scored_unanalysed(),
+    ]
+    output_path = tmp_path / "job_results_scored.json"
+
+    write_scored_results(results, path=output_path)
+
+    data = json.loads(output_path.read_text(encoding="utf-8"))
+    s = data["summary"]
+    assert s["total"] == 4
+    assert s["kept"] == 3       # 2 scored + 1 unanalysed
+    assert s["rejected"] == 1
+    assert s["analysed"] == 2
+    assert s["unanalysed"] == 1
+    assert s["analysis_failed"] == 0
+
+
+def test_write_scored_results_kept_sorted_by_score_desc(tmp_path: Path):
+    results = [
+        make_scored_kept(score=4, url="https://example.com/low"),
+        make_scored_kept(score=9, url="https://example.com/high"),
+        make_scored_kept(score=6, url="https://example.com/mid"),
+    ]
+    output_path = tmp_path / "job_results_scored.json"
+
+    write_scored_results(results, path=output_path)
+
+    data = json.loads(output_path.read_text(encoding="utf-8"))
+    scores = [r["analysis"]["score"] for r in data["kept"] if r["analysis"]]
+    assert scores == sorted(scores, reverse=True)
+    assert scores[0] == 9
+
+
+def test_write_scored_results_analysis_failed_counted(tmp_path: Path):
+    failed = ScoredResult(
+        job=make_job(), flags=["analysis_failed"], rejected=False,
+        reject_reason=None, analysis=None,
+    )
+    output_path = tmp_path / "job_results_scored.json"
+
+    write_scored_results([failed], path=output_path)
+
+    data = json.loads(output_path.read_text(encoding="utf-8"))
+    assert data["summary"]["analysis_failed"] == 1
+    assert data["summary"]["unanalysed"] == 0
