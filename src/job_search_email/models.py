@@ -5,10 +5,19 @@ from typing import Any
 @dataclass
 class Profile:
     name: str
-    target_roles: list[str]
+    current_role: str
+    about: str
+    seniority: str
+    industry: str
     skills: list[str]
+    previous_roles: list[str]
+    target_roles: list[str]
+    open_to: list[str]
+    not_open_to: list[str]
+    qualifications: list[str]
+    employment_type: list[str]
     location: str
-    preferred_nhs_band: str
+    min_salary: int
 
 
 @dataclass

@@ -22,12 +22,22 @@ def load_profile(path: Path = PROFILE_PATH) -> Profile:
     with path.open("r", encoding="utf-8") as stream:
         data = yaml.safe_load(stream)
 
+    p = data["profile"]
     return Profile(
-        name=data.get("name", "Anonymous"),
-        target_roles=data.get("target_roles", []),
-        skills=data.get("skills", []),
+        name=p["name"],
+        current_role=p.get("current_role", ""),
+        about=p.get("about", ""),
+        seniority=p.get("seniority", ""),
+        industry=p.get("industry", ""),
+        skills=p.get("skills", []),
+        previous_roles=p.get("previous_roles", []),
+        target_roles=p.get("target_roles", []),
+        open_to=p.get("open_to", []),
+        not_open_to=p.get("not_open_to", []),
+        qualifications=p.get("qualifications", []),
+        employment_type=p.get("employment_type", []),
         location=data.get("location", ""),
-        preferred_nhs_band=data.get("preferred_nhs_band", "Band 8a+"),
+        min_salary=data.get("min_salary", 0),
     )
 
 
@@ -40,9 +50,9 @@ def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:
     return SearchPlan(
         profile_fingerprint=fingerprint,
         queries=generate_queries(profile),
-        exclusions=get_exclusions(),
+        exclusions=get_exclusions(profile),
         nhs_rules=get_nhs_rules(),
-        evaluator_notes=get_evaluator_notes(),
+        evaluator_notes=get_evaluator_notes(profile),
     )
 
 
@@ -60,7 +70,10 @@ def save_cached_plan(plan: SearchPlan, cache_path: Path = CACHE_PATH) -> None:
     cache: dict[str, Any] = {}
     if cache_path.exists():
         with cache_path.open("r", encoding="utf-8") as handle:
-            cache = json.load(handle)
+            try:
+                cache = json.load(handle)
+            except json.JSONDecodeError:
+                cache = {}
 
     cache[plan.profile_fingerprint] = asdict(plan)
     with cache_path.open("w", encoding="utf-8") as handle:
