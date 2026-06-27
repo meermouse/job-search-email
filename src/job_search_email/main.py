@@ -1,4 +1,3 @@
-import hashlib
 import json
 from dataclasses import asdict
 from pathlib import Path
@@ -6,6 +5,7 @@ from typing import Any
 
 import yaml
 
+from .cache import fingerprint_profile
 from .email import build_email_html, send_email
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
@@ -48,11 +48,6 @@ def load_profile(path: Path = PROFILE_PATH) -> Profile:
         preamble=data.get("preamble", ""),
         recipient_email=data.get("recipient_email", ""),
     )
-
-
-def fingerprint_profile(profile: Profile) -> str:
-    canonical = json.dumps(asdict(profile), sort_keys=True, ensure_ascii=False)
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:

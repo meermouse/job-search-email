@@ -6,8 +6,8 @@ from job_search_email.evaluator_notes import get_evaluator_notes
 from job_search_email.queries import generate_queries
 from job_search_email.exclusions import get_exclusions
 from job_search_email.nhs_rules import get_nhs_rules
+from job_search_email.cache import fingerprint_profile
 from job_search_email.main import (
-    fingerprint_profile,
     generate_search_plan,
     load_cached_plan,
     load_profile,
