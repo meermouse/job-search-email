@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -64,25 +65,26 @@ def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:
 def load_cached_plan(cache_path: Path = CACHE_PATH, fingerprint: str = "") -> dict[str, Any] | None:
     if not cache_path.exists():
         return None
-
-    with cache_path.open("r", encoding="utf-8") as handle:
-        cache = json.load(handle)
-
+    try:
+        with cache_path.open("r", encoding="utf-8") as handle:
+            cache = json.load(handle)
+    except json.JSONDecodeError:
+        return None
     return cache.get(fingerprint)
 
 
 def save_cached_plan(plan: SearchPlan, cache_path: Path = CACHE_PATH) -> None:
     cache: dict[str, Any] = {}
     if cache_path.exists():
-        with cache_path.open("r", encoding="utf-8") as handle:
-            try:
+        try:
+            with cache_path.open("r", encoding="utf-8") as handle:
                 cache = json.load(handle)
-            except json.JSONDecodeError:
-                cache = {}
-
+        except json.JSONDecodeError:
+            cache = {}
     cache[plan.profile_fingerprint] = asdict(plan)
-    with cache_path.open("w", encoding="utf-8") as handle:
-        json.dump(cache, handle, indent=2)
+    tmp = cache_path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(cache, indent=2), encoding="utf-8")
+    os.replace(tmp, cache_path)
 
 
 def write_search_plan(plan: SearchPlan, path: Path = PLAN_PATH) -> None:
