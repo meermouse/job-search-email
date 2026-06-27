@@ -136,3 +136,47 @@ def test_employment_type_zero_hours_no_false_match():
     job = make_job(description="This zerophours system tracks time.")
     result = _check_employment_type(job)
     assert result.rejected is False
+
+
+from job_search_email.filter import _check_role_suitability
+
+
+def test_role_suitability_rejects_matching_title():
+    job = make_job(title="Staff Nurse Band 5")
+    result = _check_role_suitability(job, ["staff nurse", "ward manager", "clinical lead"])
+    assert result is not None
+    assert result.rejected is True
+    assert "staff nurse" in result.reject_reason
+
+
+def test_role_suitability_rejects_case_insensitively():
+    job = make_job(title="WARD MANAGER")
+    result = _check_role_suitability(job, ["ward manager"])
+    assert result is not None
+    assert result.rejected is True
+
+
+def test_role_suitability_rejects_on_partial_title_match():
+    job = make_job(title="Senior Clinical Lead - Digital")
+    result = _check_role_suitability(job, ["clinical lead"])
+    assert result is not None
+    assert result.rejected is True
+
+
+def test_role_suitability_passes_non_matching_title():
+    job = make_job(title="Business Manager Digital Transformation")
+    result = _check_role_suitability(job, ["staff nurse", "ward manager", "clinical lead"])
+    assert result is None
+
+
+def test_role_suitability_passes_empty_exclusion_list():
+    job = make_job(title="Staff Nurse")
+    result = _check_role_suitability(job, [])
+    assert result is None
+
+
+def test_role_suitability_reject_reason_includes_matched_term():
+    job = make_job(title="Consultant Physician")
+    result = _check_role_suitability(job, ["consultant physician"])
+    assert result is not None
+    assert result.reject_reason == "unsuitable role: consultant physician"

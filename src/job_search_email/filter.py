@@ -39,7 +39,11 @@ def _check_employment_type(job: JobListing) -> FilteredResult:
 
 
 def _check_role_suitability(job: JobListing, exclusion_roles: list[str]) -> FilteredResult | None:
-    raise NotImplementedError
+    title_lower = job.title.lower()
+    for term in exclusion_roles:
+        if term.lower() in title_lower:
+            return FilteredResult(job=job, flags=[], rejected=True, reject_reason=f"unsuitable role: {term}")
+    return None
 
 
 def filter_jobs(jobs: list[JobListing], plan: SearchPlan, profile: Profile) -> list[FilteredResult]:
