@@ -50,7 +50,7 @@ def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:
     return SearchPlan(
         profile_fingerprint=fingerprint,
         queries=generate_queries(profile),
-        exclusions=get_exclusions(),
+        exclusions=get_exclusions(profile),
         nhs_rules=get_nhs_rules(),
         evaluator_notes=get_evaluator_notes(),
     )

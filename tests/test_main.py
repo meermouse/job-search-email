@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from job_search_email.exclusions import get_exclusions
 from job_search_email.main import (
     fingerprint_profile,
     generate_search_plan,
@@ -91,3 +92,23 @@ def test_fingerprint_and_cache(tmp_path: Path) -> None:
     assert cached is not None
     assert cached["profile_fingerprint"] == fingerprint
     assert len(cached["queries"]) == 8
+
+
+def test_get_exclusions_merges_not_open_to() -> None:
+    profile = make_profile()  # not_open_to: ["clinical roles", "nursing"]
+    result = get_exclusions(profile)
+
+    assert "roles" in result
+    assert "employment_types" in result
+    assert "clinical roles" in result["roles"]
+    assert "nursing" in result["roles"]
+    assert "locum" in result["roles"]        # from STANDARD_CLINICAL_TERMS
+    assert "fixed-term" in result["employment_types"]
+    assert "bank" in result["employment_types"]
+
+
+def test_get_exclusions_deduplicates() -> None:
+    profile = make_profile()
+    profile.not_open_to.append("locum")     # already in STANDARD_CLINICAL_TERMS
+    result = get_exclusions(profile)
+    assert result["roles"].count("locum") == 1
