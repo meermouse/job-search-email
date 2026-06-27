@@ -1,0 +1,11 @@
+name: "Jane Doe"
+target_roles:
+  - "Product Manager"
+  - "Program Manager"
+  - "Delivery Lead"
+skills:
+  - "stakeholder management"
+  - "digital transformation"
+  - "healthcare strategy"
+location: "London"
+preferred_nhs_band: "Band 8a+"
