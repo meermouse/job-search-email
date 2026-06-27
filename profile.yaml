@@ -1,11 +1,57 @@
-name: "Jane Doe"
-target_roles:
-  - "Product Manager"
-  - "Program Manager"
-  - "Delivery Lead"
-skills:
-  - "stakeholder management"
-  - "digital transformation"
-  - "healthcare strategy"
-location: "London"
-preferred_nhs_band: "Band 8a+"
+profile:
+  name: Jie
+  current_role: NHS Digital Transformation
+  about: |
+    Experienced with health care project management, digital transformation and education
+    facilities management. Technology and consulting acumen. Works closely with practitioners
+    and IT professionals to develop new ways of working in order to improve patient access
+    and patient experience. Works with stakeholders such as health providers, and local
+    education and training boards to deliver value. Understands and responds to patients
+    needs by positioning appropriate solutions and services to meet best outcomes. Sets up
+    and leads projects that are vital to patient care being of the highest possible standard.
+  seniority: Senior
+  industry: NHS / Private Sector / Business
+  skills:
+    - Analytical Skills
+    - digital transformation
+    - Digital Marketing
+    - Project Initiation and Planning
+    - Operations and Supply Chain Decisions and Metrics
+    - Business Strategy
+  previous_roles:
+    - Executive Secretary to the General Manager
+    - Business Manager of Research Centre
+    - Instructor of Clinical Skills
+    - Workforce and Governance Manager for Digital Services
+  target_roles:
+    - Business Manager
+    - Digital Transformation
+    - Senior Management
+  open_to:
+    - Strategy Consultant
+    - Project Planning
+  not_open_to:
+    - clinical roles
+    - nursing
+    - GP / medical practitioner
+    - ward-based roles
+    - surgical / theatre roles
+  qualifications:
+    - Digital Marketing (DMS4all)
+    - Project Initiation and Planning
+    - Project Execution and Control
+    - "Leading Teams: Developing as a Leader"
+    - "Managerial Accounting: Cost Behaviors, Systems, and Analysis (with Honors)"
+    - Operations and Supply Chain Decisions and Metrics
+    - Business Strategy
+    - Corporate Strategy
+    - Masters Strategic Management of Projects
+    - Master's degree Management
+    - Bachelor of Arts - BA, English Language and Literature, General
+  employment_type:
+    - full-time
+
+location: Bristol
+min_salary: 60000
+
+preamble: "Hey Jie, its The Job Mule. Lets go through todays jobs."

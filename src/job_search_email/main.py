@@ -22,12 +22,22 @@ def load_profile(path: Path = PROFILE_PATH) -> Profile:
     with path.open("r", encoding="utf-8") as stream:
         data = yaml.safe_load(stream)
 
+    p = data["profile"]
     return Profile(
-        name=data.get("name", "Anonymous"),
-        target_roles=data.get("target_roles", []),
-        skills=data.get("skills", []),
+        name=p["name"],
+        current_role=p.get("current_role", ""),
+        about=p.get("about", ""),
+        seniority=p.get("seniority", ""),
+        industry=p.get("industry", ""),
+        skills=p.get("skills", []),
+        previous_roles=p.get("previous_roles", []),
+        target_roles=p.get("target_roles", []),
+        open_to=p.get("open_to", []),
+        not_open_to=p.get("not_open_to", []),
+        qualifications=p.get("qualifications", []),
+        employment_type=p.get("employment_type", []),
         location=data.get("location", ""),
-        preferred_nhs_band=data.get("preferred_nhs_band", "Band 8a+"),
+        min_salary=data.get("min_salary", 0),
     )
 
 
