@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import anthropic
@@ -95,7 +96,8 @@ def score_jobs(results: list[FilteredResult], profile: Profile) -> list[ScoredRe
                     job=r.job, flags=r.flags, rejected=r.rejected,
                     reject_reason=r.reject_reason, analysis=analysis,
                 )
-            except Exception:
+            except Exception as exc:
+                print(f"[scorer] analysis failed for {r.job.url!r}: {exc}", file=sys.stderr)
                 scored_map[idx] = ScoredResult(
                     job=r.job, flags=r.flags + ["analysis_failed"],
                     rejected=r.rejected, reject_reason=r.reject_reason,
