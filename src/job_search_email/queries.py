@@ -1,4 +1,6 @@
 import json
+import sys
+import time
 
 import anthropic
 
@@ -44,12 +46,32 @@ def generate_queries(profile: Profile) -> list[str]:
         skills=", ".join(profile.skills),
         previous_roles=", ".join(profile.previous_roles),
     )
-    response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=512,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    queries = json.loads(response.content[0].text)
-    if not isinstance(queries, list) or len(queries) != 8:
-        raise ValueError(f"Expected list of 8 strings from Claude, got: {queries!r}")
-    return queries
+
+    for attempt in range(1, 4):
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=512,
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        if not response.content:
+            print(f"[queries] attempt {attempt}: empty content list (stop_reason={response.stop_reason})", file=sys.stderr)
+        else:
+            block = response.content[0]
+            text = getattr(block, "text", "")
+            if not text.strip():
+                print(f"[queries] attempt {attempt}: empty text block (stop_reason={response.stop_reason}, type={type(block).__name__})", file=sys.stderr)
+            else:
+                try:
+                    queries = json.loads(text)
+                except json.JSONDecodeError as exc:
+                    print(f"[queries] attempt {attempt}: JSON parse failed: {exc}\nRaw: {text!r}", file=sys.stderr)
+                else:
+                    if not isinstance(queries, list) or len(queries) != 8:
+                        raise ValueError(f"Expected list of 8 strings from Claude, got: {queries!r}")
+                    return queries
+
+        if attempt < 3:
+            time.sleep(2 ** attempt)
+
+    raise RuntimeError("[queries] generate_queries failed after 3 attempts")

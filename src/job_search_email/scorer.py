@@ -62,7 +62,13 @@ def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis
         system=system_prompt,
         messages=[{"role": "user", "content": _build_user_message(job)}],
     )
-    data = json.loads(response.content[0].text)
+    if not response.content:
+        raise ValueError(f"empty content list from Claude (stop_reason={response.stop_reason})")
+    block = response.content[0]
+    text = getattr(block, "text", "")
+    if not text.strip():
+        raise ValueError(f"empty text block from Claude (stop_reason={response.stop_reason}, type={type(block).__name__})")
+    data = json.loads(text)
     return JobAnalysis(
         score=int(data["score"]),
         matched_skills=data.get("matched_skills", []),
