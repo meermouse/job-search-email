@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from job_search_email.exclusions import get_exclusions
+from job_search_email.nhs_rules import get_nhs_rules
 from job_search_email.main import (
     fingerprint_profile,
     generate_search_plan,
@@ -112,3 +113,14 @@ def test_get_exclusions_deduplicates() -> None:
     profile.not_open_to.append("locum")     # already in STANDARD_CLINICAL_TERMS
     result = get_exclusions(profile)
     assert result["roles"].count("locum") == 1
+
+
+def test_get_nhs_rules_has_salary_map() -> None:
+    result = get_nhs_rules()
+
+    assert result["default_floor"] == "Band 8a"
+    assert result["london_remote_floor"] == "Band 7"
+    assert "band_salary_map" in result
+    assert result["band_salary_map"]["Band 8a"] == 53755
+    assert result["band_salary_map"]["Band 7"] == 43742
+    assert "rule" in result
