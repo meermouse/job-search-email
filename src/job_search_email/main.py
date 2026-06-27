@@ -11,11 +11,13 @@ from .exclusions import get_exclusions
 from .models import Profile, SearchPlan
 from .nhs_rules import get_nhs_rules
 from .queries import generate_queries
+from .search_api.fetcher import fetch_all_jobs
 
 ROOT = Path.cwd()
 PROFILE_PATH = ROOT / "profile.yaml"
 CACHE_PATH = ROOT / "search_plan_cache.json"
 PLAN_PATH = ROOT / "search_plan.json"
+RESULTS_PATH = ROOT / "job_results.json"
 
 
 def load_profile(path: Path = PROFILE_PATH) -> Profile:
@@ -91,17 +93,23 @@ def main() -> None:
     cached = load_cached_plan(fingerprint=fingerprint)
 
     if cached:
-        plan_data = cached
+        plan = SearchPlan(**cached)
     else:
         plan = generate_search_plan(profile, fingerprint)
         save_cached_plan(plan)
-        write_search_plan(plan)
-        plan_data = asdict(plan)
+    write_search_plan(plan)
 
     print("Job search plan ready:")
     print(f"- profile: {profile.name}")
     print(f"- plan fingerprint: {fingerprint}")
-    print(f"- queries: {len(plan_data['queries'])}")
+    print(f"- queries: {len(plan.queries)}")
+
+    print("Fetching jobs...")
+    jobs = fetch_all_jobs(plan, profile)
+    with RESULTS_PATH.open("w", encoding="utf-8") as handle:
+        json.dump([asdict(job) for job in jobs], handle, indent=2)
+    print(f"- jobs fetched: {len(jobs)}")
+    print(f"- results written to: {RESULTS_PATH}")
 
 
 if __name__ == "__main__":
