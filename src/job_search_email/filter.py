@@ -99,6 +99,11 @@ def filter_jobs(jobs: list[JobListing], plan: SearchPlan, profile: Profile) -> l
             results.append(role_result)
             continue
 
+        nhs_result = _check_nhs_band_salary(job, plan.nhs_rules, profile.min_salary)
+        if nhs_result is not None:
+            results.append(nhs_result)
+            continue
+
         results.append(FilteredResult(
             job=job,
             flags=et_result.flags,

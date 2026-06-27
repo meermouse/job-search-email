@@ -186,12 +186,12 @@ from job_search_email.filter import filter_jobs
 from job_search_email.models import SearchPlan
 
 
-def make_plan(roles: list[str] | None = None) -> SearchPlan:
+def make_plan(roles: list[str] | None = None, nhs_rules: dict | None = None) -> SearchPlan:
     return SearchPlan(
         profile_fingerprint="abc123",
         queries=["test query"],
         exclusions={"roles": roles or [], "employment_types": []},
-        nhs_rules={},
+        nhs_rules=nhs_rules or {},
         evaluator_notes=[],
     )
 
@@ -357,3 +357,30 @@ def test_nhs_band_reject_reason_london_format():
     job = make_job(title="Manager Band 7", source="nhs_jobs", location="London")
     result = _check_nhs_band_salary(job, _NHS_RULES, 60000)
     assert result.reject_reason == "nhs band salary below threshold: Band 7 London (~£52,490)"
+
+
+def test_filter_jobs_rejects_nhs_band_below_threshold():
+    jobs = [make_job(title="Manager Band 7", source="nhs_jobs", employment_type="full-time", location="Bristol")]
+    results = filter_jobs(jobs, make_plan(nhs_rules=_NHS_RULES), make_profile_stub())
+    assert results[0].rejected is True
+    assert "Band 7" in results[0].reject_reason
+
+
+def test_filter_jobs_keeps_nhs_band_above_threshold():
+    jobs = [make_job(title="Manager Band 8b", source="nhs_jobs", employment_type="full-time", location="Bristol")]
+    results = filter_jobs(jobs, make_plan(nhs_rules=_NHS_RULES), make_profile_stub())
+    assert results[0].rejected is False
+
+
+def test_filter_jobs_employment_type_checked_before_nhs_band():
+    # contract should be rejected for employment type, not band salary
+    jobs = [make_job(title="Manager Band 7", source="nhs_jobs", employment_type="contract")]
+    results = filter_jobs(jobs, make_plan(nhs_rules=_NHS_RULES), make_profile_stub())
+    assert results[0].reject_reason == "employment type: contract"
+
+
+def test_filter_jobs_role_check_before_nhs_band():
+    # clinical role title should be rejected for role suitability, not band salary
+    jobs = [make_job(title="Staff Nurse Band 7", source="nhs_jobs", employment_type="full-time")]
+    results = filter_jobs(jobs, make_plan(roles=["staff nurse"], nhs_rules=_NHS_RULES), make_profile_stub())
+    assert "staff nurse" in results[0].reject_reason
