@@ -1,5 +1,4 @@
 import json
-import os
 from dataclasses import asdict
 from pathlib import Path
 
@@ -71,7 +70,9 @@ def _write_filtered_results(results: list[FilteredResult], path: Path) -> None:
 def _write_scored_results(results: list[ScoredResult], path: Path) -> None:
     kept = [r for r in results if not r.rejected]
     rejected = [r for r in results if r.rejected]
-    analysed = [r for r in kept if r.analysis is not None]
+    analysed = [r for r in kept if r.analysis is not None and "analysis_failed" not in r.flags]
+    unanalysed = [r for r in kept if r.analysis is None and "analysis_failed" not in r.flags]
+    failed = [r for r in kept if "analysis_failed" in r.flags]
     kept_sorted = sorted(kept, key=lambda r: (r.analysis.score if r.analysis else 0), reverse=True)
     output = {
         "summary": {
@@ -79,6 +80,8 @@ def _write_scored_results(results: list[ScoredResult], path: Path) -> None:
             "kept": len(kept),
             "rejected": len(rejected),
             "analysed": len(analysed),
+            "unanalysed": len(unanalysed),
+            "analysis_failed": len(failed),
         },
         "kept": [asdict(r) for r in kept_sorted],
         "rejected": [asdict(r) for r in rejected],

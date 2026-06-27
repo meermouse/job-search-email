@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pytest
 from job_search_email.fixtures import fixture_queries, fixture_jobs, fixture_scores
 from job_search_email.models import FilteredResult, JobAnalysis, JobListing
@@ -62,10 +65,6 @@ def test_fixture_scores_rejected_jobs_have_no_analysis():
     assert all(s.analysis is None for s in rejected)
 
 
-import json
-from pathlib import Path
-
-
 def test_local_run_writes_email_preview(tmp_path, monkeypatch):
     import shutil
 
@@ -102,3 +101,7 @@ def test_local_run_writes_json_artefacts(tmp_path, monkeypatch):
 
     filtered = json.loads((tmp_path / "job_results_filtered.json").read_text())
     assert filtered["summary"]["kept"] >= 1
+
+    scored = json.loads((tmp_path / "job_results_scored.json").read_text())
+    assert "unanalysed" in scored["summary"]
+    assert "analysis_failed" in scored["summary"]
