@@ -24,6 +24,7 @@ classifiers = [
 
 [project.scripts]
 job-search-email = "job_search_email.main:main"
+job-search-email-local = "job_search_email.local_run:main"
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]

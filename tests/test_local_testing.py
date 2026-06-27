@@ -60,3 +60,45 @@ def test_fixture_scores_rejected_jobs_have_no_analysis():
     scored = fixture_scores(results)
     rejected = [s for s in scored if s.rejected]
     assert all(s.analysis is None for s in rejected)
+
+
+import json
+from pathlib import Path
+
+
+def test_local_run_writes_email_preview(tmp_path, monkeypatch):
+    import shutil
+
+    # Copy profile.yaml into the temp directory
+    project_root = Path(__file__).parent.parent
+    shutil.copy(project_root / "profile.yaml", tmp_path / "profile.yaml")
+
+    # Point cwd at tmp_path so all file writes land there
+    monkeypatch.chdir(tmp_path)
+
+    from job_search_email import local_run
+    local_run.main()
+
+    preview = tmp_path / "email_preview.html"
+    assert preview.exists(), "email_preview.html was not created"
+    content = preview.read_text(encoding="utf-8")
+    assert "<!DOCTYPE html>" in content
+    assert "Senior Business Manager" in content
+
+
+def test_local_run_writes_json_artefacts(tmp_path, monkeypatch):
+    import shutil
+
+    project_root = Path(__file__).parent.parent
+    shutil.copy(project_root / "profile.yaml", tmp_path / "profile.yaml")
+    monkeypatch.chdir(tmp_path)
+
+    from job_search_email import local_run
+    local_run.main()
+
+    assert (tmp_path / "search_plan.json").exists()
+    assert (tmp_path / "job_results_filtered.json").exists()
+    assert (tmp_path / "job_results_scored.json").exists()
+
+    filtered = json.loads((tmp_path / "job_results_filtered.json").read_text())
+    assert filtered["summary"]["kept"] >= 1
