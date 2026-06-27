@@ -49,4 +49,7 @@ def generate_queries(profile: Profile) -> list[str]:
         max_tokens=512,
         messages=[{"role": "user", "content": prompt}],
     )
-    return json.loads(response.content[0].text)
+    queries = json.loads(response.content[0].text)
+    if not isinstance(queries, list) or len(queries) != 8:
+        raise ValueError(f"Expected list of 8 strings from Claude, got: {queries!r}")
+    return queries

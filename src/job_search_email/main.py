@@ -70,7 +70,10 @@ def save_cached_plan(plan: SearchPlan, cache_path: Path = CACHE_PATH) -> None:
     cache: dict[str, Any] = {}
     if cache_path.exists():
         with cache_path.open("r", encoding="utf-8") as handle:
-            cache = json.load(handle)
+            try:
+                cache = json.load(handle)
+            except json.JSONDecodeError:
+                cache = {}
 
     cache[plan.profile_fingerprint] = asdict(plan)
     with cache_path.open("w", encoding="utf-8") as handle:

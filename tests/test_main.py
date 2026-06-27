@@ -179,3 +179,34 @@ def test_generate_queries_prompt_includes_exclusions() -> None:
 
     assert "clinical roles" in prompt_content
     assert "nursing" in prompt_content
+
+
+def test_save_cached_plan_handles_corrupted_cache(tmp_path: Path) -> None:
+    cache_path = tmp_path / "search_plan_cache.json"
+    cache_path.write_text("not valid json", encoding="utf-8")  # corrupted file
+
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps([f"query {i}" for i in range(8)]))]
+
+    profile = make_profile()
+    fingerprint = fingerprint_profile(profile)
+
+    with patch("job_search_email.queries.client") as mock_client:
+        mock_client.messages.create.return_value = mock_response
+        plan = generate_search_plan(profile, fingerprint)
+
+    save_cached_plan(plan, cache_path=cache_path)
+    cached = load_cached_plan(cache_path=cache_path, fingerprint=fingerprint)
+    assert cached is not None
+    assert cached["profile_fingerprint"] == fingerprint
+
+
+def test_generate_queries_raises_on_bad_response() -> None:
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text='{"not": "a list"}')]
+
+    with patch("job_search_email.queries.client") as mock_client:
+        mock_client.messages.create.return_value = mock_response
+        import pytest
+        with pytest.raises(ValueError, match="Expected list of 8 strings"):
+            generate_queries(make_profile())
