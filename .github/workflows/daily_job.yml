@@ -12,13 +12,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e .
+
+      - name: Get date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            search_plan_cache.json
+            job_score_cache.json
+          key: job-search-cache-${{ runner.os }}-${{ steps.date.outputs.date }}
+          restore-keys: |
+            job-search-cache-${{ runner.os }}-
+
       - name: Run job search email plan
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -27,3 +44,12 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: job-search-email
+
+      - name: Save cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            search_plan_cache.json
+            job_score_cache.json
+          key: job-search-cache-${{ runner.os }}-${{ steps.date.outputs.date }}
