@@ -384,3 +384,110 @@ def test_filter_jobs_role_check_before_nhs_band():
     jobs = [make_job(title="Staff Nurse Band 7", source="nhs_jobs", employment_type="full-time")]
     results = filter_jobs(jobs, make_plan(roles=["staff nurse"], nhs_rules=_NHS_RULES), make_profile_stub())
     assert "staff nurse" in results[0].reject_reason
+
+
+from job_search_email.filter import _check_sponsor
+
+_SPONSOR_SET = frozenset({
+    "bossmans retail abergavenny",
+    "bossmans retail",          # prefix entry
+    "acme digital solutions",
+    "acme digital",             # prefix entry
+})
+
+
+def test_check_sponsor_nhs_source_passes():
+    job = make_job(source="nhs", company="NHS Trust Bristol")
+    assert _check_sponsor(job, _SPONSOR_SET) is None
+
+
+def test_check_sponsor_exact_match_passes():
+    job = make_job(source="reed", company="Bossmans Retail Abergavenny")
+    assert _check_sponsor(job, _SPONSOR_SET) is None
+
+
+def test_check_sponsor_prefix_match_passes():
+    # "Bossmans Retail" matches because it's a prefix entry in the set
+    job = make_job(source="reed", company="Bossmans Retail")
+    assert _check_sponsor(job, _SPONSOR_SET) is None
+
+
+def test_check_sponsor_not_in_list_rejected():
+    job = make_job(source="reed", company="Unknown Corp Ltd")
+    result = _check_sponsor(job, _SPONSOR_SET)
+    assert result is not None
+    assert result.rejected is True
+    assert result.reject_reason == "company not on approved sponsor list"
+
+
+def test_check_sponsor_empty_company_flagged_not_rejected():
+    job = make_job(source="reed", company="")
+    result = _check_sponsor(job, _SPONSOR_SET)
+    assert result is not None
+    assert result.rejected is False
+    assert "sponsor_unknown_company" in result.flags
+
+
+def test_check_sponsor_none_company_flagged_not_rejected():
+    job = make_job(source="reed", company=None)
+    result = _check_sponsor(job, _SPONSOR_SET)
+    assert result is not None
+    assert result.rejected is False
+    assert "sponsor_unknown_company" in result.flags
+
+
+def test_check_sponsor_short_company_flagged_not_rejected():
+    # "NHS" normalizes to "nhs" — 3 chars, too short to match reliably
+    job = make_job(source="reed", company="NHS")
+    result = _check_sponsor(job, _SPONSOR_SET)
+    assert result is not None
+    assert result.rejected is False
+    assert "sponsor_unknown_company" in result.flags
+
+
+def test_check_sponsor_single_word_under_8_chars_flagged():
+    # "acme" is 4 chars — below 8-char threshold
+    job = make_job(source="reed", company="Acme")
+    result = _check_sponsor(job, _SPONSOR_SET)
+    assert result is not None
+    assert result.rejected is False
+    assert "sponsor_unknown_company" in result.flags
+
+
+def test_check_sponsor_company_with_ltd_stripped_before_lookup():
+    # "Bossmans Retail Ltd" → normalized → "bossmans retail" → in set
+    job = make_job(source="indeed", company="Bossmans Retail Ltd")
+    assert _check_sponsor(job, _SPONSOR_SET) is None
+
+
+def test_filter_jobs_sponsor_check_rejects_unlisted_company():
+    jobs = [make_job(source="reed", employment_type="full-time", company="Unknown Agency Ltd")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=_SPONSOR_SET)
+    assert results[0].rejected is True
+    assert results[0].reject_reason == "company not on approved sponsor list"
+
+
+def test_filter_jobs_sponsor_check_passes_listed_company():
+    jobs = [make_job(source="reed", employment_type="full-time", company="Bossmans Retail")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=_SPONSOR_SET)
+    assert results[0].rejected is False
+
+
+def test_filter_jobs_sponsor_check_skipped_when_set_is_none():
+    # Existing tests pass sponsor_set=None; unlisted companies should still pass
+    jobs = [make_job(source="reed", employment_type="full-time", company="Unknown Corp")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=None)
+    assert results[0].rejected is False
+
+
+def test_filter_jobs_employment_type_checked_before_sponsor():
+    # Contract role: reject reason should be employment type, not sponsor
+    jobs = [make_job(source="reed", employment_type="contract", company="Unknown Corp")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=_SPONSOR_SET)
+    assert results[0].reject_reason == "employment type: contract"
+
+
+def test_filter_jobs_nhs_source_passes_sponsor_check():
+    jobs = [make_job(source="nhs", employment_type="full-time", company="Unknown NHS Trust")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=_SPONSOR_SET)
+    assert results[0].rejected is False
