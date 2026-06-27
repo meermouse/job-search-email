@@ -13,6 +13,7 @@ from .models import FilteredResult, Profile, SearchPlan
 from .nhs_rules import get_nhs_rules
 from .queries import generate_queries
 from .search_api.fetcher import fetch_all_jobs
+from .sponsor_filter import load_sponsor_set
 
 ROOT = Path.cwd()
 PROFILE_PATH = ROOT / "profile.yaml"
@@ -20,6 +21,7 @@ CACHE_PATH = ROOT / "search_plan_cache.json"
 PLAN_PATH = ROOT / "search_plan.json"
 RESULTS_PATH = ROOT / "job_results.json"
 FILTERED_RESULTS_PATH = ROOT / "job_results_filtered.json"
+SPONSOR_CACHE_PATH = ROOT / "assets" / "sponsor_cache.csv"
 
 
 def load_profile(path: Path = PROFILE_PATH) -> Profile:
@@ -133,7 +135,9 @@ def main() -> None:
     print(f"- jobs fetched: {len(jobs)}")
     print(f"- results written to: {RESULTS_PATH}")
     print("Filtering jobs...")
-    filtered = filter_jobs(jobs, plan, profile)
+    sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH)
+    print(f"- sponsor list loaded: {len(sponsor_set):,} entries")
+    filtered = filter_jobs(jobs, plan, profile, sponsor_set=sponsor_set)
     write_filtered_results(filtered)
     kept = [r for r in filtered if not r.rejected]
     flagged = [r for r in kept if r.flags]
