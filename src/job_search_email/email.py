@@ -21,7 +21,7 @@ def _score_badge(score: int) -> str:
     )
 
 
-def build_email_html(results: list[ScoredResult], profile: Profile) -> str:
+def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str, int]:
     eligible = [r for r in results if not r.rejected and r.analysis is not None]
     eligible.sort(key=lambda r: r.analysis.score, reverse=True)
     top = eligible[:20]
@@ -36,7 +36,7 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> str:
             f'<tr style="background:{row_bg};">'
             f"<td {cell}>{i}</td>"
             f"<td {cell}>{badge}</td>"
-            f'<td {cell}><a href="{r.job.url}" style="color:#0066cc; text-decoration:none;">{_escape(r.job.title)}</a></td>'
+            f'<td {cell}><a href="{_escape(r.job.url, quote=True)}" style="color:#0066cc; text-decoration:none;">{_escape(r.job.title)}</a></td>'
             f"<td {cell}>{_escape(r.job.company)}</td>"
             f'<td {cell} style="white-space:nowrap;">{salary}</td>'
             f"<td {cell}>{_escape(r.analysis.verdict)}</td>"
@@ -70,7 +70,7 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> str:
   </table>
   <p style="font-size:12px; color:#999999; margin-top:24px;">Generated on {today}</p>
 </body>
-</html>"""
+</html>""", n
 
 
 def send_email(html: str, profile: Profile, n: int = 0) -> None:
@@ -83,6 +83,10 @@ def send_email(html: str, profile: Profile, n: int = 0) -> None:
         print("[email] SMTP credentials not configured — skipping email send", file=sys.stderr)
         return
 
+    if not profile.recipient_email:
+        print("[email] recipient_email not configured — skipping email send", file=sys.stderr)
+        return
+
     today = date.today().strftime("%Y-%m-%d")
     msg = EmailMessage()
     msg["Subject"] = f"Job Search Results – {today} ({n} jobs found)"
@@ -91,9 +95,11 @@ def send_email(html: str, profile: Profile, n: int = 0) -> None:
     msg.set_content("Please view this email in an HTML-capable client.")
     msg.add_alternative(html, subtype="html")
 
-    with smtplib.SMTP(host, int(port)) as smtp:
-        smtp.starttls()
-        smtp.login(user, password)
-        smtp.send_message(msg)
-
-    print(f"[email] sent to {profile.recipient_email}")
+    try:
+        with smtplib.SMTP(host, int(port)) as smtp:
+            smtp.starttls()
+            smtp.login(user, password)
+            smtp.send_message(msg)
+        print(f"[email] sent to {profile.recipient_email}")
+    except Exception as exc:
+        print(f"[email] failed to send: {exc}", file=sys.stderr)

@@ -40,14 +40,14 @@ def _make_result(
 
 def test_build_email_html_includes_preamble():
     profile = _make_profile(preamble="Hey Jie, welcome!")
-    html = build_email_html([], profile)
+    html, n = build_email_html([], profile)
     assert "Hey Jie, welcome!" in html
 
 
 def test_build_email_html_limits_to_20_jobs():
     profile = _make_profile()
     results = [_make_result(score=5, title=f"Position{i:02d}") for i in range(25)]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert "Position00" in html
     assert "Position19" in html
     assert "Position20" not in html
@@ -60,7 +60,7 @@ def test_build_email_html_sorted_by_score_desc():
         _make_result(score=3, title="LowScore"),
         _make_result(score=9, title="HighScore"),
     ]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert html.index("HighScore") < html.index("LowScore")
 
 
@@ -70,7 +70,7 @@ def test_build_email_html_excludes_rejected():
         _make_result(score=8, title="GoodJob"),
         _make_result(score=7, title="RejectedJob", rejected=True),
     ]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert "GoodJob" in html
     assert "RejectedJob" not in html
 
@@ -86,7 +86,7 @@ def test_build_email_html_excludes_no_analysis():
         flags=[], rejected=False, reject_reason=None, analysis=None,
     )
     results = [_make_result(score=8, title="AnalysedJob"), no_analysis]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert "AnalysedJob" in html
     assert "NoAnalysisJob" not in html
 
@@ -94,55 +94,55 @@ def test_build_email_html_excludes_no_analysis():
 def test_build_email_html_links_job_url():
     profile = _make_profile()
     results = [_make_result(score=8, url="https://jobs.example.com/abc123")]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert 'href="https://jobs.example.com/abc123"' in html
 
 
 def test_build_email_html_salary_not_stated_when_none():
     profile = _make_profile()
     results = [_make_result(score=8, salary=None)]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert "Not stated" in html
 
 
 def test_build_email_html_formats_salary_with_commas():
     profile = _make_profile()
     results = [_make_result(score=8, salary=75000)]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert "£75,000" in html
 
 
 def test_build_email_html_green_badge_for_high_score():
     profile = _make_profile()
     results = [_make_result(score=9)]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert "#28a745" in html
 
 
 def test_build_email_html_amber_badge_for_mid_score():
     profile = _make_profile()
     results = [_make_result(score=6)]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert "#ffc107" in html
 
 
 def test_build_email_html_red_badge_for_low_score():
     profile = _make_profile()
     results = [_make_result(score=3)]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert "#dc3545" in html
 
 
 def test_build_email_html_includes_verdict():
     profile = _make_profile()
     results = [_make_result(score=8, title="MyJob")]
-    html = build_email_html(results, profile)
+    html, n = build_email_html(results, profile)
     assert "Good match for MyJob" in html
 
 
 def test_build_email_html_zero_results_shows_count():
     profile = _make_profile()
-    html = build_email_html([], profile)
+    html, n = build_email_html([], profile)
     assert "0 jobs" in html
 
 
