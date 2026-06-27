@@ -5,7 +5,7 @@ Its eventual goal is to provide a regular email to a user with a list of potenti
 
 
 This is an application in progress, i am currently going down the list and implementing each task one by one.
-Current tasks completed: 1,2
+Current tasks completed: 1,2,3
 
 # Job Search Email Filter Step Layout
 
