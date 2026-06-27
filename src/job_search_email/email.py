@@ -3,6 +3,7 @@ import smtplib
 import sys
 from datetime import date
 from email.message import EmailMessage
+from html import escape as _escape
 
 from .models import Profile, ScoredResult
 
@@ -28,17 +29,17 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> str:
     rows = []
     for i, r in enumerate(top, 1):
         row_bg = "#f9f9f9" if i % 2 == 0 else "#ffffff"
-        salary = f"£{r.job.salary_min:,}" if r.job.salary_min else "Not stated"
+        salary = f"£{r.job.salary_min:,}" if r.job.salary_min is not None else "Not stated"
         badge = _score_badge(r.analysis.score)
         cell = 'style="padding:8px 6px; border-bottom:1px solid #eeeeee;"'
         rows.append(
             f'<tr style="background:{row_bg};">'
             f"<td {cell}>{i}</td>"
             f"<td {cell}>{badge}</td>"
-            f'<td {cell}><a href="{r.job.url}" style="color:#0066cc; text-decoration:none;">{r.job.title}</a></td>'
-            f"<td {cell}>{r.job.company}</td>"
+            f'<td {cell}><a href="{r.job.url}" style="color:#0066cc; text-decoration:none;">{_escape(r.job.title)}</a></td>'
+            f"<td {cell}>{_escape(r.job.company)}</td>"
             f'<td {cell} style="white-space:nowrap;">{salary}</td>'
-            f"<td {cell}>{r.analysis.verdict}</td>"
+            f"<td {cell}>{_escape(r.analysis.verdict)}</td>"
             f"</tr>"
         )
 
@@ -50,7 +51,7 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> str:
 <html>
 <head><meta charset="UTF-8"></head>
 <body style="font-family:Arial,sans-serif; background:#ffffff; color:#333333; max-width:920px; margin:0 auto; padding:20px;">
-  <p style="font-size:16px; margin-bottom:20px;">{profile.preamble}</p>
+  <p style="font-size:16px; margin-bottom:20px;">{_escape(profile.preamble)}</p>
   <p style="font-size:14px; color:#666666; margin-bottom:16px;">Here are your top {n} jobs from today's search, ranked by suitability.</p>
   <table style="width:100%; border-collapse:collapse; font-size:13px;">
     <thead>
