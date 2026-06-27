@@ -5,7 +5,7 @@ from typing import Any
 
 import yaml
 
-from .cache import fingerprint_profile
+from .cache import fingerprint_profile, load_score_cache
 from .email import build_email_html, send_email
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
@@ -23,6 +23,7 @@ PLAN_PATH = ROOT / "search_plan.json"
 RESULTS_PATH = ROOT / "job_results.json"
 FILTERED_RESULTS_PATH = ROOT / "job_results_filtered.json"
 SCORED_RESULTS_PATH = ROOT / "job_results_scored.json"
+SCORE_CACHE_PATH = ROOT / "job_score_cache.json"
 
 
 def load_profile(path: Path = PROFILE_PATH) -> Profile:
@@ -167,7 +168,8 @@ def main() -> None:
     print(f"- filtered results written to: {FILTERED_RESULTS_PATH}")
 
     print("Scoring jobs...")
-    scored = score_jobs(filtered, profile)
+    score_cache = load_score_cache(SCORE_CACHE_PATH)
+    scored = score_jobs(filtered, profile, score_cache=score_cache, cache_path=SCORE_CACHE_PATH)
     write_scored_results(scored)
     kept_scored = [r for r in scored if not r.rejected]
     top_score = max((r.analysis.score for r in kept_scored if r.analysis), default="n/a")
