@@ -3,7 +3,9 @@
     "total": 5,
     "kept": 3,
     "rejected": 2,
-    "analysed": 3
+    "analysed": 3,
+    "unanalysed": 0,
+    "analysis_failed": 0
   },
   "kept": [
     {
