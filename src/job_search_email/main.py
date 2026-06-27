@@ -1,33 +1,21 @@
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+from .evaluator_notes import get_evaluator_notes
+from .exclusions import get_exclusions
+from .models import Profile, SearchPlan
+from .nhs_rules import get_nhs_rules
+from .queries import generate_queries
+
 ROOT = Path.cwd()
 PROFILE_PATH = ROOT / "profile.yaml"
 CACHE_PATH = ROOT / "search_plan_cache.json"
 PLAN_PATH = ROOT / "search_plan.json"
-
-
-@dataclass
-class Profile:
-    name: str
-    target_roles: list[str]
-    skills: list[str]
-    location: str
-    preferred_nhs_band: str
-
-
-@dataclass
-class SearchPlan:
-    profile_fingerprint: str
-    queries: list[str]
-    exclusions: dict[str, list[str]]
-    nhs_rules: dict[str, Any]
-    evaluator_notes: list[str]
 
 
 def load_profile(path: Path = PROFILE_PATH) -> Profile:
@@ -49,34 +37,12 @@ def fingerprint_profile(profile: Profile) -> str:
 
 
 def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:
-    # Future logic will produce richer, tailored queries.
-    target = ", ".join(profile.target_roles[:2]) or "job search"
-    skills = ", ".join(profile.skills[:3])
-    queries = [
-        f"{target} {skills} opportunity {i + 1}" for i in range(8)
-    ]
-
-    exclusions = {
-        "clinical_roles": ["doctor", "nurse", "consultant"],
-        "employment_types": ["locum", "fixed-term", "temporary"],
-    }
-
-    nhs_rules = {
-        "default_floor": "Band 8a+",
-        "london_remote_exception": "Band 7+",
-    }
-
-    evaluator_notes = [
-        "Score opportunities on seniority, skills fit, and remote flexibility.",
-        "Exclude clinical roles unless explicitly requested.",
-    ]
-
     return SearchPlan(
         profile_fingerprint=fingerprint,
-        queries=queries,
-        exclusions=exclusions,
-        nhs_rules=nhs_rules,
-        evaluator_notes=evaluator_notes,
+        queries=generate_queries(profile),
+        exclusions=get_exclusions(),
+        nhs_rules=get_nhs_rules(),
+        evaluator_notes=get_evaluator_notes(),
     )
 
 
