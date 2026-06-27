@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from job_search_email.evaluator_notes import get_evaluator_notes
 from job_search_email.exclusions import get_exclusions
 from job_search_email.nhs_rules import get_nhs_rules
 from job_search_email.main import (
@@ -124,3 +125,14 @@ def test_get_nhs_rules_has_salary_map() -> None:
     assert result["band_salary_map"]["Band 8a"] == 53755
     assert result["band_salary_map"]["Band 7"] == 43742
     assert "rule" in result
+
+
+def test_get_evaluator_notes_is_profile_aware() -> None:
+    profile = make_profile()
+    notes = get_evaluator_notes(profile)
+
+    assert len(notes) == 8
+    assert any("Senior" in note for note in notes)
+    assert any("60,000" in note for note in notes)
+    assert any("clinical roles" in note for note in notes)
+    assert any("Programme Manager" in note or "Digital Lead" in note for note in notes)

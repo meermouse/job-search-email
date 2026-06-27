@@ -52,7 +52,7 @@ def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:
         queries=generate_queries(profile),
         exclusions=get_exclusions(profile),
         nhs_rules=get_nhs_rules(),
-        evaluator_notes=get_evaluator_notes(),
+        evaluator_notes=get_evaluator_notes(profile),
     )
 
 
