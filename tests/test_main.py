@@ -230,3 +230,62 @@ def test_generate_queries_raises_on_bad_response() -> None:
         import pytest
         with pytest.raises(ValueError, match="Expected list of 8 strings"):
             generate_queries(make_profile())
+
+
+from job_search_email.main import write_filtered_results
+from job_search_email.models import FilteredResult, JobListing
+
+
+def make_job_listing(**kwargs) -> JobListing:
+    defaults = dict(
+        title="Business Manager", company="NHS Trust", location="Bristol",
+        salary_min=65000, description="", url="https://example.com/1",
+        source="reed", employment_type="full-time",
+    )
+    defaults.update(kwargs)
+    return JobListing(**defaults)
+
+
+def test_write_filtered_results_creates_file(tmp_path: Path) -> None:
+    kept = FilteredResult(job=make_job_listing(), flags=[], rejected=False, reject_reason=None)
+    rejected = FilteredResult(
+        job=make_job_listing(employment_type="contract"),
+        flags=[], rejected=True, reject_reason="employment type: contract",
+    )
+    output_path = tmp_path / "job_results_filtered.json"
+
+    write_filtered_results([kept, rejected], path=output_path)
+
+    data = json.loads(output_path.read_text(encoding="utf-8"))
+    assert data["summary"]["total"] == 2
+    assert data["summary"]["kept"] == 1
+    assert data["summary"]["rejected"] == 1
+    assert data["summary"]["flagged"] == 0
+    assert len(data["kept"]) == 1
+    assert len(data["rejected"]) == 1
+
+
+def test_write_filtered_results_counts_flagged(tmp_path: Path) -> None:
+    flagged = FilteredResult(
+        job=make_job_listing(employment_type=None),
+        flags=["employment_type_unknown"], rejected=False, reject_reason=None,
+    )
+    output_path = tmp_path / "job_results_filtered.json"
+
+    write_filtered_results([flagged], path=output_path)
+
+    data = json.loads(output_path.read_text(encoding="utf-8"))
+    assert data["summary"]["flagged"] == 1
+    assert data["kept"][0]["flags"] == ["employment_type_unknown"]
+
+
+def test_write_filtered_results_rejected_includes_reason(tmp_path: Path) -> None:
+    result = FilteredResult(
+        job=make_job_listing(), flags=[], rejected=True, reject_reason="unsuitable role: nurse",
+    )
+    output_path = tmp_path / "job_results_filtered.json"
+
+    write_filtered_results([result], path=output_path)
+
+    data = json.loads(output_path.read_text(encoding="utf-8"))
+    assert data["rejected"][0]["reject_reason"] == "unsuitable role: nurse"

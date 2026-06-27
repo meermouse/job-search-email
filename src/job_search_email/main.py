@@ -8,7 +8,8 @@ import yaml
 
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
-from .models import Profile, SearchPlan
+from .filter import filter_jobs
+from .models import FilteredResult, Profile, SearchPlan
 from .nhs_rules import get_nhs_rules
 from .queries import generate_queries
 from .search_api.fetcher import fetch_all_jobs
@@ -18,6 +19,7 @@ PROFILE_PATH = ROOT / "profile.yaml"
 CACHE_PATH = ROOT / "search_plan_cache.json"
 PLAN_PATH = ROOT / "search_plan.json"
 RESULTS_PATH = ROOT / "job_results.json"
+FILTERED_RESULTS_PATH = ROOT / "job_results_filtered.json"
 
 
 def load_profile(path: Path = PROFILE_PATH) -> Profile:
@@ -87,6 +89,26 @@ def write_search_plan(plan: SearchPlan, path: Path = PLAN_PATH) -> None:
         json.dump(asdict(plan), handle, indent=2)
 
 
+def write_filtered_results(results: list[FilteredResult], path: Path = FILTERED_RESULTS_PATH) -> None:
+    kept = [r for r in results if not r.rejected]
+    rejected = [r for r in results if r.rejected]
+    flagged = [r for r in kept if r.flags]
+
+    output = {
+        "summary": {
+            "total": len(results),
+            "kept": len(kept),
+            "rejected": len(rejected),
+            "flagged": len(flagged),
+        },
+        "kept": [asdict(r) for r in kept],
+        "rejected": [asdict(r) for r in rejected],
+    }
+
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(output, handle, indent=2)
+
+
 def main() -> None:
     profile = load_profile()
     fingerprint = fingerprint_profile(profile)
@@ -110,6 +132,13 @@ def main() -> None:
         json.dump([asdict(job) for job in jobs], handle, indent=2)
     print(f"- jobs fetched: {len(jobs)}")
     print(f"- results written to: {RESULTS_PATH}")
+    print("Filtering jobs...")
+    filtered = filter_jobs(jobs, plan, profile)
+    write_filtered_results(filtered)
+    kept = [r for r in filtered if not r.rejected]
+    flagged = [r for r in kept if r.flags]
+    print(f"- filtered: {len(kept)} kept, {len(filtered) - len(kept)} rejected ({len(flagged)} flagged unknown employment type)")
+    print(f"- filtered results written to: {FILTERED_RESULTS_PATH}")
 
 
 if __name__ == "__main__":
