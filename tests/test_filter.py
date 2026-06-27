@@ -1,5 +1,13 @@
 from dataclasses import asdict
-from job_search_email.models import FilteredResult, JobListing
+
+from job_search_email.filter import (
+    _check_employment_type,
+    _check_nhs_band_salary,
+    _check_role_suitability,
+    _check_sponsor,
+    filter_jobs,
+)
+from job_search_email.models import FilteredResult, JobListing, Profile, SearchPlan
 
 
 def make_job(**kwargs) -> JobListing:
@@ -40,9 +48,6 @@ def test_filtered_result_serialises_with_asdict():
     assert data["rejected"] is False
     assert data["job"]["title"] == "Business Manager"
     assert data["flags"] == []
-
-
-from job_search_email.filter import _check_employment_type
 
 
 # --- Stage 1: structured employment_type field ---
@@ -182,10 +187,6 @@ def test_role_suitability_reject_reason_includes_matched_term():
     assert result.reject_reason == "unsuitable role: consultant physician"
 
 
-from job_search_email.filter import filter_jobs
-from job_search_email.models import SearchPlan
-
-
 def make_plan(roles: list[str] | None = None, nhs_rules: dict | None = None) -> SearchPlan:
     return SearchPlan(
         profile_fingerprint="abc123",
@@ -267,8 +268,6 @@ def test_role_suitability_does_not_reject_word_containing_clinical_term():
     result = _check_role_suitability(job, ["ward"])
     assert result is None
 
-
-from job_search_email.filter import _check_nhs_band_salary
 
 _NHS_RULES = {
     "band_salary_map": {
@@ -385,8 +384,6 @@ def test_filter_jobs_role_check_before_nhs_band():
     results = filter_jobs(jobs, make_plan(roles=["staff nurse"], nhs_rules=_NHS_RULES), make_profile_stub())
     assert "staff nurse" in results[0].reject_reason
 
-
-from job_search_email.filter import _check_sponsor
 
 _SPONSOR_SET = frozenset({
     "bossmans retail abergavenny",
