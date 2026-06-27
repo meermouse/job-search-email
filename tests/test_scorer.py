@@ -297,3 +297,84 @@ def test_write_scored_results_analysis_failed_counted(tmp_path: Path):
     data = json.loads(output_path.read_text(encoding="utf-8"))
     assert data["summary"]["analysis_failed"] == 1
     assert data["summary"]["unanalysed"] == 0
+
+
+from job_search_email.cache import load_score_cache, make_score_key, fingerprint_profile
+
+
+def test_score_jobs_cache_hit_skips_claude():
+    job = make_job(url="https://example.com/cached")
+    profile = make_profile()
+    fp = fingerprint_profile(profile)
+    key = make_score_key(job.url, fp)
+    cached_analysis = {
+        "score": 9,
+        "matched_skills": ["python"],
+        "missing_essentials": [],
+        "employment_type_note": "Permanent",
+        "verdict": "Cached verdict",
+    }
+    score_cache = {key: cached_analysis}
+
+    results = [make_kept(job)]
+    m = _mock_client()
+
+    with patch("job_search_email.scorer.client", m):
+        scored = score_jobs(results, profile, score_cache=score_cache)
+
+    m.messages.create.assert_not_called()
+    assert scored[0].analysis.score == 9
+    assert scored[0].analysis.verdict == "Cached verdict"
+
+
+def test_score_jobs_cache_miss_calls_claude_and_populates_cache():
+    job = make_job(url="https://example.com/new")
+    profile = make_profile()
+    score_cache: dict = {}
+
+    results = [make_kept(job)]
+    with patch("job_search_email.scorer.client", _mock_client()):
+        score_jobs(results, profile, score_cache=score_cache)
+
+    fp = fingerprint_profile(profile)
+    key = make_score_key(job.url, fp)
+    assert key in score_cache
+    assert score_cache[key]["score"] == 8
+
+
+def test_score_jobs_failure_not_written_to_cache():
+    job = make_job(url="https://example.com/fail")
+    profile = make_profile()
+    score_cache: dict = {}
+
+    results = [make_kept(job)]
+    m = MagicMock()
+    m.messages.create.side_effect = ConnectionError("API unreachable")
+
+    with patch("job_search_email.scorer.client", m):
+        score_jobs(results, profile, score_cache=score_cache)
+
+    assert len(score_cache) == 0
+
+
+def test_score_jobs_writes_cache_file(tmp_path: Path):
+    cache_path = tmp_path / "job_score_cache.json"
+    job = make_job(url="https://example.com/writeme")
+    profile = make_profile()
+    score_cache: dict = {}
+
+    results = [make_kept(job)]
+    with patch("job_search_email.scorer.client", _mock_client()):
+        score_jobs(results, profile, score_cache=score_cache, cache_path=cache_path)
+
+    assert cache_path.exists()
+    data = json.loads(cache_path.read_text(encoding="utf-8"))
+    assert len(data) == 1
+
+
+def test_score_jobs_no_cache_path_does_not_write_file(tmp_path: Path):
+    cache_path = tmp_path / "job_score_cache.json"
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client()):
+        score_jobs(results, make_profile())
+    assert not cache_path.exists()

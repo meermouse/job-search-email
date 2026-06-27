@@ -2,9 +2,12 @@ import json
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict
+from pathlib import Path
 
 import anthropic
 
+from .cache import fingerprint_profile, make_score_key, save_score_cache
 from .models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
 
 client = anthropic.Anthropic()
@@ -69,9 +72,18 @@ def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis
     )
 
 
-def score_jobs(results: list[FilteredResult], profile: Profile) -> list[ScoredResult]:
+def score_jobs(
+    results: list[FilteredResult],
+    profile: Profile,
+    score_cache: dict | None = None,
+    cache_path: Path | None = None,
+) -> list[ScoredResult]:
+    if score_cache is None:
+        score_cache = {}
+
     limit = int(os.getenv("DEEP_ANALYSIS_LIMIT", "20"))
     model = os.getenv("SCORER_MODEL", "claude-haiku-4-5-20251001")
+    profile_fp = fingerprint_profile(profile)
 
     rejected = [r for r in results if r.rejected]
     kept = [r for r in results if not r.rejected]
@@ -82,11 +94,23 @@ def score_jobs(results: list[FilteredResult], profile: Profile) -> list[ScoredRe
 
     system_prompt = _build_system_prompt(profile)
     scored_map: dict[int, ScoredResult] = {}
+    to_call: list[tuple[int, FilteredResult]] = []
+
+    for i, r in enumerate(to_analyse):
+        key = make_score_key(r.job.url, profile_fp)
+        if key in score_cache:
+            scored_map[i] = ScoredResult(
+                job=r.job, flags=r.flags, rejected=r.rejected,
+                reject_reason=r.reject_reason,
+                analysis=JobAnalysis(**score_cache[key]),
+            )
+        else:
+            to_call.append((i, r))
 
     with ThreadPoolExecutor() as executor:
         futures = {
             executor.submit(_analyse_job, r.job, system_prompt, model): (i, r)
-            for i, r in enumerate(to_analyse)
+            for i, r in to_call
         }
         for future in as_completed(futures):
             idx, r = futures[future]
@@ -96,6 +120,7 @@ def score_jobs(results: list[FilteredResult], profile: Profile) -> list[ScoredRe
                     job=r.job, flags=r.flags, rejected=r.rejected,
                     reject_reason=r.reject_reason, analysis=analysis,
                 )
+                score_cache[make_score_key(r.job.url, profile_fp)] = asdict(analysis)
             except Exception as exc:
                 print(f"[scorer] analysis failed for {r.job.url!r}: {exc}", file=sys.stderr)
                 scored_map[idx] = ScoredResult(
@@ -103,6 +128,9 @@ def score_jobs(results: list[FilteredResult], profile: Profile) -> list[ScoredRe
                     rejected=r.rejected, reject_reason=r.reject_reason,
                     analysis=None,
                 )
+
+    if cache_path is not None:
+        save_score_cache(score_cache, cache_path)
 
     scored_analysed = [scored_map[i] for i in range(len(to_analyse))]
     scored_analysed.sort(
