@@ -6,6 +6,7 @@ from typing import Any
 
 import yaml
 
+from .email import build_email_html, send_email
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
 from .filter import filter_jobs
@@ -177,6 +178,12 @@ def main() -> None:
     top_score = max((r.analysis.score for r in kept_scored if r.analysis), default="n/a")
     print(f"- scored: {len(kept_scored)} kept, top score: {top_score}")
     print(f"- scored results written to: {SCORED_RESULTS_PATH}")
+
+    top_n = len([r for r in scored if not r.rejected and r.analysis is not None and "analysis_failed" not in r.flags])
+    top_n = min(top_n, 20)
+    print("Sending email...")
+    html = build_email_html(scored, profile)
+    send_email(html, profile, n=top_n)
 
 
 if __name__ == "__main__":

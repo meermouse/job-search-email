@@ -1,5 +1,5 @@
 import pytest
-from job_search_email.email import build_email_html
+from job_search_email.email import build_email_html, send_email
 from job_search_email.models import JobAnalysis, JobListing, Profile, ScoredResult
 
 
@@ -144,3 +144,14 @@ def test_build_email_html_zero_results_shows_count():
     profile = _make_profile()
     html = build_email_html([], profile)
     assert "0 jobs" in html
+
+
+def test_send_email_skips_and_warns_when_no_credentials(monkeypatch, capsys):
+    monkeypatch.delenv("SMTP_HOST", raising=False)
+    monkeypatch.delenv("SMTP_PORT", raising=False)
+    monkeypatch.delenv("SMTP_USER", raising=False)
+    monkeypatch.delenv("SMTP_PASSWORD", raising=False)
+    profile = _make_profile()
+    send_email("<html></html>", profile, n=5)  # must not raise
+    captured = capsys.readouterr()
+    assert "skipping" in captured.err
