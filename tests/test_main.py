@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from job_search_email.evaluator_notes import get_evaluator_notes
+from job_search_email.queries import generate_queries
 from job_search_email.exclusions import get_exclusions
 from job_search_email.nhs_rules import get_nhs_rules
 from job_search_email.main import (
@@ -83,11 +84,17 @@ def test_load_profile(tmp_path: Path) -> None:
 
 
 def test_fingerprint_and_cache(tmp_path: Path) -> None:
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps([f"query {i}" for i in range(8)]))]
+
     profile = make_profile()
     fingerprint = fingerprint_profile(profile)
-    plan = generate_search_plan(profile, fingerprint)
-    cache_path = tmp_path / "search_plan_cache.json"
 
+    with patch("job_search_email.queries.client") as mock_client:
+        mock_client.messages.create.return_value = mock_response
+        plan = generate_search_plan(profile, fingerprint)
+
+    cache_path = tmp_path / "search_plan_cache.json"
     save_cached_plan(plan, cache_path=cache_path)
     cached = load_cached_plan(cache_path=cache_path, fingerprint=fingerprint)
 
@@ -136,3 +143,39 @@ def test_get_evaluator_notes_is_profile_aware() -> None:
     assert any("60,000" in note for note in notes)
     assert any("clinical roles" in note for note in notes)
     assert any("Programme Manager" in note or "Digital Lead" in note for note in notes)
+
+
+def test_generate_queries_returns_eight_strings() -> None:
+    mock_queries = [
+        "Business Manager digital transformation NHS",
+        "Senior Programme Manager healthcare",
+        "Digital Transformation Lead NHS",
+        "Strategy Consultant digital health",
+        "Operations Manager NHS senior",
+        "Workforce Governance Manager digital",
+        "Project Planning Manager NHS",
+        "Head of Digital Services NHS",
+    ]
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps(mock_queries))]
+
+    with patch("job_search_email.queries.client") as mock_client:
+        mock_client.messages.create.return_value = mock_response
+        result = generate_queries(make_profile())
+
+    assert len(result) == 8
+    assert all(isinstance(q, str) for q in result)
+    assert result[0] == "Business Manager digital transformation NHS"
+
+
+def test_generate_queries_prompt_includes_exclusions() -> None:
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps(["q"] * 8))]
+
+    with patch("job_search_email.queries.client") as mock_client:
+        mock_client.messages.create.return_value = mock_response
+        generate_queries(make_profile())
+        prompt_content = mock_client.messages.create.call_args[1]["messages"][0]["content"]
+
+    assert "clinical roles" in prompt_content
+    assert "nursing" in prompt_content
