@@ -1,4 +1,5 @@
 import re
+from typing import Any
 from .models import FilteredResult, JobListing, Profile, SearchPlan
 
 _REJECT_TYPES = frozenset({
@@ -20,6 +21,9 @@ _CONTRACT_PATTERNS = re.compile(
     r"|locum post",
     re.IGNORECASE,
 )
+
+_NHS_BAND_RE = re.compile(r"Band\s*(\d+[a-dA-D]?)", re.IGNORECASE)
+_LONDON_WEIGHTING = 1.20
 
 
 def _check_employment_type(job: JobListing) -> FilteredResult:
@@ -43,6 +47,40 @@ def _check_role_suitability(job: JobListing, exclusion_roles: list[str]) -> Filt
     for term in exclusion_roles:
         if re.search(rf"\b{re.escape(term.lower())}\b", title_lower):
             return FilteredResult(job=job, flags=[], rejected=True, reject_reason=f"unsuitable role: {term}")
+    return None
+
+
+def _check_nhs_band_salary(
+    job: JobListing,
+    nhs_rules: dict[str, Any],
+    min_salary: int,
+) -> FilteredResult | None:
+    search_text = f"{job.title} {(job.description or '')[:500]}"
+    match = _NHS_BAND_RE.search(search_text)
+
+    if match is None:
+        return None
+
+    band_key = f"Band {match.group(1).lower()}"  # normalise e.g. "8A" → "8a"
+    band_map: dict[str, int] = nhs_rules.get("band_salary_map", {})
+    base_salary = band_map.get(band_key, 0)
+
+    is_london = "london" in (job.location or "").lower()
+    if is_london:
+        estimated = int(base_salary * _LONDON_WEIGHTING)
+        label = f"{band_key} London (~£{estimated:,})"
+    else:
+        estimated = base_salary
+        label = f"{band_key} (~£{estimated:,})"
+
+    if estimated < min_salary:
+        return FilteredResult(
+            job=job,
+            flags=[],
+            rejected=True,
+            reject_reason=f"nhs band salary below threshold: {label}",
+        )
+
     return None
 
 

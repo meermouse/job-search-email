@@ -266,3 +266,94 @@ def test_role_suitability_does_not_reject_word_containing_clinical_term():
     job = make_job(title="Forward Planning Lead")
     result = _check_role_suitability(job, ["ward"])
     assert result is None
+
+
+from job_search_email.filter import _check_nhs_band_salary
+
+_NHS_RULES = {
+    "band_salary_map": {
+        "Band 7":  43742,
+        "Band 8a": 53755,
+        "Band 8b": 62215,
+        "Band 8c": 72293,
+        "Band 8d": 83571,
+        "Band 9":  96376,
+    }
+}
+
+
+def test_nhs_band_non_nhs_source_no_band_returns_none():
+    job = make_job(source="reed", title="Business Manager", description="Great senior role.")
+    assert _check_nhs_band_salary(job, _NHS_RULES, 60000) is None
+
+
+def test_nhs_band_7_below_threshold_rejected():
+    job = make_job(title="Transformation Manager Band 7", source="nhs_jobs", location="Bristol")
+    result = _check_nhs_band_salary(job, _NHS_RULES, 60000)
+    assert result is not None
+    assert result.rejected is True
+    assert "Band 7" in result.reject_reason
+    assert "43,742" in result.reject_reason
+
+
+def test_nhs_band_8b_above_threshold_returns_none():
+    job = make_job(title="Digital Lead Band 8b", source="nhs_jobs", location="Bristol")
+    assert _check_nhs_band_salary(job, _NHS_RULES, 60000) is None
+
+
+def test_nhs_band_7_london_below_threshold_rejected():
+    # 43742 * 1.20 = 52490 < 60000 — still rejected
+    job = make_job(title="Manager Band 7", source="nhs_jobs", location="London")
+    result = _check_nhs_band_salary(job, _NHS_RULES, 60000)
+    assert result is not None
+    assert result.rejected is True
+    assert "London" in result.reject_reason
+    assert "52,490" in result.reject_reason
+
+
+def test_nhs_band_8a_london_above_threshold_returns_none():
+    # 53755 * 1.20 = 64506 >= 60000 — passes
+    job = make_job(title="Manager Band 8a", source="nhs_jobs", location="Greater London")
+    assert _check_nhs_band_salary(job, _NHS_RULES, 60000) is None
+
+
+def test_nhs_band_5_out_of_map_rejected():
+    job = make_job(title="Admin Band 5", source="nhs_jobs", location="Bristol")
+    result = _check_nhs_band_salary(job, _NHS_RULES, 60000)
+    assert result is not None
+    assert result.rejected is True
+
+
+def test_nhs_band_detected_in_description():
+    job = make_job(source="reed", title="NHS Digital Manager", description="AfC Band 7 post in Bristol.")
+    result = _check_nhs_band_salary(job, _NHS_RULES, 60000)
+    assert result is not None
+    assert result.rejected is True
+
+
+def test_nhs_band_beyond_500_chars_not_detected():
+    job = make_job(source="reed", title="Digital Manager", description=("A" * 500) + " Band 7 post.")
+    assert _check_nhs_band_salary(job, _NHS_RULES, 60000) is None
+
+
+def test_nhs_jobs_source_no_band_in_text_returns_none():
+    job = make_job(source="nhs_jobs", title="Digital Transformation Lead", description="No pay grade stated.")
+    assert _check_nhs_band_salary(job, _NHS_RULES, 60000) is None
+
+
+def test_nhs_london_location_case_insensitive():
+    # 53755 * 1.20 = 64506 >= 60000
+    job = make_job(title="Manager Band 8a", source="nhs_jobs", location="LONDON")
+    assert _check_nhs_band_salary(job, _NHS_RULES, 60000) is None
+
+
+def test_nhs_band_reject_reason_non_london_format():
+    job = make_job(title="Manager Band 7", source="nhs_jobs", location="Bristol")
+    result = _check_nhs_band_salary(job, _NHS_RULES, 60000)
+    assert result.reject_reason == "nhs band salary below threshold: Band 7 (~£43,742)"
+
+
+def test_nhs_band_reject_reason_london_format():
+    job = make_job(title="Manager Band 7", source="nhs_jobs", location="London")
+    result = _check_nhs_band_salary(job, _NHS_RULES, 60000)
+    assert result.reject_reason == "nhs band salary below threshold: Band 7 London (~£52,490)"
