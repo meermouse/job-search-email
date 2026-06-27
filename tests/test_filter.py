@@ -143,9 +143,6 @@ def test_employment_type_zero_hours_no_false_match():
     assert result.rejected is False
 
 
-from job_search_email.filter import _check_role_suitability
-
-
 def test_role_suitability_rejects_matching_title():
     job = make_job(title="Staff Nurse Band 5")
     result = _check_role_suitability(job, ["staff nurse", "ward manager", "clinical lead"])
