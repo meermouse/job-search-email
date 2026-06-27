@@ -55,6 +55,15 @@ def _build_user_message(job: JobListing) -> str:
     )
 
 
+def _strip_code_fence(text: str) -> str:
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.split("\n")
+        end = len(lines) - 1 if lines[-1].strip() == "```" else len(lines)
+        return "\n".join(lines[1:end]).strip()
+    return stripped
+
+
 def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis:
     response = client.messages.create(
         model=model,
@@ -68,7 +77,7 @@ def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis
     text = getattr(block, "text", "")
     if not text.strip():
         raise ValueError(f"empty text block from Claude (stop_reason={response.stop_reason}, type={type(block).__name__})")
-    data = json.loads(text)
+    data = json.loads(_strip_code_fence(text))
     return JobAnalysis(
         score=int(data["score"]),
         matched_skills=data.get("matched_skills", []),

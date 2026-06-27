@@ -34,6 +34,15 @@ Return a JSON array of exactly 8 strings. No other text.\
 """
 
 
+def _strip_code_fence(text: str) -> str:
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.split("\n")
+        end = len(lines) - 1 if lines[-1].strip() == "```" else len(lines)
+        return "\n".join(lines[1:end]).strip()
+    return stripped
+
+
 def generate_queries(profile: Profile) -> list[str]:
     prompt = QUERY_GENERATION_PROMPT.format(
         name=profile.name,
@@ -63,7 +72,7 @@ def generate_queries(profile: Profile) -> list[str]:
                 print(f"[queries] attempt {attempt}: empty text block (stop_reason={response.stop_reason}, type={type(block).__name__})", file=sys.stderr)
             else:
                 try:
-                    queries = json.loads(text)
+                    queries = json.loads(_strip_code_fence(text))
                 except json.JSONDecodeError as exc:
                     print(f"[queries] attempt {attempt}: JSON parse failed: {exc}\nRaw: {text!r}", file=sys.stderr)
                 else:
