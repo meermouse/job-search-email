@@ -180,3 +180,82 @@ def test_role_suitability_reject_reason_includes_matched_term():
     result = _check_role_suitability(job, ["consultant physician"])
     assert result is not None
     assert result.reject_reason == "unsuitable role: consultant physician"
+
+
+from job_search_email.filter import filter_jobs
+from job_search_email.models import SearchPlan
+
+
+def make_plan(roles: list[str] | None = None) -> SearchPlan:
+    return SearchPlan(
+        profile_fingerprint="abc123",
+        queries=["test query"],
+        exclusions={"roles": roles or [], "employment_types": []},
+        nhs_rules={},
+        evaluator_notes=[],
+    )
+
+
+def make_profile_stub():
+    from job_search_email.models import Profile
+    return Profile(
+        name="Test", current_role="Manager", about="", seniority="Senior",
+        industry="NHS", skills=[], previous_roles=[], target_roles=[],
+        open_to=[], not_open_to=[], qualifications=[],
+        employment_type=["full-time"], location="Bristol", min_salary=60000,
+    )
+
+
+def test_filter_jobs_rejects_contract_role():
+    jobs = [make_job(employment_type="contract")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert len(results) == 1
+    assert results[0].rejected is True
+
+
+def test_filter_jobs_keeps_full_time_role():
+    jobs = [make_job(employment_type="full-time")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert len(results) == 1
+    assert results[0].rejected is False
+    assert results[0].flags == []
+
+
+def test_filter_jobs_flags_unknown_employment_type():
+    jobs = [make_job(employment_type=None, description="A management position.")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert len(results) == 1
+    assert results[0].rejected is False
+    assert "employment_type_unknown" in results[0].flags
+
+
+def test_filter_jobs_rejects_unsuitable_role_title():
+    jobs = [make_job(title="Staff Nurse Band 5", employment_type="full-time")]
+    results = filter_jobs(jobs, make_plan(roles=["staff nurse"]), make_profile_stub())
+    assert len(results) == 1
+    assert results[0].rejected is True
+    assert "staff nurse" in results[0].reject_reason
+
+
+def test_filter_jobs_employment_type_checked_before_role():
+    # A contract role with a clinical title: reject reason should be employment type
+    jobs = [make_job(title="Staff Nurse", employment_type="contract")]
+    results = filter_jobs(jobs, make_plan(roles=["staff nurse"]), make_profile_stub())
+    assert results[0].reject_reason == "employment type: contract"
+
+
+def test_filter_jobs_returns_all_jobs_as_filtered_results():
+    jobs = [
+        make_job(employment_type="full-time"),
+        make_job(employment_type="contract"),
+        make_job(employment_type=None),
+    ]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert len(results) == 3
+
+
+def test_filter_jobs_unknown_flag_preserved_on_passing_job():
+    jobs = [make_job(employment_type=None, description="Permanent role with no type specified.")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert results[0].rejected is False
+    assert "employment_type_unknown" in results[0].flags

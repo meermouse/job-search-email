@@ -47,4 +47,25 @@ def _check_role_suitability(job: JobListing, exclusion_roles: list[str]) -> Filt
 
 
 def filter_jobs(jobs: list[JobListing], plan: SearchPlan, profile: Profile) -> list[FilteredResult]:
-    raise NotImplementedError
+    exclusion_roles = plan.exclusions.get("roles", [])
+    results: list[FilteredResult] = []
+
+    for job in jobs:
+        et_result = _check_employment_type(job)
+        if et_result.rejected:
+            results.append(et_result)
+            continue
+
+        role_result = _check_role_suitability(job, exclusion_roles)
+        if role_result is not None:
+            results.append(role_result)
+            continue
+
+        results.append(FilteredResult(
+            job=job,
+            flags=et_result.flags,
+            rejected=False,
+            reject_reason=None,
+        ))
+
+    return results
