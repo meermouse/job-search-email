@@ -47,3 +47,21 @@ class FilteredResult:
     flags: list[str]
     rejected: bool
     reject_reason: str | None
+
+
+@dataclass
+class JobAnalysis:
+    score: int
+    matched_skills: list[str]
+    missing_essentials: list[str]
+    employment_type_note: str
+    verdict: str
+
+
+@dataclass
+class ScoredResult:
+    job: JobListing
+    flags: list[str]
+    rejected: bool
+    reject_reason: str | None
+    analysis: JobAnalysis | None
