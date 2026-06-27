@@ -18,6 +18,8 @@ class Profile:
     employment_type: list[str]
     location: str
     min_salary: int
+    preamble: str = ""
+    recipient_email: str = ""
 
 
 @dataclass

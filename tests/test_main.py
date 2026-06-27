@@ -80,7 +80,8 @@ def test_load_profile(tmp_path: Path) -> None:
     assert profile.min_salary == 60000
     assert "clinical roles" in profile.not_open_to
     assert "stakeholder management" in profile.skills
-    assert not hasattr(profile, "preamble")
+    assert profile.preamble == "Test preamble"
+    assert profile.recipient_email == ""
 
 
 def test_fingerprint_and_cache(tmp_path: Path) -> None:

@@ -44,6 +44,8 @@ def load_profile(path: Path = PROFILE_PATH) -> Profile:
         employment_type=p.get("employment_type", []),
         location=data.get("location", ""),
         min_salary=data.get("min_salary", 0),
+        preamble=data.get("preamble", ""),
+        recipient_email=data.get("recipient_email", ""),
     )
 
 
