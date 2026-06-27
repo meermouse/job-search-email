@@ -97,7 +97,7 @@ def main() -> None:
     else:
         plan = generate_search_plan(profile, fingerprint)
         save_cached_plan(plan)
-        write_search_plan(plan)
+    write_search_plan(plan)
 
     print("Job search plan ready:")
     print(f"- profile: {profile.name}")

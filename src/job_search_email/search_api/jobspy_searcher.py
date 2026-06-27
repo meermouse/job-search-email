@@ -5,6 +5,19 @@ from ..models import JobListing, Profile
 
 _SALARY_RE = re.compile(r'£([\d,]+)(k)?', re.IGNORECASE)
 
+_JOB_TYPE_MAP = {
+    "fulltime": "full-time",
+    "parttime": "part-time",
+    "contract": "contract",
+    "internship": "internship",
+}
+
+
+def _normalise_job_type(value: str) -> str | None:
+    if not value:
+        return None
+    return _JOB_TYPE_MAP.get(value.lower(), value.lower())
+
 
 def search(query: str, profile: Profile) -> list[JobListing]:
     df = scrape_jobs(
@@ -33,7 +46,7 @@ def search(query: str, profile: Profile) -> list[JobListing]:
             description=_str(row.get("description")),
             url=_str(row.get("job_url")),
             source=_str(row.get("site")).lower(),
-            employment_type=_str(row.get("job_type")) or None,
+            employment_type=_normalise_job_type(_str(row.get("job_type"))),
         ))
 
     return results

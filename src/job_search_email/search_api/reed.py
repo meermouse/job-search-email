@@ -17,7 +17,7 @@ def search(query: str, profile: Profile) -> list[JobListing]:
         "minimumSalary": profile.min_salary,
         "resultsToTake": 100,
     }
-    response = requests.get(_REED_URL, params=params, auth=(api_key, ""))
+    response = requests.get(_REED_URL, params=params, auth=(api_key, ""), timeout=30)
     response.raise_for_status()
 
     return [_to_listing(item) for item in response.json().get("results", [])]

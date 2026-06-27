@@ -49,7 +49,7 @@ def test_search_returns_job_listings():
     assert job.company == "NHS Bristol"
     assert job.salary_min == 65000
     assert job.source == "linkedin"
-    assert job.employment_type == "fulltime"
+    assert job.employment_type == "full-time"
     assert job.url == "https://linkedin.com/jobs/1"
 
 
