@@ -141,7 +141,7 @@ def main() -> None:
     write_filtered_results(filtered)
     kept = [r for r in filtered if not r.rejected]
     flagged = [r for r in kept if r.flags]
-    print(f"- filtered: {len(kept)} kept, {len(filtered) - len(kept)} rejected ({len(flagged)} flagged unknown employment type)")
+    print(f"- filtered: {len(kept)} kept, {len(filtered) - len(kept)} rejected ({len(flagged)} flagged)")
     print(f"- filtered results written to: {FILTERED_RESULTS_PATH}")
 
 

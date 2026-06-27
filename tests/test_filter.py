@@ -465,6 +465,7 @@ def test_filter_jobs_sponsor_check_passes_listed_company():
     jobs = [make_job(source="reed", employment_type="full-time", company="Bossmans Retail")]
     results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=_SPONSOR_SET)
     assert results[0].rejected is False
+    assert results[0].flags == []
 
 
 def test_filter_jobs_sponsor_check_skipped_when_set_is_none():

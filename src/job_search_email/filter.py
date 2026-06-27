@@ -104,7 +104,12 @@ def _check_sponsor(job: JobListing, sponsor_set: frozenset[str]) -> FilteredResu
     return FilteredResult(job=job, flags=[], rejected=True, reject_reason="company not on approved sponsor list")
 
 
-def filter_jobs(jobs: list[JobListing], plan: SearchPlan, profile: Profile, sponsor_set: frozenset[str] | None = None) -> list[FilteredResult]:
+def filter_jobs(
+    jobs: list[JobListing],
+    plan: SearchPlan,
+    profile: Profile,
+    sponsor_set: frozenset[str] | None = None,
+) -> list[FilteredResult]:
     exclusion_roles = plan.exclusions.get("roles", [])
     results: list[FilteredResult] = []
 
