@@ -11,12 +11,11 @@ _PASS_TYPES = frozenset({"full-time", "permanent"})
 _CONTRACT_PATTERNS = re.compile(
     r"fixed.?term (?:contract|post|appointment)"
     r"|temporary (?:contract|post|role)"
-    r"|on a contract basis"
     r"|contract basis"
     r"|maternity cover"
     r"|parental leave cover"
     r"|\d+[\s\-]month (?:contract|fixed)"
-    r"|zero.hours"
+    r"|zero[\s\-]hours"
     r"|bank staff"
     r"|locum post",
     re.IGNORECASE,

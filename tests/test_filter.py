@@ -129,3 +129,10 @@ def test_employment_type_text_scan_limited_to_500_chars():
     job = make_job(description=f"{prefix} This is a fixed-term contract post.")
     result = _check_employment_type(job)
     assert result.rejected is False
+
+
+def test_employment_type_zero_hours_no_false_match():
+    # "zerophours" (no separator) must NOT trigger rejection
+    job = make_job(description="This zerophours system tracks time.")
+    result = _check_employment_type(job)
+    assert result.rejected is False
