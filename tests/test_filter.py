@@ -259,3 +259,10 @@ def test_filter_jobs_unknown_flag_preserved_on_passing_job():
     results = filter_jobs(jobs, make_plan(), make_profile_stub())
     assert results[0].rejected is False
     assert "employment_type_unknown" in results[0].flags
+
+
+def test_role_suitability_does_not_reject_word_containing_clinical_term():
+    # "ward" in STANDARD_CLINICAL_TERMS must not reject "Forward Planning Lead"
+    job = make_job(title="Forward Planning Lead")
+    result = _check_role_suitability(job, ["ward"])
+    assert result is None

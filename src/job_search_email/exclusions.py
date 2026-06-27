@@ -59,7 +59,10 @@ def _generate_exclusion_roles(profile: Profile) -> list[str]:
         max_tokens=256,
         messages=[{"role": "user", "content": prompt}],
     )
-    result = json.loads(response.content[0].text)
+    try:
+        result = json.loads(response.content[0].text)
+    except (json.JSONDecodeError, IndexError):
+        return []
     if not isinstance(result, list):
         return []
     return [str(term).lower() for term in result]
