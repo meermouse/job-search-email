@@ -39,3 +39,11 @@ class JobListing:
     url: str
     source: str
     employment_type: str | None
+
+
+@dataclass
+class FilteredResult:
+    job: JobListing
+    flags: list[str]
+    rejected: bool
+    reject_reason: str | None
