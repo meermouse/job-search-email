@@ -90,8 +90,12 @@ def test_fingerprint_and_cache(tmp_path: Path) -> None:
     profile = make_profile()
     fingerprint = fingerprint_profile(profile)
 
-    with patch("job_search_email.queries.client") as mock_client:
+    with patch("job_search_email.queries.client") as mock_client, \
+         patch("job_search_email.exclusions.client") as mock_excl_client:
         mock_client.messages.create.return_value = mock_response
+        mock_excl_client.messages.create.return_value = MagicMock(
+            content=[MagicMock(text="[]")]
+        )
         plan = generate_search_plan(profile, fingerprint)
 
     cache_path = tmp_path / "search_plan_cache.json"
@@ -105,21 +109,33 @@ def test_fingerprint_and_cache(tmp_path: Path) -> None:
 
 def test_get_exclusions_merges_not_open_to() -> None:
     profile = make_profile()  # not_open_to: ["clinical roles", "nursing"]
-    result = get_exclusions(profile)
+
+    with patch("job_search_email.exclusions.client") as mock_client:
+        mock_client.messages.create.return_value = MagicMock(
+            content=[MagicMock(text='["ward manager", "clinical lead"]')]
+        )
+        result = get_exclusions(profile)
 
     assert "roles" in result
     assert "employment_types" in result
     assert "clinical roles" in result["roles"]
     assert "nursing" in result["roles"]
-    assert "locum" in result["roles"]        # from STANDARD_CLINICAL_TERMS
+    assert "locum" in result["roles"]          # from STANDARD_CLINICAL_TERMS
+    assert "ward manager" in result["roles"]   # from Claude
     assert "fixed-term" in result["employment_types"]
     assert "bank" in result["employment_types"]
 
 
 def test_get_exclusions_deduplicates() -> None:
     profile = make_profile()
-    profile.not_open_to.append("locum")     # already in STANDARD_CLINICAL_TERMS
-    result = get_exclusions(profile)
+    profile.not_open_to.append("locum")        # already in STANDARD_CLINICAL_TERMS
+
+    with patch("job_search_email.exclusions.client") as mock_client:
+        mock_client.messages.create.return_value = MagicMock(
+            content=[MagicMock(text="[]")]
+        )
+        result = get_exclusions(profile)
+
     assert result["roles"].count("locum") == 1
 
 
@@ -191,8 +207,12 @@ def test_save_cached_plan_handles_corrupted_cache(tmp_path: Path) -> None:
     profile = make_profile()
     fingerprint = fingerprint_profile(profile)
 
-    with patch("job_search_email.queries.client") as mock_client:
+    with patch("job_search_email.queries.client") as mock_client, \
+         patch("job_search_email.exclusions.client") as mock_excl_client:
         mock_client.messages.create.return_value = mock_response
+        mock_excl_client.messages.create.return_value = MagicMock(
+            content=[MagicMock(text="[]")]
+        )
         plan = generate_search_plan(profile, fingerprint)
 
     save_cached_plan(plan, cache_path=cache_path)
