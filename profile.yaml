@@ -57,5 +57,5 @@ min_salary: 60000
 
 preamble: "Hey Jie, its The Job Mule. Lets go through todays jobs."
 recipient_email: jillcn@hotmail.com
-send_main_email: false
-send_debug_email: true
+send_main_email: true
+send_debug_email: false
