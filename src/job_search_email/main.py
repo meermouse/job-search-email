@@ -12,7 +12,7 @@ from .email import build_email_html, send_email
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
 from .filter import filter_jobs
-from .models import FilteredResult, Profile, SearchPlan, ScoredResult
+from .models import FilteredResult, JobListing, Profile, SearchPlan, ScoredResult
 from .nhs_rules import get_nhs_rules
 from .scorer import score_jobs
 from .queries import generate_queries
@@ -139,7 +139,7 @@ def write_scored_results(results: list[ScoredResult], path: Path = SCORED_RESULT
         json.dump(output, handle, indent=2)
 
 
-def _print_location_summary(jobs: list) -> None:
+def _print_location_summary(jobs: list[JobListing]) -> None:
     by_location: dict[str, Counter] = defaultdict(Counter)
     for job in jobs:
         by_location[job.location or "(blank)"][job.source] += 1
