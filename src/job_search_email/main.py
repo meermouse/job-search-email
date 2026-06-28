@@ -52,6 +52,8 @@ def load_profile(path: Path = PROFILE_PATH) -> Profile:
         min_salary=data.get("min_salary", 0),
         preamble=data.get("preamble", ""),
         recipient_email=data.get("recipient_email", ""),
+        send_main_email=data.get("send_main_email", True),
+        send_debug_email=data.get("send_debug_email", False),
     )
 
 

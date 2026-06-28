@@ -381,3 +381,20 @@ def test_print_location_summary_outputs_counts(capsys):
     assert "Bath, BA1" in out
     assert "reed" in out
     assert "linkedin" in out
+
+
+def test_load_profile_send_flags_default_to_main_on_debug_off(tmp_path: Path) -> None:
+    profile_path = tmp_path / "profile.yaml"
+    profile_path.write_text(PROFILE_YAML, encoding="utf-8")
+    profile = load_profile(path=profile_path)
+    assert profile.send_main_email is True
+    assert profile.send_debug_email is False
+
+
+def test_load_profile_reads_explicit_send_flags(tmp_path: Path) -> None:
+    yaml_with_flags = PROFILE_YAML + "send_main_email: false\nsend_debug_email: true\n"
+    profile_path = tmp_path / "profile.yaml"
+    profile_path.write_text(yaml_with_flags, encoding="utf-8")
+    profile = load_profile(path=profile_path)
+    assert profile.send_main_email is False
+    assert profile.send_debug_email is True

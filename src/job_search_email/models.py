@@ -20,6 +20,8 @@ class Profile:
     min_salary: int
     preamble: str = ""
     recipient_email: str = ""
+    send_main_email: bool = True
+    send_debug_email: bool = False
 
 
 @dataclass
