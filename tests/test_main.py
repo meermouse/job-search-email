@@ -1,4 +1,5 @@
 import json
+from collections import Counter
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -290,3 +291,31 @@ def test_write_filtered_results_rejected_includes_reason(tmp_path: Path) -> None
 
     data = json.loads(output_path.read_text(encoding="utf-8"))
     assert data["rejected"][0]["reject_reason"] == "unsuitable role: nurse"
+
+
+def test_print_location_summary_outputs_counts(capsys):
+    from job_search_email.main import _print_location_summary
+    from job_search_email.models import JobListing
+
+    def make_job(location, source):
+        return JobListing(
+            title="Manager", company="Corp", location=location,
+            salary_min=60000, description="", url="https://x.com",
+            source=source, employment_type="full-time",
+        )
+
+    jobs = [
+        make_job("Bristol, BS1", "reed"),
+        make_job("Bristol, BS1", "reed"),
+        make_job("Reading, RG1", "linkedin"),
+        make_job("Bath, BA1", "indeed"),
+    ]
+
+    _print_location_summary(jobs)
+    out = capsys.readouterr().out
+
+    assert "Bristol, BS1" in out
+    assert "Reading, RG1" in out
+    assert "Bath, BA1" in out
+    assert "reed" in out
+    assert "linkedin" in out

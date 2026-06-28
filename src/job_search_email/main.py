@@ -1,5 +1,6 @@
 import json
 import os
+from collections import Counter, defaultdict
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -138,6 +139,19 @@ def write_scored_results(results: list[ScoredResult], path: Path = SCORED_RESULT
         json.dump(output, handle, indent=2)
 
 
+def _print_location_summary(jobs: list) -> None:
+    by_location: dict[str, Counter] = defaultdict(Counter)
+    for job in jobs:
+        by_location[job.location or "(blank)"][job.source] += 1
+
+    total = len(jobs)
+    print(f"[main] Location breakdown ({total} jobs fetched):")
+    for location, sources in sorted(by_location.items(), key=lambda x: -sum(x[1].values())):
+        count = sum(sources.values())
+        source_detail = ", ".join(f"{s}: {n}" for s, n in sorted(sources.items()))
+        print(f"  {location:<40} {count:>4}  ({source_detail})")
+
+
 def main() -> None:
     profile = load_profile()
     fingerprint = fingerprint_profile(profile)
@@ -161,6 +175,7 @@ def main() -> None:
         json.dump([asdict(job) for job in jobs], handle, indent=2)
     print(f"- jobs fetched: {len(jobs)}")
     print(f"- results written to: {RESULTS_PATH}")
+    _print_location_summary(jobs)
     print("Filtering jobs...")
     filtered = filter_jobs(jobs, plan, profile)
     write_filtered_results(filtered)
