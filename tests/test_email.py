@@ -287,6 +287,13 @@ def test_quals_badge_shows_all_gaps_when_two_or_fewer():
     assert "more" not in badge
 
 
+def test_quals_badge_escapes_html_in_gap_text():
+    gaps = ['<PRINCE2>', '"MBA"']
+    badge = _quals_badge(_make_analysis(status="mismatch", gaps=gaps))
+    assert "<PRINCE2>" not in badge
+    assert "&lt;PRINCE2&gt;" in badge
+
+
 # --- Email table integration tests ---
 
 def _make_result_with_quals(

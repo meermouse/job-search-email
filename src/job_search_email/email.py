@@ -36,7 +36,7 @@ def _quals_badge(analysis: JobAnalysis) -> str:
 
     shown = gaps[:2]
     suffix = f" +{len(gaps) - 2} more" if len(gaps) > 2 else ""
-    gap_text = (", ".join(shown) + suffix) if shown else ""
+    gap_text = (", ".join(_escape(g) for g in shown) + suffix) if shown else ""
 
     if status == "mismatch":
         bg, fg, icon = "#dc3545", "#ffffff", "&#10007;"

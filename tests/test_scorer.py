@@ -373,6 +373,33 @@ def test_score_jobs_cache_hit_skips_claude():
     assert scored[0].analysis.verdict == "Cached verdict"
 
 
+def test_score_jobs_cache_hit_with_mismatch_keeps_cached_score():
+    # Scores are capped at write time, so a cached mismatch entry already has score=3.
+    # Loading from cache must not re-apply or bypass the cap.
+    job = make_job(url="https://example.com/cached-mismatch")
+    profile = make_profile()
+    fp = fingerprint_profile(profile)
+    key = make_score_key(job.url, fp)
+    cached_analysis = {
+        "score": 3,
+        "matched_skills": [],
+        "missing_essentials": ["PRINCE2"],
+        "employment_type_note": "Permanent",
+        "verdict": "Mismatch",
+        "required_qualifications": ["PRINCE2"],
+        "qualification_gaps": ["PRINCE2"],
+        "qualification_status": "mismatch",
+    }
+    score_cache = {key: cached_analysis}
+    results = [make_kept(job)]
+    m = _mock_client()
+    with patch("job_search_email.scorer.client", m):
+        scored = score_jobs(results, profile, score_cache=score_cache)
+    m.messages.create.assert_not_called()
+    assert scored[0].analysis.score == 3
+    assert scored[0].analysis.qualification_status == "mismatch"
+
+
 def test_score_jobs_cache_miss_calls_claude_and_populates_cache():
     job = make_job(url="https://example.com/new")
     profile = make_profile()
