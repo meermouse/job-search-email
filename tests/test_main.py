@@ -479,3 +479,10 @@ def test_routing_main_off_debug_off_sends_nothing(tmp_path: Path, monkeypatch):
     send_count, debug_count, _ = _run_main_with_toggles(tmp_path, monkeypatch, send_main=False, send_debug=False)
     assert send_count == 0
     assert debug_count == 0
+
+
+def test_routing_main_off_debug_on_skips_main_email_when_no_smtp_user(tmp_path: Path, monkeypatch):
+    monkeypatch.delenv("SMTP_USER", raising=False)
+    send_count, debug_count, _ = _run_main_with_toggles(tmp_path, monkeypatch, send_main=False, send_debug=True)
+    assert send_count == 0
+    assert debug_count == 1

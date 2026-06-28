@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from collections import Counter, defaultdict
 from dataclasses import asdict
 from pathlib import Path
@@ -220,7 +221,11 @@ def main() -> None:
     if profile.send_main_email:
         send_email(main_html, profile, n=top_n)
     elif profile.send_debug_email:
-        send_email(main_html, profile, n=top_n, override_to=os.getenv("SMTP_USER", ""))
+        smtp_user = os.getenv("SMTP_USER")
+        if smtp_user:
+            send_email(main_html, profile, n=top_n, override_to=smtp_user)
+        else:
+            print("[main] send_main_email=False but SMTP_USER not set — skipping main email redirect", file=sys.stderr)
 
     if profile.send_debug_email:
         debug_html = build_debug_email_html(classification, filtered, profile)
