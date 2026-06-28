@@ -73,7 +73,7 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
 </html>""", n
 
 
-def send_email(html: str, profile: Profile, n: int = 0) -> None:
+def send_email(html: str, profile: Profile, n: int = 0, override_to: str | None = None) -> None:
     host = os.getenv("SMTP_HOST")
     port = os.getenv("SMTP_PORT")
     user = os.getenv("SMTP_USER")
@@ -83,7 +83,8 @@ def send_email(html: str, profile: Profile, n: int = 0) -> None:
         print("[email] SMTP credentials not configured — skipping email send", file=sys.stderr)
         return
 
-    if not profile.recipient_email:
+    to = override_to if override_to else profile.recipient_email
+    if not to:
         print("[email] recipient_email not configured — skipping email send", file=sys.stderr)
         return
 
@@ -91,7 +92,7 @@ def send_email(html: str, profile: Profile, n: int = 0) -> None:
     msg = EmailMessage()
     msg["Subject"] = f"Job Search Results – {today} ({n} jobs found)"
     msg["From"] = user
-    msg["To"] = profile.recipient_email
+    msg["To"] = to
     msg.set_content("Please view this email in an HTML-capable client.")
     msg.add_alternative(html, subtype="html")
 
@@ -100,6 +101,34 @@ def send_email(html: str, profile: Profile, n: int = 0) -> None:
             smtp.starttls()
             smtp.login(user, password)
             smtp.send_message(msg)
-        print(f"[email] sent to {profile.recipient_email}")
+        print(f"[email] sent to {to}")
     except Exception as exc:
         print(f"[email] failed to send: {exc}", file=sys.stderr)
+
+
+def send_debug_report(html: str) -> None:
+    host = os.getenv("SMTP_HOST")
+    port = os.getenv("SMTP_PORT")
+    user = os.getenv("SMTP_USER")
+    password = os.getenv("SMTP_PASSWORD")
+
+    if not all([host, port, user, password]):
+        print("[email] SMTP credentials not configured — skipping debug report", file=sys.stderr)
+        return
+
+    today = date.today().strftime("%Y-%m-%d")
+    msg = EmailMessage()
+    msg["Subject"] = f"[DEBUG] Job Search – {today}"
+    msg["From"] = user
+    msg["To"] = user
+    msg.set_content("Please view this email in an HTML-capable client.")
+    msg.add_alternative(html, subtype="html")
+
+    try:
+        with smtplib.SMTP(host, int(port)) as smtp:
+            smtp.starttls()
+            smtp.login(user, password)
+            smtp.send_message(msg)
+        print(f"[email] debug report sent to {user}")
+    except Exception as exc:
+        print(f"[email] failed to send debug report: {exc}", file=sys.stderr)

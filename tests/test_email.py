@@ -1,5 +1,6 @@
 import pytest
-from job_search_email.email import build_email_html, send_email
+from unittest.mock import patch
+from job_search_email.email import build_email_html, send_email, send_debug_report
 from job_search_email.models import JobAnalysis, JobListing, Profile, ScoredResult
 
 
@@ -155,3 +156,78 @@ def test_send_email_skips_and_warns_when_no_credentials(monkeypatch, capsys):
     send_email("<html></html>", profile, n=5)  # must not raise
     captured = capsys.readouterr()
     assert "skipping" in captured.err
+
+
+def test_send_email_uses_recipient_email_by_default(monkeypatch):
+    monkeypatch.setenv("SMTP_HOST", "smtp.test.com")
+    monkeypatch.setenv("SMTP_PORT", "587")
+    monkeypatch.setenv("SMTP_USER", "sender@test.com")
+    monkeypatch.setenv("SMTP_PASSWORD", "secret")
+    profile = _make_profile(recipient_email="recipient@test.com")
+    captured = []
+
+    class FakeSMTP:
+        def __init__(self, host, port): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): pass
+        def starttls(self): pass
+        def login(self, u, p): pass
+        def send_message(self, msg): captured.append(msg)
+
+    with patch("smtplib.SMTP", FakeSMTP):
+        send_email("<html/>", profile)
+
+    assert captured[0]["To"] == "recipient@test.com"
+
+
+def test_send_email_override_to_replaces_recipient(monkeypatch):
+    monkeypatch.setenv("SMTP_HOST", "smtp.test.com")
+    monkeypatch.setenv("SMTP_PORT", "587")
+    monkeypatch.setenv("SMTP_USER", "sender@test.com")
+    monkeypatch.setenv("SMTP_PASSWORD", "secret")
+    profile = _make_profile(recipient_email="recipient@test.com")
+    captured = []
+
+    class FakeSMTP:
+        def __init__(self, host, port): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): pass
+        def starttls(self): pass
+        def login(self, u, p): pass
+        def send_message(self, msg): captured.append(msg)
+
+    with patch("smtplib.SMTP", FakeSMTP):
+        send_email("<html/>", profile, override_to="override@test.com")
+
+    assert captured[0]["To"] == "override@test.com"
+
+
+def test_send_debug_report_sends_to_smtp_user(monkeypatch):
+    monkeypatch.setenv("SMTP_HOST", "smtp.test.com")
+    monkeypatch.setenv("SMTP_PORT", "587")
+    monkeypatch.setenv("SMTP_USER", "sender@test.com")
+    monkeypatch.setenv("SMTP_PASSWORD", "secret")
+    captured = []
+
+    class FakeSMTP:
+        def __init__(self, host, port): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): pass
+        def starttls(self): pass
+        def login(self, u, p): pass
+        def send_message(self, msg): captured.append(msg)
+
+    with patch("smtplib.SMTP", FakeSMTP):
+        send_debug_report("<html/>")
+
+    assert captured[0]["To"] == "sender@test.com"
+    assert "[DEBUG]" in captured[0]["Subject"]
+
+
+def test_send_debug_report_skips_when_no_credentials(monkeypatch, capsys):
+    monkeypatch.delenv("SMTP_HOST", raising=False)
+    monkeypatch.delenv("SMTP_PORT", raising=False)
+    monkeypatch.delenv("SMTP_USER", raising=False)
+    monkeypatch.delenv("SMTP_PASSWORD", raising=False)
+    send_debug_report("<html/>")
+    assert "skipping" in capsys.readouterr().err
