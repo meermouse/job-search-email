@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -61,6 +61,9 @@ class JobAnalysis:
     missing_essentials: list[str]
     employment_type_note: str
     verdict: str
+    required_qualifications: list[str] = field(default_factory=list)
+    qualification_gaps: list[str] = field(default_factory=list)
+    qualification_status: str = ""
 
 
 @dataclass

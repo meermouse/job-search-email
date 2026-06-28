@@ -36,6 +36,52 @@ def test_job_analysis_fields():
     assert a.verdict == "Strong match for senior management roles."
 
 
+def test_job_analysis_new_fields_have_defaults():
+    a = make_analysis()
+    assert a.required_qualifications == []
+    assert a.qualification_gaps == []
+    assert a.qualification_status == ""
+
+
+def test_job_analysis_new_fields_accept_values():
+    a = make_analysis(
+        required_qualifications=["PRINCE2"],
+        qualification_gaps=["PRINCE2"],
+        qualification_status="mismatch",
+    )
+    assert a.required_qualifications == ["PRINCE2"]
+    assert a.qualification_gaps == ["PRINCE2"]
+    assert a.qualification_status == "mismatch"
+
+
+def test_job_analysis_serialises_new_fields_with_asdict():
+    from dataclasses import asdict
+    a = make_analysis(
+        required_qualifications=["MBA"],
+        qualification_gaps=["MBA"],
+        qualification_status="mismatch",
+    )
+    data = asdict(a)
+    assert data["required_qualifications"] == ["MBA"]
+    assert data["qualification_gaps"] == ["MBA"]
+    assert data["qualification_status"] == "mismatch"
+
+
+def test_job_analysis_backwards_compat_from_dict():
+    # Old cache entries without new fields must still deserialise
+    old_cache_entry = {
+        "score": 7,
+        "matched_skills": ["digital transformation"],
+        "missing_essentials": [],
+        "employment_type_note": "Permanent",
+        "verdict": "Good match",
+    }
+    a = JobAnalysis(**old_cache_entry)
+    assert a.qualification_status == ""
+    assert a.required_qualifications == []
+    assert a.qualification_gaps == []
+
+
 def test_scored_result_with_analysis():
     result = ScoredResult(
         job=make_job(), flags=[], rejected=False,
