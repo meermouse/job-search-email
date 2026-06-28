@@ -293,6 +293,68 @@ def test_write_filtered_results_rejected_includes_reason(tmp_path: Path) -> None
     assert data["rejected"][0]["reject_reason"] == "unsuitable role: nurse"
 
 
+def test_main_loads_and_saves_location_cache(tmp_path, monkeypatch):
+    """Location cache is loaded before classify and saved after."""
+    import sys
+    import importlib
+    importlib.import_module("job_search_email.main")
+    main_mod = sys.modules["job_search_email.main"]
+
+    # Point all file paths to tmp_path
+    monkeypatch.setattr(main_mod, "ROOT", tmp_path)
+    monkeypatch.setattr(main_mod, "PROFILE_PATH", tmp_path / "profile.yaml")
+    monkeypatch.setattr(main_mod, "CACHE_PATH", tmp_path / "plan_cache.json")
+    monkeypatch.setattr(main_mod, "PLAN_PATH", tmp_path / "plan.json")
+    monkeypatch.setattr(main_mod, "RESULTS_PATH", tmp_path / "results.json")
+    monkeypatch.setattr(main_mod, "FILTERED_RESULTS_PATH", tmp_path / "filtered.json")
+    monkeypatch.setattr(main_mod, "SCORED_RESULTS_PATH", tmp_path / "scored.json")
+    monkeypatch.setattr(main_mod, "SCORE_CACHE_PATH", tmp_path / "score_cache.json")
+    monkeypatch.setattr(main_mod, "LOCATION_CACHE_PATH", tmp_path / "location_cache.json")
+
+    # Write a minimal profile.yaml
+    (tmp_path / "profile.yaml").write_text(
+        "profile:\n  name: Test\n  current_role: ''\n  about: ''\n"
+        "  seniority: ''\n  industry: ''\n  skills: []\n  previous_roles: []\n"
+        "  target_roles: []\n  open_to: []\n  not_open_to: []\n"
+        "  qualifications: []\n  employment_type: [full-time]\n"
+        "location: Bristol\nmin_salary: 60000\n",
+        encoding="utf-8",
+    )
+
+    from job_search_email.models import JobListing
+
+    dummy_job = JobListing(
+        title="Manager", company="NHS", location="Bristol, BS1",
+        salary_min=65000, description="", url="https://x.com/1",
+        source="reed", employment_type="full-time",
+    )
+
+    from job_search_email.models import SearchPlan
+
+    dummy_plan = SearchPlan(
+        profile_fingerprint="test",
+        queries=["test query"],
+        exclusions={"roles": [], "employment_types": []},
+        nhs_rules={},
+        evaluator_notes=[],
+    )
+
+    with (
+        patch("job_search_email.main.fetch_all_jobs", return_value=[dummy_job]),
+        patch("job_search_email.main.generate_search_plan", return_value=dummy_plan),
+        patch("job_search_email.main.classify_locations", return_value={"Bristol, BS1": "within"}) as mock_classify,
+        patch("job_search_email.main.score_jobs", return_value=[]),
+        patch("job_search_email.main.build_email_html", return_value=("<html/>", 0)),
+        patch("job_search_email.main.send_email"),
+    ):
+        main_mod.main()
+
+    mock_classify.assert_called_once()
+    call_kwargs = mock_classify.call_args
+    assert "Bristol" in str(call_kwargs)
+    assert (tmp_path / "location_cache.json").exists()
+
+
 def test_print_location_summary_outputs_counts(capsys):
     from job_search_email.main import _print_location_summary
     from job_search_email.models import JobListing

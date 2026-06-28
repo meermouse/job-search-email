@@ -12,6 +12,7 @@ from .email import build_email_html, send_email
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
 from .filter import filter_jobs
+from .location_filter import classify_locations, load_location_cache, save_location_cache
 from .models import FilteredResult, JobListing, Profile, SearchPlan, ScoredResult
 from .nhs_rules import get_nhs_rules
 from .scorer import score_jobs
@@ -26,6 +27,7 @@ RESULTS_PATH = ROOT / "job_results.json"
 FILTERED_RESULTS_PATH = ROOT / "job_results_filtered.json"
 SCORED_RESULTS_PATH = ROOT / "job_results_scored.json"
 SCORE_CACHE_PATH = ROOT / "job_score_cache.json"
+LOCATION_CACHE_PATH = ROOT / "location_cache.json"
 
 
 def load_profile(path: Path = PROFILE_PATH) -> Profile:
@@ -176,8 +178,24 @@ def main() -> None:
     print(f"- jobs fetched: {len(jobs)}")
     print(f"- results written to: {RESULTS_PATH}")
     _print_location_summary(jobs)
+
+    print("Classifying job locations...")
+    location_cache = load_location_cache(LOCATION_CACHE_PATH)
+    unique_locations = list({j.location for j in jobs if j.location})
+    classification = classify_locations(
+        unique_locations,
+        home=profile.location,
+        radius_miles=50,
+        cache=location_cache,
+    )
+    save_location_cache(location_cache, LOCATION_CACHE_PATH)
+    rejected_locations = frozenset(loc for loc, verdict in classification.items() if verdict == "outside")
+    outside_count = len(rejected_locations)
+    if outside_count:
+        print(f"- {outside_count} location(s) classified as outside radius: {sorted(rejected_locations)}")
+
     print("Filtering jobs...")
-    filtered = filter_jobs(jobs, plan, profile)
+    filtered = filter_jobs(jobs, plan, profile, rejected_locations=rejected_locations)
     write_filtered_results(filtered)
     kept = [r for r in filtered if not r.rejected]
     flagged = [r for r in kept if r.flags]
