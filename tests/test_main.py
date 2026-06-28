@@ -2,6 +2,7 @@ import json
 from collections import Counter
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from unittest.mock import patch as _patch
 
 from job_search_email.evaluator_notes import get_evaluator_notes
 from job_search_email.queries import generate_queries
@@ -398,3 +399,83 @@ def test_load_profile_reads_explicit_send_flags(tmp_path: Path) -> None:
     profile = load_profile(path=profile_path)
     assert profile.send_main_email is False
     assert profile.send_debug_email is True
+
+
+def _run_main_with_toggles(tmp_path: Path, monkeypatch, send_main: bool, send_debug: bool):
+    import sys
+    import importlib
+    importlib.import_module("job_search_email.main")
+    main_mod = sys.modules["job_search_email.main"]
+
+    (tmp_path / "profile.yaml").write_text(
+        "profile:\n  name: Test\n  current_role: ''\n  about: ''\n"
+        "  seniority: ''\n  industry: ''\n  skills: []\n  previous_roles: []\n"
+        "  target_roles: []\n  open_to: []\n  not_open_to: []\n"
+        "  qualifications: []\n  employment_type: [full-time]\n"
+        "location: Bristol\nmin_salary: 60000\n"
+        f"send_main_email: {'true' if send_main else 'false'}\n"
+        f"send_debug_email: {'true' if send_debug else 'false'}\n",
+        encoding="utf-8",
+    )
+
+    for attr, val in [
+        ("ROOT", tmp_path), ("PROFILE_PATH", tmp_path / "profile.yaml"),
+        ("CACHE_PATH", tmp_path / "plan.json"), ("PLAN_PATH", tmp_path / "plan.json"),
+        ("RESULTS_PATH", tmp_path / "results.json"),
+        ("FILTERED_RESULTS_PATH", tmp_path / "filtered.json"),
+        ("SCORED_RESULTS_PATH", tmp_path / "scored.json"),
+        ("SCORE_CACHE_PATH", tmp_path / "score_cache.json"),
+        ("LOCATION_CACHE_PATH", tmp_path / "location_cache.json"),
+    ]:
+        monkeypatch.setattr(main_mod, attr, val)
+
+    from job_search_email.models import JobListing, SearchPlan
+    dummy_job = JobListing(
+        title="Manager", company="NHS", location="Bristol",
+        salary_min=65000, description="", url="https://x.com/1",
+        source="reed", employment_type="full-time",
+    )
+    dummy_plan = SearchPlan(
+        profile_fingerprint="test", queries=["q"],
+        exclusions={"roles": [], "employment_types": []},
+        nhs_rules={}, evaluator_notes=[],
+    )
+
+    with (
+        _patch("job_search_email.main.fetch_all_jobs", return_value=[dummy_job]),
+        _patch("job_search_email.main.generate_search_plan", return_value=dummy_plan),
+        _patch("job_search_email.main.classify_locations", return_value={"Bristol": "within"}),
+        _patch("job_search_email.main.score_jobs", return_value=[]),
+        _patch("job_search_email.main.build_email_html", return_value=("<html/>", 0)),
+        _patch("job_search_email.main.send_email") as mock_send,
+        _patch("job_search_email.main.send_debug_report") as mock_debug,
+        _patch("job_search_email.main.build_debug_email_html", return_value="<debug/>"),
+    ):
+        main_mod.main()
+        return mock_send.call_count, mock_debug.call_count, mock_send.call_args_list
+
+
+def test_routing_main_on_debug_off_sends_only_main(tmp_path: Path, monkeypatch):
+    send_count, debug_count, _ = _run_main_with_toggles(tmp_path, monkeypatch, send_main=True, send_debug=False)
+    assert send_count == 1
+    assert debug_count == 0
+
+
+def test_routing_main_on_debug_on_sends_both(tmp_path: Path, monkeypatch):
+    send_count, debug_count, _ = _run_main_with_toggles(tmp_path, monkeypatch, send_main=True, send_debug=True)
+    assert send_count == 1
+    assert debug_count == 1
+
+
+def test_routing_main_off_debug_on_sends_main_to_smtp_user(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("SMTP_USER", "sender@test.com")
+    send_count, debug_count, call_args = _run_main_with_toggles(tmp_path, monkeypatch, send_main=False, send_debug=True)
+    assert send_count == 1
+    assert debug_count == 1
+    assert call_args[0].kwargs.get("override_to") == "sender@test.com"
+
+
+def test_routing_main_off_debug_off_sends_nothing(tmp_path: Path, monkeypatch):
+    send_count, debug_count, _ = _run_main_with_toggles(tmp_path, monkeypatch, send_main=False, send_debug=False)
+    assert send_count == 0
+    assert debug_count == 0

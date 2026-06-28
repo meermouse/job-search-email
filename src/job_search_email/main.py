@@ -8,7 +8,8 @@ from typing import Any
 import yaml
 
 from .cache import fingerprint_profile, load_score_cache
-from .email import build_email_html, send_email
+from .email import build_email_html, send_email, send_debug_report
+from .debug_email import build_debug_email_html
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
 from .filter import filter_jobs
@@ -157,7 +158,7 @@ def _print_location_summary(jobs: list[JobListing]) -> None:
 
 
 def main() -> None:
-    profile = load_profile()
+    profile = load_profile(PROFILE_PATH)
     fingerprint = fingerprint_profile(profile)
     cached = load_cached_plan(fingerprint=fingerprint)
 
@@ -213,9 +214,17 @@ def main() -> None:
     print(f"- scored: {len(kept_scored)} kept, top score: {top_score}")
     print(f"- scored results written to: {SCORED_RESULTS_PATH}")
 
-    print("Sending email...")
-    html, top_n = build_email_html(scored, profile)
-    send_email(html, profile, n=top_n)
+    print("Sending emails...")
+    main_html, top_n = build_email_html(scored, profile)
+
+    if profile.send_main_email:
+        send_email(main_html, profile, n=top_n)
+    elif profile.send_debug_email:
+        send_email(main_html, profile, n=top_n, override_to=os.getenv("SMTP_USER", ""))
+
+    if profile.send_debug_email:
+        debug_html = build_debug_email_html(classification, filtered, profile)
+        send_debug_report(debug_html)
 
 
 if __name__ == "__main__":
