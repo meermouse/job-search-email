@@ -424,3 +424,135 @@ def test_score_jobs_no_cache_path_does_not_write_file(tmp_path: Path):
     with patch("job_search_email.scorer.client", _mock_client()):
         score_jobs(results, make_profile())
     assert not cache_path.exists()
+
+
+_MISMATCH_RESPONSE = json.dumps({
+    "score": 8,
+    "matched_skills": [],
+    "missing_essentials": ["PRINCE2"],
+    "employment_type_note": "Permanent full-time",
+    "verdict": "Good role but PRINCE2 required",
+    "required_qualifications": ["PRINCE2"],
+    "qualification_gaps": ["PRINCE2"],
+    "qualification_status": "mismatch",
+})
+
+_PARTIAL_RESPONSE = json.dumps({
+    "score": 7,
+    "matched_skills": ["digital transformation"],
+    "missing_essentials": [],
+    "employment_type_note": "Permanent full-time",
+    "verdict": "Partial match",
+    "required_qualifications": ["PRINCE2"],
+    "qualification_gaps": ["PRINCE2"],
+    "qualification_status": "partial",
+})
+
+_MET_RESPONSE = json.dumps({
+    "score": 9,
+    "matched_skills": ["digital transformation"],
+    "missing_essentials": [],
+    "employment_type_note": "Permanent full-time",
+    "verdict": "Strong match",
+    "required_qualifications": ["Master's degree"],
+    "qualification_gaps": [],
+    "qualification_status": "met",
+})
+
+
+def test_score_jobs_caps_score_to_3_when_mismatch():
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(_MISMATCH_RESPONSE)):
+        scored = score_jobs(results, make_profile())
+    a = scored[0].analysis
+    assert a.score == 3
+    assert a.qualification_status == "mismatch"
+    assert "PRINCE2" in a.qualification_gaps
+    assert "PRINCE2" in a.required_qualifications
+
+
+def test_score_jobs_does_not_cap_score_when_partial():
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(_PARTIAL_RESPONSE)):
+        scored = score_jobs(results, make_profile())
+    a = scored[0].analysis
+    assert a.score == 7
+    assert a.qualification_status == "partial"
+
+
+def test_score_jobs_does_not_cap_score_when_met():
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(_MET_RESPONSE)):
+        scored = score_jobs(results, make_profile())
+    a = scored[0].analysis
+    assert a.score == 9
+    assert a.qualification_status == "met"
+    assert a.qualification_gaps == []
+
+
+def test_score_jobs_mismatch_cap_does_not_raise_score():
+    # A mismatch job that was already scored 2 must stay at 2, not be raised to 3
+    low_mismatch = json.dumps({
+        "score": 2,
+        "matched_skills": [],
+        "missing_essentials": ["MBA"],
+        "employment_type_note": "",
+        "verdict": "Very weak",
+        "required_qualifications": ["MBA"],
+        "qualification_gaps": ["MBA"],
+        "qualification_status": "mismatch",
+    })
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(low_mismatch)):
+        scored = score_jobs(results, make_profile())
+    assert scored[0].analysis.score == 2
+
+
+def test_score_jobs_parses_qualification_fields():
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(_MET_RESPONSE)):
+        scored = score_jobs(results, make_profile())
+    a = scored[0].analysis
+    assert a.required_qualifications == ["Master's degree"]
+    assert a.qualification_gaps == []
+    assert a.qualification_status == "met"
+
+
+def test_score_jobs_qualification_fields_default_when_absent():
+    # LLM response without new fields (e.g. cache hit from old cache entry)
+    old_response = json.dumps({
+        "score": 8,
+        "matched_skills": ["digital transformation"],
+        "missing_essentials": [],
+        "employment_type_note": "Permanent",
+        "verdict": "Good",
+    })
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(old_response)):
+        scored = score_jobs(results, make_profile())
+    a = scored[0].analysis
+    assert a.required_qualifications == []
+    assert a.qualification_gaps == []
+    assert a.qualification_status == ""
+
+
+def test_system_prompt_contains_qualification_instructions():
+    from job_search_email.scorer import _build_system_prompt
+    prompt = _build_system_prompt(make_profile())
+    assert "qualification_status" in prompt
+    assert "exact or near-exact" in prompt
+    assert "mismatch" in prompt
+
+
+def test_user_message_contains_qualification_schema():
+    from job_search_email.scorer import _build_user_message
+    from job_search_email.models import JobListing
+    job = JobListing(
+        title="Manager", company="NHS", location="Bristol",
+        salary_min=70000, description="Need PRINCE2.",
+        url="https://example.com/1", source="reed", employment_type="full-time",
+    )
+    msg = _build_user_message(job)
+    assert "required_qualifications" in msg
+    assert "qualification_gaps" in msg
+    assert "qualification_status" in msg

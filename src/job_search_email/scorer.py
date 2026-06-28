@@ -12,7 +12,7 @@ from .models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResu
 
 client = anthropic.Anthropic()
 
-_DESCRIPTION_LIMIT = 1500
+_DESCRIPTION_LIMIT = 2500
 
 
 def _build_system_prompt(profile: Profile) -> str:
@@ -30,7 +30,17 @@ def _build_system_prompt(profile: Profile) -> str:
         f"- Min salary: £{profile.min_salary:,}\n\n"
         "Score guidance: 8-10 = strong match (profile clearly fits). "
         "5-7 = partial match (relevant but gaps present). "
-        "1-4 = weak (missing essentials or significant misalignment)."
+        "1-4 = weak (missing essentials or significant misalignment).\n\n"
+        "Qualification analysis instructions:\n"
+        "- Extract any explicitly stated qualification requirements from the job description\n"
+        "- Compare each against the candidate's qualifications using exact or near-exact matching only\n"
+        '- "PRINCE2 required" is a gap if the candidate does not list PRINCE2 specifically\n'
+        "- A Master's degree satisfies \"degree required\" but not \"MBA required\"\n"
+        "- Set qualification_status to:\n"
+        '    "met"      — all stated requirements are present in the candidate\'s profile\n'
+        '    "partial"  — some gaps exist but not clearly disqualifying\n'
+        '    "mismatch" — one or more hard requirements are clearly absent\n'
+        '    ""         — no qualification requirements found in the description'
     )
 
 
@@ -50,7 +60,10 @@ def _build_user_message(job: JobListing) -> str:
         '  "matched_skills": ["..."],\n'
         '  "missing_essentials": ["..."],\n'
         '  "employment_type_note": "...",\n'
-        '  "verdict": "..."\n'
+        '  "verdict": "...",\n'
+        '  "required_qualifications": ["..."],\n'
+        '  "qualification_gaps": ["..."],\n'
+        '  "qualification_status": "met|partial|mismatch|"\n'
         "}"
     )
 
@@ -67,7 +80,7 @@ def _strip_code_fence(text: str) -> str:
 def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis:
     response = client.messages.create(
         model=model,
-        max_tokens=512,
+        max_tokens=768,
         system=system_prompt,
         messages=[{"role": "user", "content": _build_user_message(job)}],
     )
@@ -78,12 +91,19 @@ def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis
     if not text.strip():
         raise ValueError(f"empty text block from Claude (stop_reason={response.stop_reason}, type={type(block).__name__})")
     data = json.loads(_strip_code_fence(text))
+    score = int(data["score"])
+    qual_status = data.get("qualification_status", "")
+    if qual_status == "mismatch":
+        score = min(score, 3)
     return JobAnalysis(
-        score=int(data["score"]),
+        score=score,
         matched_skills=data.get("matched_skills", []),
         missing_essentials=data.get("missing_essentials", []),
         employment_type_note=data.get("employment_type_note", ""),
         verdict=data.get("verdict", ""),
+        required_qualifications=data.get("required_qualifications", []),
+        qualification_gaps=data.get("qualification_gaps", []),
+        qualification_status=qual_status,
     )
 
 
