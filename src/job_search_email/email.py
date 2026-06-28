@@ -5,7 +5,7 @@ from datetime import date
 from email.message import EmailMessage
 from html import escape as _escape
 
-from .models import Profile, ScoredResult
+from .models import JobAnalysis, Profile, ScoredResult
 
 
 def _score_badge(score: int) -> str:
@@ -21,6 +21,35 @@ def _score_badge(score: int) -> str:
     )
 
 
+def _quals_badge(analysis: JobAnalysis) -> str:
+    status = analysis.qualification_status
+    gaps = analysis.qualification_gaps
+
+    if not status:
+        return '<span style="color:#999999; font-size:12px;">&#8212;</span>'
+
+    if status == "met":
+        return (
+            '<span style="background:#28a745; color:#ffffff; padding:2px 8px; '
+            'border-radius:4px; font-size:12px;">&#10003; Met</span>'
+        )
+
+    shown = gaps[:2]
+    suffix = f" +{len(gaps) - 2} more" if len(gaps) > 2 else ""
+    gap_text = (", ".join(shown) + suffix) if shown else ""
+
+    if status == "mismatch":
+        bg, fg, icon = "#dc3545", "#ffffff", "&#10007;"
+    else:
+        bg, fg, icon = "#ffc107", "#333333", "&#9888;"
+
+    label = f"{icon} {gap_text}".strip() if gap_text else icon
+    return (
+        f'<span style="background:{bg}; color:{fg}; padding:2px 8px; '
+        f'border-radius:4px; font-size:12px;">{label}</span>'
+    )
+
+
 def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str, int]:
     eligible = [r for r in results if not r.rejected and r.analysis is not None]
     eligible.sort(key=lambda r: r.analysis.score, reverse=True)
@@ -31,6 +60,7 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
         row_bg = "#f9f9f9" if i % 2 == 0 else "#ffffff"
         salary = f"£{r.job.salary_min:,}" if r.job.salary_min is not None else "Not stated"
         badge = _score_badge(r.analysis.score)
+        quals = _quals_badge(r.analysis)
         cell = 'style="padding:8px 6px; border-bottom:1px solid #eeeeee;"'
         rows.append(
             f'<tr style="background:{row_bg};">'
@@ -39,6 +69,7 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
             f'<td {cell}><a href="{_escape(r.job.url, quote=True)}" style="color:#0066cc; text-decoration:none;">{_escape(r.job.title)}</a></td>'
             f"<td {cell}>{_escape(r.job.company)}</td>"
             f'<td {cell} style="white-space:nowrap;">{salary}</td>'
+            f"<td {cell}>{quals}</td>"
             f"<td {cell}>{_escape(r.analysis.verdict)}</td>"
             f"</tr>"
         )
@@ -61,6 +92,7 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
         <th {th}>Job Title</th>
         <th {th}>Company</th>
         <th {th}>Salary</th>
+        <th {th}>Quals</th>
         <th {th}>Verdict</th>
       </tr>
     </thead>

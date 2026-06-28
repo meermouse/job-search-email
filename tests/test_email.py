@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from job_search_email.email import build_email_html, send_email, send_debug_report
+from job_search_email.email import build_email_html, send_email, send_debug_report, _quals_badge
 from job_search_email.models import JobAnalysis, JobListing, Profile, ScoredResult
 
 
@@ -231,3 +231,112 @@ def test_send_debug_report_skips_when_no_credentials(monkeypatch, capsys):
     monkeypatch.delenv("SMTP_PASSWORD", raising=False)
     send_debug_report("<html/>")
     assert "skipping" in capsys.readouterr().err
+
+
+# --- _quals_badge unit tests ---
+
+def _make_analysis(status: str = "", gaps: list[str] | None = None) -> JobAnalysis:
+    return JobAnalysis(
+        score=7, matched_skills=[], missing_essentials=[],
+        employment_type_note="", verdict="",
+        required_qualifications=gaps or [],
+        qualification_gaps=gaps or [],
+        qualification_status=status,
+    )
+
+
+def test_quals_badge_empty_status_shows_dash():
+    badge = _quals_badge(_make_analysis(status=""))
+    assert "&#8212;" in badge
+
+
+def test_quals_badge_met_shows_green_and_checkmark():
+    badge = _quals_badge(_make_analysis(status="met"))
+    assert "#28a745" in badge
+    assert "&#10003;" in badge
+
+
+def test_quals_badge_partial_shows_amber_and_warning():
+    badge = _quals_badge(_make_analysis(status="partial", gaps=["PRINCE2"]))
+    assert "#ffc107" in badge
+    assert "&#9888;" in badge
+    assert "PRINCE2" in badge
+
+
+def test_quals_badge_mismatch_shows_red_and_cross():
+    badge = _quals_badge(_make_analysis(status="mismatch", gaps=["MBA"]))
+    assert "#dc3545" in badge
+    assert "&#10007;" in badge
+    assert "MBA" in badge
+
+
+def test_quals_badge_shows_first_two_gaps_only():
+    gaps = ["PRINCE2", "MBA", "CFA"]
+    badge = _quals_badge(_make_analysis(status="mismatch", gaps=gaps))
+    assert "PRINCE2" in badge
+    assert "MBA" in badge
+    assert "CFA" not in badge
+    assert "+1 more" in badge
+
+
+def test_quals_badge_shows_all_gaps_when_two_or_fewer():
+    gaps = ["PRINCE2", "MBA"]
+    badge = _quals_badge(_make_analysis(status="mismatch", gaps=gaps))
+    assert "PRINCE2" in badge
+    assert "MBA" in badge
+    assert "more" not in badge
+
+
+# --- Email table integration tests ---
+
+def _make_result_with_quals(
+    score: int,
+    status: str = "met",
+    gaps: list[str] | None = None,
+    title: str = "Job Title",
+    url: str = "https://example.com/job/1",
+    salary: int | None = 70000,
+) -> ScoredResult:
+    job = JobListing(
+        title=title, company="Acme Corp", location="Bristol",
+        salary_min=salary, description="",
+        url=url, source="reed", employment_type="full-time",
+    )
+    analysis = JobAnalysis(
+        score=score, matched_skills=[], missing_essentials=[],
+        employment_type_note="Permanent", verdict=f"Good match for {title}",
+        required_qualifications=gaps or [],
+        qualification_gaps=gaps or [],
+        qualification_status=status,
+    )
+    return ScoredResult(job=job, flags=[], rejected=False, reject_reason=None, analysis=analysis)
+
+
+def test_build_email_html_has_quals_column_header():
+    profile = _make_profile()
+    results = [_make_result_with_quals(score=8)]
+    html, _ = build_email_html(results, profile)
+    assert "Quals" in html
+
+
+def test_build_email_html_shows_green_badge_for_met():
+    profile = _make_profile()
+    results = [_make_result_with_quals(score=8, status="met")]
+    html, _ = build_email_html(results, profile)
+    assert "#28a745" in html
+    assert "&#10003;" in html
+
+
+def test_build_email_html_shows_red_badge_for_mismatch():
+    profile = _make_profile()
+    results = [_make_result_with_quals(score=3, status="mismatch", gaps=["MBA"])]
+    html, _ = build_email_html(results, profile)
+    assert "#dc3545" in html
+    assert "MBA" in html
+
+
+def test_build_email_html_shows_dash_for_no_requirements():
+    profile = _make_profile()
+    results = [_make_result_with_quals(score=8, status="")]
+    html, _ = build_email_html(results, profile)
+    assert "&#8212;" in html
