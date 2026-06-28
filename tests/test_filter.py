@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from job_search_email.models import FilteredResult, JobListing
+from job_search_email.models import FilteredResult, JobListing, Profile, SearchPlan
 
 
 def make_job(**kwargs) -> JobListing:
@@ -42,7 +42,33 @@ def test_filtered_result_serialises_with_asdict():
     assert data["flags"] == []
 
 
-from job_search_email.filter import _check_employment_type
+from job_search_email.filter import _check_employment_type, _check_location
+
+
+def test_check_location_rejects_outside_location():
+    job = make_job(location="Reading, RG1")
+    result = _check_location(job, rejected_locations=frozenset({"Reading, RG1"}))
+    assert result is not None
+    assert result.rejected is True
+    assert result.reject_reason == "location outside radius: Reading, RG1"
+
+
+def test_check_location_passes_within_location():
+    job = make_job(location="Bath, BA1")
+    result = _check_location(job, rejected_locations=frozenset({"Reading, RG1"}))
+    assert result is None
+
+
+def test_check_location_passes_empty_rejected_set():
+    job = make_job(location="Reading, RG1")
+    result = _check_location(job, rejected_locations=frozenset())
+    assert result is None
+
+
+def test_check_location_passes_blank_location():
+    job = make_job(location="")
+    result = _check_location(job, rejected_locations=frozenset({""}))
+    assert result is None
 
 
 # --- Stage 1: structured employment_type field ---
@@ -197,7 +223,6 @@ def make_plan(roles: list[str] | None = None, nhs_rules: dict | None = None) -> 
 
 
 def make_profile_stub():
-    from job_search_email.models import Profile
     return Profile(
         name="Test", current_role="Manager", about="", seniority="Senior",
         industry="NHS", skills=[], previous_roles=[], target_roles=[],
@@ -384,3 +409,48 @@ def test_filter_jobs_role_check_before_nhs_band():
     jobs = [make_job(title="Staff Nurse Band 7", source="nhs_jobs", employment_type="full-time")]
     results = filter_jobs(jobs, make_plan(roles=["staff nurse"], nhs_rules=_NHS_RULES), make_profile_stub())
     assert "staff nurse" in results[0].reject_reason
+
+
+def test_filter_jobs_rejects_outside_location():
+    jobs = [
+        make_job(employment_type="full-time", location="Reading, RG1"),
+        make_job(employment_type="full-time", location="Bath, BA1"),
+    ]
+    plan = SearchPlan(
+        profile_fingerprint="fp",
+        queries=[],
+        exclusions={"roles": []},
+        nhs_rules={},
+        evaluator_notes=[],
+    )
+    profile = Profile(
+        name="Test", current_role="", about="", seniority="", industry="",
+        skills=[], previous_roles=[], target_roles=[], open_to=[], not_open_to=[],
+        qualifications=[], employment_type=["full-time"],
+        location="Bristol", min_salary=0,
+    )
+    results = filter_jobs(
+        jobs, plan, profile,
+        rejected_locations=frozenset({"Reading, RG1"}),
+    )
+    reading_result = next(r for r in results if r.job.location == "Reading, RG1")
+    bath_result = next(r for r in results if r.job.location == "Bath, BA1")
+    assert reading_result.rejected is True
+    assert reading_result.reject_reason == "location outside radius: Reading, RG1"
+    assert bath_result.rejected is False
+
+
+def test_filter_jobs_default_no_location_rejection():
+    jobs = [make_job(employment_type="full-time", location="Reading, RG1")]
+    plan = SearchPlan(
+        profile_fingerprint="fp", queries=[],
+        exclusions={"roles": []}, nhs_rules={}, evaluator_notes=[],
+    )
+    profile = Profile(
+        name="Test", current_role="", about="", seniority="", industry="",
+        skills=[], previous_roles=[], target_roles=[], open_to=[], not_open_to=[],
+        qualifications=[], employment_type=["full-time"],
+        location="Bristol", min_salary=0,
+    )
+    results = filter_jobs(jobs, plan, profile)
+    assert results[0].rejected is False

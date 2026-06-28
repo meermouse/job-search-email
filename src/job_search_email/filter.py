@@ -84,11 +84,30 @@ def _check_nhs_band_salary(
     return None
 
 
-def filter_jobs(jobs: list[JobListing], plan: SearchPlan, profile: Profile) -> list[FilteredResult]:
+def _check_location(job: JobListing, rejected_locations: frozenset[str]) -> FilteredResult | None:
+    if not job.location or job.location not in rejected_locations:
+        return None
+    return FilteredResult(
+        job=job, flags=[], rejected=True,
+        reject_reason=f"location outside radius: {job.location}",
+    )
+
+
+def filter_jobs(
+    jobs: list[JobListing],
+    plan: SearchPlan,
+    profile: Profile,
+    rejected_locations: frozenset[str] = frozenset(),
+) -> list[FilteredResult]:
     exclusion_roles = plan.exclusions.get("roles", [])
     results: list[FilteredResult] = []
 
     for job in jobs:
+        loc_result = _check_location(job, rejected_locations)
+        if loc_result is not None:
+            results.append(loc_result)
+            continue
+
         et_result = _check_employment_type(job)
         if et_result.rejected:
             results.append(et_result)
