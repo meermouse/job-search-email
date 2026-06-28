@@ -1,87 +1,26 @@
 {
   "summary": {
-    "total": 5,
-    "kept": 3,
-    "rejected": 2,
+    "total": 1,
+    "kept": 1,
+    "rejected": 0,
     "flagged": 0
   },
   "kept": [
     {
       "job": {
-        "title": "Senior Business Manager",
-        "company": "Accenture UK",
-        "location": "Bristol",
-        "salary_min": 75000,
-        "description": "Lead business transformation initiatives across our public sector clients. You will manage cross-functional teams and drive strategic change programmes. Permanent, full-time role based in Bristol.",
-        "url": "https://www.reed.co.uk/jobs/senior-business-manager/12345678",
-        "source": "reed",
-        "employment_type": "permanent"
-      },
-      "flags": [],
-      "rejected": false,
-      "reject_reason": null
-    },
-    {
-      "job": {
-        "title": "Band 8b NHS Digital Transformation Manager",
-        "company": "NHS Bristol, North Somerset and South Gloucestershire ICB",
-        "location": "Bristol",
-        "salary_min": 62215,
-        "description": "",
-        "url": "https://www.jobs.nhs.uk/candidate/jobadvert/A1234-25-0001",
-        "source": "nhs_jobs",
-        "employment_type": "permanent"
-      },
-      "flags": [],
-      "rejected": false,
-      "reject_reason": null
-    },
-    {
-      "job": {
-        "title": "Strategy Consultant",
-        "company": "PwC UK",
-        "location": "Bristol",
+        "title": "Manager",
+        "company": "NHS",
+        "location": "Bristol, BS1",
         "salary_min": 65000,
-        "description": "Work with senior leadership teams across financial services and public sector to develop and implement strategic change. Permanent role with hybrid working.",
-        "url": "https://www.reed.co.uk/jobs/strategy-consultant/12345680",
+        "description": "",
+        "url": "https://x.com/1",
         "source": "reed",
-        "employment_type": "permanent"
+        "employment_type": "full-time"
       },
       "flags": [],
       "rejected": false,
       "reject_reason": null
     }
   ],
-  "rejected": [
-    {
-      "job": {
-        "title": "Digital Transformation Consultant",
-        "company": "Deloitte UK",
-        "location": "Bristol",
-        "salary_min": 80000,
-        "description": "6-month contract engagement supporting a major NHS trust with their digital roadmap. Day rate negotiable.",
-        "url": "https://www.linkedin.com/jobs/view/12345679",
-        "source": "linkedin",
-        "employment_type": "contract"
-      },
-      "flags": [],
-      "rejected": true,
-      "reject_reason": "employment type: contract"
-    },
-    {
-      "job": {
-        "title": "Band 5 NHS Administrator",
-        "company": "University Hospitals Bristol NHS Foundation Trust",
-        "location": "Bristol",
-        "salary_min": 29970,
-        "description": "",
-        "url": "https://www.jobs.nhs.uk/candidate/jobadvert/A1234-25-0002",
-        "source": "nhs_jobs",
-        "employment_type": "permanent"
-      },
-      "flags": [],
-      "rejected": true,
-      "reject_reason": "nhs band salary below threshold: Band 5 (~\u00a30)"
-    }
-  ]
+  "rejected": []
 }
