@@ -1,5 +1,6 @@
 import json
 import os
+import statistics
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
@@ -116,14 +117,22 @@ def score_jobs(
     if score_cache is None:
         score_cache = {}
 
-    limit = int(os.getenv("DEEP_ANALYSIS_LIMIT", "20"))
+    limit = int(os.getenv("DEEP_ANALYSIS_LIMIT", "100"))
     model = os.getenv("SCORER_MODEL", "claude-haiku-4-5-20251001")
     profile_fp = fingerprint_profile(profile)
 
     rejected = [r for r in results if r.rejected]
     kept = [r for r in results if not r.rejected]
 
-    kept_sorted = sorted(kept, key=lambda r: r.job.salary_min or 0, reverse=True)
+    # When the cap bites we analyse the highest-paid jobs first. Rank blank-salary
+    # jobs at the median stated salary so they are not categorically dropped first.
+    stated_salaries = [r.job.salary_min for r in kept if r.job.salary_min is not None]
+    blank_rank = statistics.median(stated_salaries) if stated_salaries else profile.min_salary
+    kept_sorted = sorted(
+        kept,
+        key=lambda r: r.job.salary_min if r.job.salary_min is not None else blank_rank,
+        reverse=True,
+    )
     to_analyse = kept_sorted[:limit]
     beyond_cap = kept_sorted[limit:]
 

@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import asdict
 from unittest.mock import MagicMock, patch
 
@@ -195,6 +196,39 @@ def test_score_jobs_sorts_by_salary_before_cap():
     assert "https://example.com/high" in analysed_urls
     assert "https://example.com/mid" in analysed_urls
     assert "https://example.com/low" not in analysed_urls
+
+
+def test_score_jobs_default_limit_exceeds_twenty():
+    # The default analysis cap must be well above the old value of 20 so that
+    # valid jobs are not silently dropped before scoring.
+    jobs = [make_job(url=f"https://example.com/d{i}", salary_min=60000 + i) for i in range(25)]
+    results = [make_kept(j) for j in jobs]
+    env_without_limit = {k: v for k, v in os.environ.items() if k != "DEEP_ANALYSIS_LIMIT"}
+    with patch("job_search_email.scorer.client", _mock_client()), \
+         patch.dict(os.environ, env_without_limit, clear=True):
+        scored = score_jobs(results, make_profile())
+    analysed = [r for r in scored if r.analysis is not None]
+    assert len(analysed) == 25
+
+
+def test_score_jobs_none_salary_ranked_by_median_not_zero():
+    # A blank-salary job must not be categorically dropped first when the cap
+    # bites; it is ranked at the median stated salary, so it beats lower-paid
+    # stated jobs.
+    high = make_job(salary_min=100000, url="https://example.com/h")
+    mid = make_job(salary_min=90000, url="https://example.com/m")
+    low = make_job(salary_min=80000, url="https://example.com/l")
+    blank = make_job(salary_min=None, url="https://example.com/blank")
+    results = [make_kept(high), make_kept(mid), make_kept(low), make_kept(blank)]
+
+    with patch("job_search_email.scorer.client", _mock_client()), \
+         patch.dict("os.environ", {"DEEP_ANALYSIS_LIMIT": "3"}):
+        scored = score_jobs(results, make_profile())
+
+    analysed_urls = {r.job.url for r in scored if r.analysis is not None}
+    # median of [100k, 90k, 80k] = 90k, so blank (ranked at 90k) outranks the 80k job
+    assert "https://example.com/blank" in analysed_urls
+    assert "https://example.com/l" not in analysed_urls
 
 
 def test_score_jobs_beyond_cap_gets_none_analysis():
