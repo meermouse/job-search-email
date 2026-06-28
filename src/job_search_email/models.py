@@ -18,6 +18,7 @@ class Profile:
     employment_type: list[str]
     location: str
     min_salary: int
+    radius_miles: int = 50
     preamble: str = ""
     recipient_email: str = ""
     send_main_email: bool = True

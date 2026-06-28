@@ -52,6 +52,7 @@ def load_profile(path: Path = PROFILE_PATH) -> Profile:
         employment_type=p.get("employment_type", []),
         location=data.get("location", ""),
         min_salary=data.get("min_salary", 0),
+        radius_miles=data.get("radius_miles", 50),
         preamble=data.get("preamble", ""),
         recipient_email=data.get("recipient_email", ""),
         send_main_email=data.get("send_main_email", True),
@@ -189,7 +190,7 @@ def main() -> None:
     classification = classify_locations(
         unique_locations,
         home=profile.location,
-        radius_miles=50,
+        radius_miles=profile.radius_miles,
         cache=location_cache,
     )
     save_location_cache(location_cache, LOCATION_CACHE_PATH)
