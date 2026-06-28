@@ -52,7 +52,7 @@ profile:
     - full-time
 
 location: Bristol
-radius_miles: 30
+radius_miles: 40
 min_salary: 60000
 
 preamble: "Hey Jie, its The Job Mule. Lets go through todays jobs."
