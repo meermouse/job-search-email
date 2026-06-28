@@ -92,3 +92,15 @@ def test_save_location_cache_writes_atomically(tmp_path):
     assert not (tmp_path / "cache.tmp").exists()
     data = json.loads(path.read_text(encoding="utf-8"))
     assert data == {"Bristol:50:Bath": "within"}
+
+
+def test_classify_locations_handles_fenced_json():
+    cache: dict[str, str] = {}
+    with patch("job_search_email.location_filter.client") as mock_client:
+        block = MagicMock()
+        block.text = '```json\n{"Reading, RG1": "outside"}\n```'
+        response = MagicMock()
+        response.content = [block]
+        mock_client.messages.create.return_value = response
+        result = classify_locations(["Reading, RG1"], home="Bristol", radius_miles=50, cache=cache)
+    assert result["Reading, RG1"] == "outside"

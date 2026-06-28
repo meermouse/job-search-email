@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from pathlib import Path
 
 import anthropic
@@ -23,6 +24,15 @@ _SYSTEM_PROMPT = (
 
 def _cache_key(home: str, radius_miles: int, location: str) -> str:
     return f"{home}:{radius_miles}:{location}"
+
+
+def _strip_code_fence(text: str) -> str:
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.split("\n")
+        end = len(lines) - 1 if lines[-1].strip() == "```" else len(lines)
+        return "\n".join(lines[1:end]).strip()
+    return stripped
 
 
 def classify_locations(
@@ -56,8 +66,12 @@ def classify_locations(
             messages=[{"role": "user", "content": user_message}],
         )
         text = response.content[0].text if response.content else ""
-        verdicts: dict[str, str] = json.loads(text)
-    except Exception:
+        raw = json.loads(_strip_code_fence(text))
+        if not isinstance(raw, dict):
+            raise ValueError(f"expected dict, got {type(raw).__name__}")
+        verdicts: dict[str, str] = raw
+    except Exception as exc:
+        print(f"[location_filter] classify call failed: {exc}", file=sys.stderr)
         verdicts = {}
 
     for loc in to_classify:
