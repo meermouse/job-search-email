@@ -27,7 +27,7 @@ def _scorer_block(trace: AnalysisTrace) -> str:
         f"Matched: {_format_list(a.matched_skills)}\n"
         f"Missing: {_format_list(a.missing_essentials)}\n"
         f"Qualifications: {qual} (gaps: {_format_list(a.qualification_gaps)})\n"
-        f"Exclude: {'yes — ' + a.exclude_reason if a.exclude else 'no'}\n"
+        f"Exclude: {'yes — ' + (a.exclude_reason or '(reason not provided)') if a.exclude else 'no'}\n"
         f"\n── LLM CALL (verbatim) {_RULE[:24]}\n"
         f"[system prompt]\n{trace.system_prompt}\n\n"
         f"[user message]\n{trace.user_message}\n\n"

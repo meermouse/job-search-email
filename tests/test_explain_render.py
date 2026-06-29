@@ -55,3 +55,20 @@ def test_render_rejected_job_marks_first_reject_and_skips_scorer():
     assert "first reject" in out.lower()
     assert "rejected by Employment type" in out
     assert "AI SUITABILITY" not in out
+
+
+def test_render_scorer_guards_empty_exclude_reason():
+    """When exclude=True but exclude_reason is empty, show fallback text."""
+    trace = AnalysisTrace(
+        analysis=JobAnalysis(
+            score=7, matched_skills=["management"], missing_essentials=[],
+            employment_type_note="Permanent", verdict="Good fit",
+            exclude=True, exclude_reason="",  # Empty reason edge case
+        ),
+        system_prompt="SYS", user_message="USER", raw_text='{"score": 7}',
+    )
+    out = render_explanation(_job(), _gates_all_pass(), trace, None)
+    # Should NOT contain dangling "yes — " with nothing after
+    assert "yes — \n" not in out
+    # Should contain fallback text
+    assert "yes — (reason not provided)" in out
