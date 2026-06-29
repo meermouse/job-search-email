@@ -55,6 +55,31 @@ def test_job_analysis_new_fields_accept_values():
     assert a.qualification_status == "mismatch"
 
 
+def test_job_analysis_exclude_fields_default():
+    a = make_analysis()
+    assert a.exclude is False
+    assert a.exclude_reason == ""
+
+
+def test_job_analysis_exclude_fields_accept_values():
+    a = make_analysis(exclude=True, exclude_reason="Fixed-term contract")
+    assert a.exclude is True
+    assert a.exclude_reason == "Fixed-term contract"
+
+
+def test_job_analysis_exclude_backwards_compat_from_dict():
+    old_cache_entry = {
+        "score": 7,
+        "matched_skills": [],
+        "missing_essentials": [],
+        "employment_type_note": "Permanent",
+        "verdict": "Good match",
+    }
+    a = JobAnalysis(**old_cache_entry)
+    assert a.exclude is False
+    assert a.exclude_reason == ""
+
+
 def test_job_analysis_serialises_new_fields_with_asdict():
     from dataclasses import asdict
     a = make_analysis(
