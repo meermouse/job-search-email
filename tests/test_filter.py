@@ -164,6 +164,44 @@ def test_employment_type_zero_hours_no_false_match():
     assert result.rejected is False
 
 
+def test_employment_type_permanent_tag_with_contract_description_rejected():
+    # Regression: a "permanent" structured type must NOT short-circuit the
+    # description scan. A fixed-term phrase in the description still rejects.
+    job = make_job(employment_type="permanent", description="This is a fixed term contract post.")
+    result = _check_employment_type(job)
+    assert result.rejected is True
+    assert result.reject_reason == "description contains contract indicators"
+
+
+def test_employment_type_full_time_tag_with_contract_description_rejected():
+    job = make_job(employment_type="full-time", description="Offered on a fixed-term basis for 12 months.")
+    result = _check_employment_type(job)
+    assert result.rejected is True
+    assert result.reject_reason == "description contains contract indicators"
+
+
+def test_employment_type_combined_permanent_and_fixed_term_rejected():
+    # Indeed can return a combined structured value.
+    job = make_job(employment_type="Permanent, Fixed term contract")
+    result = _check_employment_type(job)
+    assert result.rejected is True
+    assert result.reject_reason == "description contains contract indicators"
+
+
+def test_employment_type_bare_fixed_term_phrase_rejected():
+    job = make_job(description="This is a fixed term role within the team.")
+    result = _check_employment_type(job)
+    assert result.rejected is True
+    assert result.reject_reason == "description contains contract indicators"
+
+
+def test_employment_type_permanent_clean_still_passes():
+    job = make_job(employment_type="permanent", description="A permanent senior management role.")
+    result = _check_employment_type(job)
+    assert result.rejected is False
+    assert result.flags == []
+
+
 from job_search_email.filter import _check_role_suitability
 
 

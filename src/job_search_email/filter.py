@@ -12,6 +12,7 @@ _PASS_TYPES = frozenset({"full-time", "permanent"})
 
 _CONTRACT_PATTERNS = re.compile(
     r"fixed.?term (?:contract|post|appointment)"
+    r"|fixed[\s\-]?term"
     r"|temporary (?:contract|post|role)"
     r"|contract basis"
     r"|maternity cover"
@@ -31,16 +32,19 @@ _MIN_COMPANY_WORDS = 2
 
 def _check_employment_type(job: JobListing) -> FilteredResult:
     et = (job.employment_type or "").lower().strip()
+    # Scan the structured type field together with the title and the first
+    # 500 chars of the description, so reject indicators win over pass
+    # indicators (a "permanent" tag can't hide a fixed-term description).
+    combined = f"{et} {job.title} {(job.description or '')[:500]}"
 
     if et in _REJECT_TYPES:
         return FilteredResult(job=job, flags=[], rejected=True, reject_reason=f"employment type: {et}")
 
+    if _CONTRACT_PATTERNS.search(combined):
+        return FilteredResult(job=job, flags=[], rejected=True, reject_reason="description contains contract indicators")
+
     if et in _PASS_TYPES:
         return FilteredResult(job=job, flags=[], rejected=False, reject_reason=None)
-
-    text = f"{job.title} {job.description}"[:500]
-    if _CONTRACT_PATTERNS.search(text):
-        return FilteredResult(job=job, flags=[], rejected=True, reject_reason="description contains contract indicators")
 
     return FilteredResult(job=job, flags=["employment_type_unknown"], rejected=False, reject_reason=None)
 
