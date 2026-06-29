@@ -1,6 +1,7 @@
 import re
 from typing import Any
 from .models import FilteredResult, JobListing, Profile, SearchPlan
+from .sponsor_filter import _normalize as _normalize_company
 
 _REJECT_TYPES = frozenset({
     "contract", "fixed-term", "temporary", "locum", "bank",
@@ -24,6 +25,8 @@ _CONTRACT_PATTERNS = re.compile(
 
 _NHS_BAND_RE = re.compile(r"Band\s*(\d+[a-dA-D]?)", re.IGNORECASE)
 _LONDON_WEIGHTING = 1.20
+_MIN_COMPANY_CHARS = 8
+_MIN_COMPANY_WORDS = 2
 
 
 def _check_employment_type(job: JobListing) -> FilteredResult:
@@ -84,6 +87,32 @@ def _check_nhs_band_salary(
     return None
 
 
+def _check_sponsor(job: JobListing, sponsor_set: frozenset[str]) -> FilteredResult | None:
+    if job.source == "nhs":
+        return None
+
+    normalized = _normalize_company(job.company or "")
+    words = normalized.split()
+
+    if normalized in sponsor_set:
+        return None
+
+    if len(normalized) < _MIN_COMPANY_CHARS or len(words) < _MIN_COMPANY_WORDS:
+        return FilteredResult(
+            job=job,
+            flags=[],
+            rejected=True,
+            reject_reason="company not specified — cannot verify approved sponsor",
+        )
+
+    return FilteredResult(
+        job=job,
+        flags=[],
+        rejected=True,
+        reject_reason="company not on approved sponsor list",
+    )
+
+
 def _check_location(job: JobListing, rejected_locations: frozenset[str]) -> FilteredResult | None:
     if not job.location or job.location not in rejected_locations:
         return None
@@ -98,6 +127,7 @@ def filter_jobs(
     plan: SearchPlan,
     profile: Profile,
     rejected_locations: frozenset[str] = frozenset(),
+    sponsor_set: frozenset[str] | None = None,
 ) -> list[FilteredResult]:
     exclusion_roles = plan.exclusions.get("roles", [])
     results: list[FilteredResult] = []
@@ -122,6 +152,12 @@ def filter_jobs(
         if nhs_result is not None:
             results.append(nhs_result)
             continue
+
+        if sponsor_set is not None:
+            sponsor_result = _check_sponsor(job, sponsor_set)
+            if sponsor_result is not None:
+                results.append(sponsor_result)
+                continue
 
         results.append(FilteredResult(
             job=job,

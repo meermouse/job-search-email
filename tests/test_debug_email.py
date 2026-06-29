@@ -105,11 +105,30 @@ def test_nhs_band_rejected_job_appears():
     assert "Band 6" in html
 
 
-def test_debug_email_has_four_details_sections():
+def test_debug_email_has_five_details_sections():
     html = build_debug_email_html({}, [], _make_profile())
-    assert html.count("<details") == 4
+    assert html.count("<details") == 5
 
 
 def test_debug_email_includes_profile_name():
     html = build_debug_email_html({}, [], _make_profile())
     assert "Jie" in html
+
+
+def test_sponsor_missing_company_rejected_job_appears():
+    html = build_debug_email_html(
+        {"Bristol": "within"},
+        [_rejected(_make_job(), "company not specified — cannot verify approved sponsor")],
+        _make_profile(),
+    )
+    assert "Sponsor Filter" in html
+    assert "company not specified" in html
+
+
+def test_sponsor_not_on_list_rejected_job_appears():
+    html = build_debug_email_html(
+        {"Bristol": "within"},
+        [_rejected(_make_job(), "company not on approved sponsor list")],
+        _make_profile(),
+    )
+    assert "company not on approved sponsor list" in html

@@ -20,6 +20,7 @@ from .nhs_rules import get_nhs_rules
 from .scorer import score_jobs
 from .queries import generate_queries
 from .search_api.fetcher import fetch_all_jobs
+from .sponsor_filter import load_sponsor_set
 
 ROOT = Path.cwd()
 PROFILE_PATH = ROOT / "profile.yaml"
@@ -30,6 +31,7 @@ FILTERED_RESULTS_PATH = ROOT / "job_results_filtered.json"
 SCORED_RESULTS_PATH = ROOT / "job_results_scored.json"
 SCORE_CACHE_PATH = ROOT / "job_score_cache.json"
 LOCATION_CACHE_PATH = ROOT / "location_cache.json"
+SPONSOR_CACHE_PATH = ROOT / "assets" / "sponsor_cache.csv"
 
 
 def load_profile(path: Path = PROFILE_PATH) -> Profile:
@@ -200,7 +202,13 @@ def main() -> None:
         print(f"- {outside_count} location(s) classified as outside radius: {sorted(rejected_locations)}")
 
     print("Filtering jobs...")
-    filtered = filter_jobs(jobs, plan, profile, rejected_locations=rejected_locations)
+    sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH)
+    print(f"- sponsor list loaded: {len(sponsor_set):,} entries")
+    filtered = filter_jobs(
+        jobs, plan, profile,
+        rejected_locations=rejected_locations,
+        sponsor_set=sponsor_set,
+    )
     write_filtered_results(filtered)
     kept = [r for r in filtered if not r.rejected]
     flagged = [r for r in kept if r.flags]

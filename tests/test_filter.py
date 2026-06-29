@@ -454,3 +454,71 @@ def test_filter_jobs_default_no_location_rejection():
     )
     results = filter_jobs(jobs, plan, profile)
     assert results[0].rejected is False
+
+
+from job_search_email.filter import _check_sponsor
+
+_SPONSORS = frozenset({"acme analytics", "bossmans retail abergavenny", "bossmans retail"})
+
+
+def test_check_sponsor_passes_nhs_source_without_lookup():
+    job = make_job(source="nhs", company="")
+    assert _check_sponsor(job, frozenset()) is None
+
+
+def test_check_sponsor_rejects_empty_company():
+    job = make_job(source="reed", company="")
+    result = _check_sponsor(job, _SPONSORS)
+    assert result is not None and result.rejected is True
+    assert result.reject_reason == "company not specified — cannot verify approved sponsor"
+
+
+def test_check_sponsor_rejects_too_short_company():
+    job = make_job(source="reed", company="Hays")
+    result = _check_sponsor(job, _SPONSORS)
+    assert result is not None and result.rejected is True
+    assert result.reject_reason == "company not specified — cannot verify approved sponsor"
+
+
+def test_check_sponsor_passes_listed_company():
+    job = make_job(source="reed", company="Acme Analytics Ltd")
+    assert _check_sponsor(job, _SPONSORS) is None
+
+
+def test_check_sponsor_rejects_unlisted_company():
+    job = make_job(source="reed", company="Totally Unlisted Widgets")
+    result = _check_sponsor(job, _SPONSORS)
+    assert result is not None and result.rejected is True
+    assert result.reject_reason == "company not on approved sponsor list"
+
+
+def test_filter_jobs_rejects_missing_company_when_sponsor_set_given():
+    jobs = [make_job(source="reed", company="", employment_type="full-time")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=_SPONSORS)
+    assert results[0].rejected is True
+    assert results[0].reject_reason == "company not specified — cannot verify approved sponsor"
+
+
+def test_filter_jobs_keeps_listed_company_when_sponsor_set_given():
+    jobs = [make_job(source="reed", company="Acme Analytics Ltd", employment_type="full-time")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=_SPONSORS)
+    assert results[0].rejected is False
+
+
+def test_filter_jobs_skips_sponsor_check_when_no_set():
+    jobs = [make_job(source="reed", company="", employment_type="full-time")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert results[0].rejected is False
+
+
+def test_filter_jobs_employment_type_checked_before_sponsor():
+    jobs = [make_job(source="reed", company="", employment_type="contract")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=_SPONSORS)
+    assert results[0].rejected is True
+    assert results[0].reject_reason == "employment type: contract"
+
+
+def test_check_sponsor_passes_listed_single_word_company():
+    sponsors = frozenset({"nakshatra"})
+    job = make_job(source="reed", company="Nakshatra Limited")
+    assert _check_sponsor(job, sponsors) is None
