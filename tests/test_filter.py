@@ -185,7 +185,7 @@ def test_employment_type_combined_permanent_and_fixed_term_rejected():
     job = make_job(employment_type="Permanent, Fixed term contract")
     result = _check_employment_type(job)
     assert result.rejected is True
-    assert result.reject_reason == "description contains contract indicators"
+    assert result.reject_reason == "employment type: permanent, fixed term contract"
 
 
 def test_employment_type_bare_fixed_term_phrase_rejected():

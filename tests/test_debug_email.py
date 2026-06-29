@@ -145,6 +145,13 @@ def _ai_excluded(job: JobListing, reason: str, score: int = 6) -> ScoredResult:
     )
 
 
+def test_score_cell_renders_score_and_em_dash_fallback():
+    from job_search_email.debug_email import _score_cell
+    assert _score_cell(_ai_excluded(_make_job(), "x", score=7)) == "7"
+    # A result without an analysis attribute falls back to the em-dash.
+    assert _score_cell(_kept(_make_job())) == "&#8212;"
+
+
 def test_ai_suitability_section_present():
     html = build_debug_email_html({}, [], _make_profile())
     assert "AI Suitability" in html

@@ -207,21 +207,21 @@ def _ai_suitability_section(scored: list) -> str:
 
 def build_debug_email_html(
     classification: dict[str, str],
-    filtered: list[ScoredResult],
+    scored: list[ScoredResult],
     profile: Profile,
 ) -> str:
     today = date.today().strftime("%Y-%m-%d")
-    total = len(filtered)
-    kept = sum(1 for r in filtered if not r.rejected)
+    total = len(scored)
+    kept = sum(1 for r in scored if not r.rejected)
     rejected = total - kept
 
     sections = (
-        _location_section(classification, filtered)
-        + _employment_type_section(filtered)
-        + _role_suitability_section(filtered)
-        + _nhs_band_section(filtered)
-        + _sponsor_section(filtered)
-        + _ai_suitability_section(filtered)
+        _location_section(classification, scored)
+        + _employment_type_section(scored)
+        + _role_suitability_section(scored)
+        + _nhs_band_section(scored)
+        + _sponsor_section(scored)
+        + _ai_suitability_section(scored)
     )
 
     return (

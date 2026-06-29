@@ -11,8 +11,7 @@ _REJECT_TYPES = frozenset({
 _PASS_TYPES = frozenset({"full-time", "permanent"})
 
 _CONTRACT_PATTERNS = re.compile(
-    r"fixed.?term (?:contract|post|appointment)"
-    r"|fixed[\s\-]?term"
+    r"fixed[\s\-]?term"
     r"|temporary (?:contract|post|role)"
     r"|contract basis"
     r"|maternity cover"
@@ -32,15 +31,18 @@ _MIN_COMPANY_WORDS = 2
 
 def _check_employment_type(job: JobListing) -> FilteredResult:
     et = (job.employment_type or "").lower().strip()
-    # Scan the structured type field together with the title and the first
-    # 500 chars of the description, so reject indicators win over pass
-    # indicators (a "permanent" tag can't hide a fixed-term description).
-    combined = f"{et} {job.title} {(job.description or '')[:500]}"
 
     if et in _REJECT_TYPES:
         return FilteredResult(job=job, flags=[], rejected=True, reject_reason=f"employment type: {et}")
 
-    if _CONTRACT_PATTERNS.search(combined):
+    # A structured type field can carry a contract signal even alongside
+    # "permanent" (e.g. Indeed's "Permanent, Fixed term contract"). Attribute
+    # the rejection to the type field so the debug email reads accurately.
+    if _CONTRACT_PATTERNS.search(et):
+        return FilteredResult(job=job, flags=[], rejected=True, reject_reason=f"employment type: {et}")
+
+    text = f"{job.title} {(job.description or '')[:500]}"
+    if _CONTRACT_PATTERNS.search(text):
         return FilteredResult(job=job, flags=[], rejected=True, reject_reason="description contains contract indicators")
 
     if et in _PASS_TYPES:
