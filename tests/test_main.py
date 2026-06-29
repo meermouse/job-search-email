@@ -486,3 +486,13 @@ def test_routing_main_off_debug_on_skips_main_email_when_no_smtp_user(tmp_path: 
     send_count, debug_count, _ = _run_main_with_toggles(tmp_path, monkeypatch, send_main=False, send_debug=True)
     assert send_count == 0
     assert debug_count == 1
+
+
+def test_sponsor_cache_loads_from_real_asset():
+    from job_search_email.main import SPONSOR_CACHE_PATH
+    from job_search_email.sponsor_filter import load_sponsor_set
+
+    assert SPONSOR_CACHE_PATH.name == "sponsor_cache.csv"
+    sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH)
+    assert isinstance(sponsor_set, frozenset)
+    assert len(sponsor_set) > 1000
