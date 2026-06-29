@@ -42,6 +42,20 @@ def _build_system_prompt(profile: Profile) -> str:
         '    "partial"  — some gaps exist but not clearly disqualifying\n'
         '    "mismatch" — one or more hard requirements are clearly absent\n'
         '    ""         — no qualification requirements found in the description'
+        "\n\nExclusion instructions:\n"
+        "- Set exclude=true when the job clearly fails a hard requirement that the "
+        "upstream filters are meant to enforce but may have missed, based on the full "
+        "description: the role is not permanent (fixed-term, contract, temporary, "
+        "interim, maternity cover, locum, bank, or seasonal); the salary is clearly "
+        "below the stated minimum; or the location is clearly outside the candidate's "
+        "area.\n"
+        "- Also set exclude=true when the job is clearly unsuitable for this candidate: "
+        "wrong seniority level, a fundamentally different profession, or a domain the "
+        "candidate is not open to.\n"
+        "- When excluding, put a short human-readable reason (a few words) in "
+        "exclude_reason, e.g. \"Fixed-term contract\" or \"Clinical nursing role\".\n"
+        "- Otherwise set exclude=false and exclude_reason to an empty string; rank the "
+        "job with the score instead."
     )
 
 
@@ -64,7 +78,9 @@ def _build_user_message(job: JobListing) -> str:
         '  "verdict": "...",\n'
         '  "required_qualifications": ["..."],\n'
         '  "qualification_gaps": ["..."],\n'
-        '  "qualification_status": "met|partial|mismatch|"\n'
+        '  "qualification_status": "met|partial|mismatch|",\n'
+        '  "exclude": false,\n'
+        '  "exclude_reason": ""\n'
         "}"
     )
 
@@ -105,6 +121,20 @@ def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis
         required_qualifications=data.get("required_qualifications", []),
         qualification_gaps=data.get("qualification_gaps", []),
         qualification_status=qual_status,
+        exclude=bool(data.get("exclude", False)),
+        exclude_reason=data.get("exclude_reason", ""),
+    )
+
+
+def _build_scored_result(r: FilteredResult, analysis: JobAnalysis) -> ScoredResult:
+    rejected = r.rejected
+    reject_reason = r.reject_reason
+    if analysis.exclude:
+        rejected = True
+        reject_reason = f"AI suitability: {analysis.exclude_reason}"
+    return ScoredResult(
+        job=r.job, flags=r.flags, rejected=rejected,
+        reject_reason=reject_reason, analysis=analysis,
     )
 
 
@@ -143,11 +173,7 @@ def score_jobs(
     for i, r in enumerate(to_analyse):
         key = make_score_key(r.job.url, profile_fp)
         if key in score_cache:
-            scored_map[i] = ScoredResult(
-                job=r.job, flags=r.flags, rejected=r.rejected,
-                reject_reason=r.reject_reason,
-                analysis=JobAnalysis(**score_cache[key]),
-            )
+            scored_map[i] = _build_scored_result(r, JobAnalysis(**score_cache[key]))
         else:
             to_call.append((i, r))
 
@@ -160,10 +186,7 @@ def score_jobs(
             idx, r = futures[future]
             try:
                 analysis = future.result()
-                scored_map[idx] = ScoredResult(
-                    job=r.job, flags=r.flags, rejected=r.rejected,
-                    reject_reason=r.reject_reason, analysis=analysis,
-                )
+                scored_map[idx] = _build_scored_result(r, analysis)
                 score_cache[make_score_key(r.job.url, profile_fp)] = asdict(analysis)
             except Exception as exc:
                 print(f"[scorer] analysis failed for {r.job.url!r}: {exc}", file=sys.stderr)

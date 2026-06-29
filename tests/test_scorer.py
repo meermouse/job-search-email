@@ -642,3 +642,71 @@ def test_user_message_contains_qualification_schema():
     assert "required_qualifications" in msg
     assert "qualification_gaps" in msg
     assert "qualification_status" in msg
+
+
+_EXCLUDE_RESPONSE = json.dumps({
+    "score": 6,
+    "matched_skills": ["digital transformation"],
+    "missing_essentials": [],
+    "employment_type_note": "Listed as permanent but description says fixed-term",
+    "verdict": "Fixed-term contract despite permanent tag.",
+    "exclude": True,
+    "exclude_reason": "Fixed-term contract",
+})
+
+
+def test_score_jobs_excludes_job_when_llm_flags_exclude():
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(_EXCLUDE_RESPONSE)):
+        scored = score_jobs(results, make_profile())
+    assert scored[0].rejected is True
+    assert scored[0].reject_reason == "AI suitability: Fixed-term contract"
+    assert scored[0].analysis is not None
+    assert scored[0].analysis.exclude is True
+
+
+def test_score_jobs_keeps_job_when_exclude_false():
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client()):  # _GOOD_RESPONSE has no exclude
+        scored = score_jobs(results, make_profile())
+    assert scored[0].rejected is False
+    assert scored[0].reject_reason is None
+    assert scored[0].analysis.exclude is False
+
+
+def test_score_jobs_cache_hit_exclude_applies():
+    job = make_job(url="https://example.com/cached-exclude")
+    profile = make_profile()
+    fp = fingerprint_profile(profile)
+    key = make_score_key(job.url, fp)
+    cached_analysis = {
+        "score": 6,
+        "matched_skills": [],
+        "missing_essentials": [],
+        "employment_type_note": "",
+        "verdict": "Fixed-term",
+        "exclude": True,
+        "exclude_reason": "Contract role",
+    }
+    score_cache = {key: cached_analysis}
+    results = [make_kept(job)]
+    m = _mock_client()
+    with patch("job_search_email.scorer.client", m):
+        scored = score_jobs(results, profile, score_cache=score_cache)
+    m.messages.create.assert_not_called()
+    assert scored[0].rejected is True
+    assert scored[0].reject_reason == "AI suitability: Contract role"
+    assert scored[0].analysis.exclude is True
+
+
+def test_user_message_contains_exclude_schema():
+    from job_search_email.scorer import _build_user_message
+    msg = _build_user_message(make_job())
+    assert "exclude" in msg
+    assert "exclude_reason" in msg
+
+
+def test_system_prompt_contains_exclusion_instructions():
+    from job_search_email.scorer import _build_system_prompt
+    prompt = _build_system_prompt(make_profile())
+    assert "exclude" in prompt
