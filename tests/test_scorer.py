@@ -672,6 +672,7 @@ def test_score_jobs_keeps_job_when_exclude_false():
     assert scored[0].rejected is False
     assert scored[0].reject_reason is None
     assert scored[0].analysis.exclude is False
+    assert scored[0].analysis.exclude_reason == ""
 
 
 def test_score_jobs_cache_hit_exclude_applies():
@@ -699,6 +700,32 @@ def test_score_jobs_cache_hit_exclude_applies():
     assert scored[0].analysis.exclude is True
 
 
+def test_score_jobs_cache_hit_without_exclude_fields_defaults_to_kept():
+    # A stale cache entry written before the exclude fields existed must
+    # deserialize via JobAnalysis(**cached) and default to not-excluded.
+    job = make_job(url="https://example.com/cached-stale")
+    profile = make_profile()
+    fp = fingerprint_profile(profile)
+    key = make_score_key(job.url, fp)
+    cached_analysis = {
+        "score": 8,
+        "matched_skills": [],
+        "missing_essentials": [],
+        "employment_type_note": "Permanent",
+        "verdict": "Good match",
+    }
+    score_cache = {key: cached_analysis}
+    results = [make_kept(job)]
+    m = _mock_client()
+    with patch("job_search_email.scorer.client", m):
+        scored = score_jobs(results, profile, score_cache=score_cache)
+    m.messages.create.assert_not_called()
+    assert scored[0].rejected is False
+    assert scored[0].reject_reason is None
+    assert scored[0].analysis.exclude is False
+    assert scored[0].analysis.exclude_reason == ""
+
+
 def test_user_message_contains_exclude_schema():
     from job_search_email.scorer import _build_user_message
     msg = _build_user_message(make_job())
@@ -710,3 +737,4 @@ def test_system_prompt_contains_exclusion_instructions():
     from job_search_email.scorer import _build_system_prompt
     prompt = _build_system_prompt(make_profile())
     assert "exclude" in prompt
+    assert "Exclusion instructions" in prompt
