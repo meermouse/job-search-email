@@ -65,9 +65,9 @@ Three touchpoints, no new dependencies:
 
 Rewrite `_check_employment_type` with this order:
 
-1. **Build combined text** from the employment-type field plus title plus description
-   (description capped at 500 chars as today):
-   `combined = f"{job.employment_type or ''} {job.title} {job.description or ''}"[:...]`.
+1. **Build combined text** from the employment-type field plus title plus the description
+   (description capped at 500 chars, matching today's scan budget):
+   `combined = f"{job.employment_type or ''} {job.title} {(job.description or '')[:500]}"`.
    The employment-type field is included in the scanned text so combined strings like
    `"Permanent, Fixed term contract"` are caught by the pattern scan, not just by exact-set
    membership.
