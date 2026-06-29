@@ -32,6 +32,7 @@ jobs:
           path: |
             search_plan_cache.json
             job_score_cache.json
+            location_cache.json
           key: job-search-cache-${{ runner.os }}-${{ steps.date.outputs.date }}
           restore-keys: |
             job-search-cache-${{ runner.os }}-
@@ -53,4 +54,5 @@ jobs:
           path: |
             search_plan_cache.json
             job_score_cache.json
+            location_cache.json
           key: job-search-cache-${{ runner.os }}-${{ steps.date.outputs.date }}
