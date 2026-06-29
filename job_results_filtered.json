@@ -1,11 +1,12 @@
 {
   "summary": {
     "total": 1,
-    "kept": 1,
-    "rejected": 0,
+    "kept": 0,
+    "rejected": 1,
     "flagged": 0
   },
-  "kept": [
+  "kept": [],
+  "rejected": [
     {
       "job": {
         "title": "Manager",
@@ -18,9 +19,8 @@
         "employment_type": "full-time"
       },
       "flags": [],
-      "rejected": false,
-      "reject_reason": null
+      "rejected": true,
+      "reject_reason": "company not specified \u2014 cannot verify approved sponsor"
     }
-  ],
-  "rejected": []
+  ]
 }
