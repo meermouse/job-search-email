@@ -3,7 +3,7 @@ import os
 import statistics
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import anthropic
@@ -14,6 +14,14 @@ from .models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResu
 client = anthropic.Anthropic()
 
 _DESCRIPTION_LIMIT = 2500
+
+
+@dataclass
+class AnalysisTrace:
+    analysis: JobAnalysis
+    system_prompt: str
+    user_message: str
+    raw_text: str
 
 
 def _build_system_prompt(profile: Profile) -> str:
@@ -94,19 +102,7 @@ def _strip_code_fence(text: str) -> str:
     return stripped
 
 
-def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis:
-    response = client.messages.create(
-        model=model,
-        max_tokens=768,
-        system=system_prompt,
-        messages=[{"role": "user", "content": _build_user_message(job)}],
-    )
-    if not response.content:
-        raise ValueError(f"empty content list from Claude (stop_reason={response.stop_reason})")
-    block = response.content[0]
-    text = getattr(block, "text", "")
-    if not text.strip():
-        raise ValueError(f"empty text block from Claude (stop_reason={response.stop_reason}, type={type(block).__name__})")
+def _parse_analysis(text: str) -> JobAnalysis:
     data = json.loads(_strip_code_fence(text))
     score = int(data["score"])
     qual_status = data.get("qualification_status", "")
@@ -123,6 +119,46 @@ def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis
         qualification_status=qual_status,
         exclude=bool(data.get("exclude", False)),
         exclude_reason=data.get("exclude_reason", ""),
+    )
+
+
+def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis:
+    response = client.messages.create(
+        model=model,
+        max_tokens=768,
+        system=system_prompt,
+        messages=[{"role": "user", "content": _build_user_message(job)}],
+    )
+    if not response.content:
+        raise ValueError(f"empty content list from Claude (stop_reason={response.stop_reason})")
+    block = response.content[0]
+    text = getattr(block, "text", "")
+    if not text.strip():
+        raise ValueError(f"empty text block from Claude (stop_reason={response.stop_reason}, type={type(block).__name__})")
+    return _parse_analysis(text)
+
+
+def analyse_job(job: JobListing, profile: Profile) -> AnalysisTrace:
+    system_prompt = _build_system_prompt(profile)
+    user_message = _build_user_message(job)
+    model = os.getenv("SCORER_MODEL", "claude-haiku-4-5-20251001")
+    response = client.messages.create(
+        model=model,
+        max_tokens=768,
+        system=system_prompt,
+        messages=[{"role": "user", "content": user_message}],
+    )
+    if not response.content:
+        raise ValueError(f"empty content list from Claude (stop_reason={response.stop_reason})")
+    block = response.content[0]
+    raw_text = getattr(block, "text", "")
+    if not raw_text.strip():
+        raise ValueError(f"empty text block from Claude (stop_reason={response.stop_reason}, type={type(block).__name__})")
+    return AnalysisTrace(
+        analysis=_parse_analysis(raw_text),
+        system_prompt=system_prompt,
+        user_message=user_message,
+        raw_text=raw_text,
     )
 
 
