@@ -52,9 +52,11 @@ location → employment-type → role → NHS-band checks.
 | Condition | Result |
 |---|---|
 | `job.source == "nhs"` | `None` — pass (NHS/public-health bodies are inherently sponsor-eligible) |
+| normalized company in `sponsor_set` | `None` — pass (checked **before** the ambiguity gate, so single-word approved sponsors are not falsely rejected) |
 | company empty/None, **or** normalized `< 8` chars / `< 2` words | **REJECT**, `reject_reason="company not specified — cannot verify approved sponsor"` |
-| normalized company in `sponsor_set` | `None` — pass |
 | normalized company NOT in `sponsor_set` | **REJECT**, `reject_reason="company not on approved sponsor list"` |
+
+> **Note:** set membership is tested before the ambiguity gate. A company that appears on the approved list passes regardless of word count — a single-word entry such as `"nakshatra"` will not be falsely rejected by the `< 2 words` heuristic.
 
 **Change from FE-005:** the empty/too-short branch is now a rejection instead of a
 flag-and-pass. The `sponsor_unknown_company` flag is removed. The rejection carries a

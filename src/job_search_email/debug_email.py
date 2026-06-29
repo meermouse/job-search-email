@@ -133,6 +133,40 @@ def _nhs_band_section(filtered: list[FilteredResult]) -> str:
     )
 
 
+def _sponsor_section(filtered: list[FilteredResult]) -> str:
+    sponsor_prefixes = (
+        "company not specified",
+        "company not on approved sponsor list",
+    )
+    rejected = [
+        r for r in filtered
+        if r.rejected and r.reject_reason and any(r.reject_reason.startswith(p) for p in sponsor_prefixes)
+    ]
+
+    if not rejected:
+        body = '<p style="color:#999; font-size:13px;">No sponsor filter rejections.</p>'
+    else:
+        rows = "".join(
+            f'<tr><td style="padding:4px 8px;">{_escape(r.job.title)}</td>'
+            f'<td style="padding:4px 8px;">{_escape(r.job.company)}</td>'
+            f'<td style="padding:4px 8px;">{_escape(r.reject_reason or "")}</td></tr>'
+            for r in rejected
+        )
+        body = (
+            '<table style="width:100%; border-collapse:collapse; font-size:13px;">'
+            '<thead><tr style="background:#f0f0f0;">'
+            '<th style="padding:4px 8px; text-align:left;">Title</th>'
+            '<th style="padding:4px 8px; text-align:left;">Company</th>'
+            '<th style="padding:4px 8px; text-align:left;">Reason</th>'
+            f'</tr></thead><tbody>{rows}</tbody></table>'
+        )
+
+    return (
+        "<details><summary style='font-size:15px; font-weight:bold; cursor:pointer; padding:8px 0;'>"
+        "Sponsor Filter</summary>" + body + "</details>"
+    )
+
+
 def build_debug_email_html(
     classification: dict[str, str],
     filtered: list[FilteredResult],
@@ -148,6 +182,7 @@ def build_debug_email_html(
         + _employment_type_section(filtered)
         + _role_suitability_section(filtered)
         + _nhs_band_section(filtered)
+        + _sponsor_section(filtered)
     )
 
     return (

@@ -516,3 +516,9 @@ def test_filter_jobs_employment_type_checked_before_sponsor():
     results = filter_jobs(jobs, make_plan(), make_profile_stub(), sponsor_set=_SPONSORS)
     assert results[0].rejected is True
     assert results[0].reject_reason == "employment type: contract"
+
+
+def test_check_sponsor_passes_listed_single_word_company():
+    sponsors = frozenset({"nakshatra"})
+    job = make_job(source="reed", company="Nakshatra Limited")
+    assert _check_sponsor(job, sponsors) is None

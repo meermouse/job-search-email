@@ -94,6 +94,9 @@ def _check_sponsor(job: JobListing, sponsor_set: frozenset[str]) -> FilteredResu
     normalized = _normalize_company(job.company or "")
     words = normalized.split()
 
+    if normalized in sponsor_set:
+        return None
+
     if len(normalized) < _MIN_COMPANY_CHARS or len(words) < _MIN_COMPANY_WORDS:
         return FilteredResult(
             job=job,
@@ -101,9 +104,6 @@ def _check_sponsor(job: JobListing, sponsor_set: frozenset[str]) -> FilteredResu
             rejected=True,
             reject_reason="company not specified — cannot verify approved sponsor",
         )
-
-    if normalized in sponsor_set:
-        return None
 
     return FilteredResult(
         job=job,
