@@ -237,7 +237,7 @@ def main() -> None:
             print("[main] send_main_email=False but SMTP_USER not set — skipping main email redirect", file=sys.stderr)
 
     if profile.send_debug_email:
-        debug_html = build_debug_email_html(classification, filtered, profile)
+        debug_html = build_debug_email_html(classification, scored, profile)
         send_debug_report(debug_html)
 
 

@@ -2,7 +2,7 @@ from collections import Counter
 from datetime import date
 from html import escape as _escape
 
-from .models import FilteredResult, Profile
+from .models import FilteredResult, Profile, ScoredResult
 
 
 def _location_section(classification: dict[str, str], filtered: list[FilteredResult]) -> str:
@@ -167,9 +167,47 @@ def _sponsor_section(filtered: list[FilteredResult]) -> str:
     )
 
 
+def _score_cell(r) -> str:
+    analysis = getattr(r, "analysis", None)
+    return str(analysis.score) if analysis is not None else "&#8212;"
+
+
+def _ai_suitability_section(scored: list) -> str:
+    prefix = "AI suitability:"
+    excluded = [
+        r for r in scored
+        if r.rejected and r.reject_reason and r.reject_reason.startswith(prefix)
+    ]
+
+    if not excluded:
+        body = '<p style="color:#999; font-size:13px;">No AI suitability exclusions.</p>'
+    else:
+        rows = "".join(
+            f'<tr><td style="padding:4px 8px;">{_escape(r.job.title)}</td>'
+            f'<td style="padding:4px 8px;">{_escape(r.job.company)}</td>'
+            f'<td style="padding:4px 8px; text-align:right;">{_score_cell(r)}</td>'
+            f'<td style="padding:4px 8px;">{_escape(r.reject_reason.replace(prefix + " ", "", 1))}</td></tr>'
+            for r in excluded
+        )
+        body = (
+            '<table style="width:100%; border-collapse:collapse; font-size:13px;">'
+            '<thead><tr style="background:#f0f0f0;">'
+            '<th style="padding:4px 8px; text-align:left;">Title</th>'
+            '<th style="padding:4px 8px; text-align:left;">Company</th>'
+            '<th style="padding:4px 8px; text-align:right;">Score</th>'
+            '<th style="padding:4px 8px; text-align:left;">Reason</th>'
+            f'</tr></thead><tbody>{rows}</tbody></table>'
+        )
+
+    return (
+        "<details><summary style='font-size:15px; font-weight:bold; cursor:pointer; padding:8px 0;'>"
+        "AI Suitability Filter</summary>" + body + "</details>"
+    )
+
+
 def build_debug_email_html(
     classification: dict[str, str],
-    filtered: list[FilteredResult],
+    filtered: list[ScoredResult],
     profile: Profile,
 ) -> str:
     today = date.today().strftime("%Y-%m-%d")
@@ -183,6 +221,7 @@ def build_debug_email_html(
         + _role_suitability_section(filtered)
         + _nhs_band_section(filtered)
         + _sponsor_section(filtered)
+        + _ai_suitability_section(filtered)
     )
 
     return (

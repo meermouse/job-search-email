@@ -1,5 +1,5 @@
 from job_search_email.debug_email import build_debug_email_html
-from job_search_email.models import FilteredResult, JobListing, Profile
+from job_search_email.models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
 
 
 def _make_profile() -> Profile:
@@ -105,9 +105,9 @@ def test_nhs_band_rejected_job_appears():
     assert "Band 6" in html
 
 
-def test_debug_email_has_five_details_sections():
+def test_debug_email_has_six_details_sections():
     html = build_debug_email_html({}, [], _make_profile())
-    assert html.count("<details") == 5
+    assert html.count("<details") == 6
 
 
 def test_debug_email_includes_profile_name():
@@ -132,3 +132,41 @@ def test_sponsor_not_on_list_rejected_job_appears():
         _make_profile(),
     )
     assert "company not on approved sponsor list" in html
+
+
+def _ai_excluded(job: JobListing, reason: str, score: int = 6) -> ScoredResult:
+    return ScoredResult(
+        job=job, flags=[], rejected=True,
+        reject_reason=f"AI suitability: {reason}",
+        analysis=JobAnalysis(
+            score=score, matched_skills=[], missing_essentials=[],
+            employment_type_note="", verdict="", exclude=True, exclude_reason=reason,
+        ),
+    )
+
+
+def test_ai_suitability_section_present():
+    html = build_debug_email_html({}, [], _make_profile())
+    assert "AI Suitability" in html
+
+
+def test_ai_suitability_excluded_job_appears():
+    html = build_debug_email_html(
+        {"Bristol": "within"},
+        [_ai_excluded(_make_job(), "Fixed-term contract", score=6)],
+        _make_profile(),
+    )
+    assert "AI Suitability" in html
+    assert "Business Manager" in html
+    assert "Fixed-term contract" in html
+    assert ">6<" in html  # score cell
+
+
+def test_ai_suitability_ignores_non_ai_rejects():
+    # A deterministic reject must not appear in the AI section's table.
+    html = build_debug_email_html(
+        {},
+        [_rejected(_make_job(), "employment type: contract")],
+        _make_profile(),
+    )
+    assert "No AI suitability exclusions." in html
