@@ -107,7 +107,7 @@ def load_run_data(path) -> dict[str, JobListing]:
 
 def _normalize_url(url: str) -> str:
     parts = urlparse(url)
-    return f"{parts.scheme}://{parts.netloc}{parts.path.rstrip('/')}".lower()
+    return f"{parts.scheme}://{parts.netloc}".lower() + parts.path.rstrip("/")
 
 
 def lookup_job(url: str, run_data: dict[str, JobListing]) -> JobListing | None:

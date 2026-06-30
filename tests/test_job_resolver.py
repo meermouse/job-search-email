@@ -164,8 +164,7 @@ def test_resolve_job_uses_run_data_for_unsupported_source():
     assert resolved.employment_type == "contract"
 
 
-def test_resolve_job_run_data_precedes_live_fetch(monkeypatch):
-    from unittest.mock import patch
+def test_resolve_job_run_data_precedes_live_fetch():
     job = _stored_job(url="https://www.reed.co.uk/jobs/x/55", source="reed")
     data = {job.url: job}
     with patch("job_search_email.job_resolver.requests.get") as mock_get:
@@ -174,10 +173,27 @@ def test_resolve_job_run_data_precedes_live_fetch(monkeypatch):
     mock_get.assert_not_called()   # run data wins, no Reed call
 
 
-def test_resolve_job_falls_through_to_live_fetch_when_not_in_run_data(monkeypatch):
+def test_resolve_job_falls_through_to_live_fetch_when_not_in_run_data():
     data = {"https://other/1": _stored_job(url="https://other/1")}
     with pytest.raises(UnsupportedSourceError):
         resolve_job("https://uk.linkedin.com/jobs/view/9", run_data=data)
+
+
+def test_lookup_job_path_case_is_preserved():
+    """Path case must be preserved: two URLs differing only in path case are distinct."""
+    job_upper = _stored_job(url="https://www.reed.co.uk/jobs/Senior-Manager/123")
+    job_lower = _stored_job(url="https://www.reed.co.uk/jobs/senior-manager/123")
+    data = {
+        job_upper.url: job_upper,
+        job_lower.url: job_lower,
+    }
+    # Exact lookup still works
+    assert lookup_job("https://www.reed.co.uk/jobs/Senior-Manager/123", data) is job_upper
+    assert lookup_job("https://www.reed.co.uk/jobs/senior-manager/123", data) is job_lower
+    # Scheme/host case is normalised (HTTPS == https)
+    assert lookup_job("HTTPS://WWW.REED.CO.UK/jobs/Senior-Manager/123", data) is job_upper
+    # The two paths are NOT equal to each other
+    assert lookup_job("https://www.reed.co.uk/jobs/Senior-Manager/123", data) is not job_lower
 
 
 def test_dump_job_file_round_trips(tmp_path):

@@ -146,6 +146,12 @@ def test_explain_resolves_from_run_data(tmp_path):
     assert str(rd.name) in out  # staleness/source note mentions the run-data file
 
 
+def test_explain_no_source_note_when_not_from_run_data():
+    """When the job is NOT resolved from run data, the output must not contain 'Source:'."""
+    out = _run_explain(_job())
+    assert "Source:" not in out
+
+
 def test_explain_dump_job_file_round_trips(tmp_path):
     from job_search_email import explain_job
     from job_search_email.job_resolver import load_job_file

@@ -13,7 +13,7 @@ def _print_decisions(scored: list[ScoredResult]) -> None:
     print("\nDecisions:")
     print(f"  {len(kept)} kept, {len(rejected)} rejected")
     for r in sorted(kept, key=lambda r: (r.analysis.score if r.analysis else 0), reverse=True):
-        score = r.analysis.score if r.analysis else "—"
+        score = str(r.analysis.score) if r.analysis else "—"
         print(f"  [keep] {score:>3}  {r.job.title} — {r.job.company}")
     for r in rejected:
         print(f"  [drop]      {r.job.title} — {r.job.company}  ({r.reject_reason})")

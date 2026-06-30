@@ -11,3 +11,7 @@ dist/
 *.egg-info/
 search_plan.json
 search_plan_cache.json
+job_results.json
+job_results_filtered.json
+job_results_scored.json
+debug_report.html

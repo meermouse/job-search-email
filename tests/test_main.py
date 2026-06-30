@@ -511,7 +511,7 @@ def test_run_pipeline_writes_files_and_returns_tuple(tmp_path, monkeypatch):
     monkeypatch.setattr(main_mod, "SCORE_CACHE_PATH", tmp_path / "score_cache.json")
     monkeypatch.setattr(main_mod, "LOCATION_CACHE_PATH", tmp_path / "location_cache.json")
 
-    from job_search_email.models import JobListing, SearchPlan, ScoredResult, JobAnalysis, FilteredResult
+    from job_search_email.models import JobListing, SearchPlan, ScoredResult, JobAnalysis
     job = JobListing(
         title="Manager", company="NHS", location="Bristol",
         salary_min=65000, description="", url="https://x.com/1",
