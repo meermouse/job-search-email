@@ -161,17 +161,16 @@ def _print_location_summary(jobs: list[JobListing]) -> None:
         print(f"  {location:<40} {count:>4}  ({source_detail})")
 
 
-def main() -> None:
-    profile = load_profile(PROFILE_PATH)
+def run_pipeline(profile: Profile) -> tuple[dict[str, Any], list[ScoredResult]]:
     fingerprint = fingerprint_profile(profile)
-    cached = load_cached_plan(fingerprint=fingerprint)
+    cached = load_cached_plan(cache_path=CACHE_PATH, fingerprint=fingerprint)
 
     if cached:
         plan = SearchPlan(**cached)
     else:
         plan = generate_search_plan(profile, fingerprint)
-        save_cached_plan(plan)
-    write_search_plan(plan)
+        save_cached_plan(plan, cache_path=CACHE_PATH)
+    write_search_plan(plan, PLAN_PATH)
 
     print("Job search plan ready:")
     print(f"- profile: {profile.name}")
@@ -209,7 +208,7 @@ def main() -> None:
         rejected_locations=rejected_locations,
         sponsor_set=sponsor_set,
     )
-    write_filtered_results(filtered)
+    write_filtered_results(filtered, FILTERED_RESULTS_PATH)
     kept = [r for r in filtered if not r.rejected]
     flagged = [r for r in kept if r.flags]
     print(f"- filtered: {len(kept)} kept, {len(filtered) - len(kept)} rejected ({len(flagged)} flagged unknown employment type)")
@@ -218,11 +217,18 @@ def main() -> None:
     print("Scoring jobs...")
     score_cache = load_score_cache(SCORE_CACHE_PATH)
     scored = score_jobs(filtered, profile, score_cache=score_cache, cache_path=SCORE_CACHE_PATH)
-    write_scored_results(scored)
+    write_scored_results(scored, SCORED_RESULTS_PATH)
     kept_scored = [r for r in scored if not r.rejected]
     top_score = max((r.analysis.score for r in kept_scored if r.analysis), default="n/a")
     print(f"- scored: {len(kept_scored)} kept, top score: {top_score}")
     print(f"- scored results written to: {SCORED_RESULTS_PATH}")
+
+    return classification, scored
+
+
+def main() -> None:
+    profile = load_profile(PROFILE_PATH)
+    classification, scored = run_pipeline(profile)
 
     print("Sending emails...")
     main_html, top_n = build_email_html(scored, profile)
