@@ -39,7 +39,7 @@ scraping, no `gh` tooling required.
 
 Two steps: recreate once, explain many.
 
-1. **Debug command** (`job-search-email-debug`): runs the real pipeline and emits
+1. **Debug command** (`job-search-debug`): runs the real pipeline and emits
    the decisions — never an email. Writes the run data to disk and a local
    decisions report.
 2. **Enhanced `explain-job`**: reads that local run data as its primary source,
@@ -49,7 +49,7 @@ Recreating is the expensive part (real fetch + up to 100 LLM scores); the
 developer does it once, then runs `explain-job` against the saved data as many
 times as needed, cheaply.
 
-## Component 1: `job-search-email-debug` command
+## Component 1: `job-search-debug` command
 
 A new console-script entry point that runs the identical pipeline as production
 up to (but not including) the email.
@@ -74,7 +74,7 @@ its email steps; its observable behaviour is unchanged.
 
 ### Debug command behaviour
 
-`job-search-email-debug`:
+`job-search-debug`:
 1. loads the profile (`load_profile`),
 2. calls `run_pipeline(profile)`,
 3. writes the decisions report to `debug_report.html` in the repo root, using
@@ -99,7 +99,7 @@ source, ahead of live fetching.
 3. Live fetch (Reed API / NHS scrape) → fallback when the URL is not in the run
    data (unchanged behaviour for those sources).
 4. `UnsupportedSourceError` → message updated to suggest running
-   `job-search-email-debug` first, or passing `--job-file`.
+   `job-search-debug` first, or passing `--job-file`.
 
 URL matching is exact first, then a normalised comparison (strip trailing slash
 and query string) to absorb trivial differences.
@@ -128,7 +128,7 @@ round-trips: loading it back via `load_job_file` yields an equal `JobListing`.
 ## Error handling
 
 - `job_results.json` missing when run-data lookup is attempted and no live-fetch
-  source matches: clear message — "no local run data; run `job-search-email-debug`
+  source matches: clear message — "no local run data; run `job-search-debug`
   first, or pass `--job-file`".
 - The debug command surfaces missing `REED_API_KEY` / `ANTHROPIC_API_KEY` the
   same way the real pipeline does (the underlying fetchers/scorer already fail
