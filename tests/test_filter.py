@@ -202,6 +202,35 @@ def test_employment_type_permanent_clean_still_passes():
     assert result.flags == []
 
 
+def test_check_employment_type_rejects_ftc_in_description():
+    # Indeed "Job Type: Permanent / FTC" with no structured type — the real miss.
+    job = make_job(
+        employment_type=None,
+        description="Basic information\nJob Type\nPermanent / FTC\nDate published 30-Jun-2026",
+    )
+    result = _check_employment_type(job)
+    assert result.rejected is True
+    assert result.reject_reason == "description contains contract indicators"
+
+
+def test_check_employment_type_rejects_ftc_in_title():
+    job = make_job(title="Project Manager (FTC)", employment_type=None, description="")
+    result = _check_employment_type(job)
+    assert result.rejected is True
+    assert result.reject_reason == "description contains contract indicators"
+
+
+def test_check_employment_type_ftc_requires_word_boundary():
+    # "softclose" contains the substring f-t-c but is not the FTC token;
+    # \bftc\b must NOT match it, so a permanent job is not falsely rejected.
+    job = make_job(
+        employment_type=None,
+        description="The cabinet uses softclose hinges and aftercare support.",
+    )
+    result = _check_employment_type(job)
+    assert result.rejected is False
+
+
 from job_search_email.filter import _check_role_suitability
 
 
