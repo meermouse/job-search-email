@@ -26,6 +26,7 @@ classifiers = [
 job-search-email = "job_search_email.main:main"
 job-search-email-local = "job_search_email.local_run:main"
 explain-job = "job_search_email.explain_job:main"
+job-search-debug = "job_search_email.debug_run:main"
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]
