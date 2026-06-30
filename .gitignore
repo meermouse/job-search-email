@@ -9,6 +9,7 @@ venv/
 build/
 dist/
 *.egg-info/
+.env
 search_plan.json
 search_plan_cache.json
 job_results.json
