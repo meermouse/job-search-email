@@ -156,6 +156,20 @@ def test_lookup_job_exact_and_normalised():
     assert lookup_job("https://www.reed.co.uk/jobs/x/999", data) is None
 
 
+def test_lookup_job_query_identity_not_collided():
+    """Indeed-style URLs carry the job id in the query (jk=...); distinct jk
+    values must not collide, while tracking params are still absorbed."""
+    job_a = _stored_job(url="https://uk.indeed.com/viewjob?jk=AAA", source="indeed")
+    job_b = _stored_job(url="https://uk.indeed.com/viewjob?jk=BBB", source="indeed")
+    data = {job_a.url: job_a, job_b.url: job_b}
+    assert lookup_job("https://uk.indeed.com/viewjob?jk=AAA", data) is job_a
+    assert lookup_job("https://uk.indeed.com/viewjob?jk=BBB", data) is job_b
+    # A tracking param tacked on does not break the match
+    assert lookup_job("https://uk.indeed.com/viewjob?jk=AAA&utm_source=x", data) is job_a
+    # A different jk does not fall back to the wrong job
+    assert lookup_job("https://uk.indeed.com/viewjob?jk=ZZZ", data) is None
+
+
 def test_resolve_job_uses_run_data_for_unsupported_source():
     job = _stored_job()  # indeed url
     data = {job.url: job}

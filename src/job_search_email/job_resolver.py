@@ -2,7 +2,7 @@ import json
 import os
 import re
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlencode, urlparse
 
 import requests
 import yaml
@@ -105,9 +105,23 @@ def load_run_data(path) -> dict[str, JobListing]:
     return {item["url"]: JobListing(**item) for item in items}
 
 
+# Query params that carry no job identity and may differ between how a URL was
+# shared vs. how a fetcher stored it. Identity params (e.g. Indeed's "jk") are
+# kept so distinct jobs never collide during normalised matching.
+_TRACKING_PARAMS = frozenset({
+    "utm", "utm_source", "utm_medium", "utm_campaign", "utm_term",
+    "utm_content", "gclid", "fbclid", "ref",
+})
+
+
 def _normalize_url(url: str) -> str:
     parts = urlparse(url)
-    return f"{parts.scheme}://{parts.netloc}".lower() + parts.path.rstrip("/")
+    base = f"{parts.scheme}://{parts.netloc}".lower() + parts.path.rstrip("/")
+    kept = sorted(
+        (k, v) for k, v in parse_qsl(parts.query)
+        if k.lower() not in _TRACKING_PARAMS
+    )
+    return f"{base}?{urlencode(kept)}" if kept else base
 
 
 def lookup_job(url: str, run_data: dict[str, JobListing]) -> JobListing | None:
