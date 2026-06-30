@@ -5,6 +5,7 @@ import pytest
 from job_search_email.job_resolver import (
     UnsupportedSourceError,
     _extract_reed_id,
+    fetch_nhs_job,
     fetch_reed_job,
     load_job_file,
     resolve_job,
@@ -83,6 +84,30 @@ def test_load_job_file(tmp_path):
     assert job.salary_min == 70000
     assert job.source == "linkedin"
     assert job.employment_type == "permanent"
+
+
+def test_fetch_nhs_job_scrapes_fields():
+    nhs_url = "https://jobs.nhs.uk/xi/vacancy/916964468"
+    html = (
+        "<html><body>"
+        "<h1>Band 8a Programme Manager</h1>"
+        "<span data-test='employer-name'>NHS Foundation Trust</span>"
+        "<span data-test='location'>Leeds, LS1 3EX</span>"
+        "<p>Salary: £55,000 per annum</p>"
+        "</body></html>"
+    )
+    resp = MagicMock()
+    resp.text = html
+    resp.raise_for_status.return_value = None
+    with patch("job_search_email.job_resolver.requests.get", return_value=resp):
+        job = fetch_nhs_job(nhs_url)
+    assert job.title == "Band 8a Programme Manager"
+    assert job.company == "NHS Foundation Trust"
+    assert job.location == "Leeds, LS1 3EX"
+    assert job.salary_min == 55000
+    assert job.description == ""
+    assert job.source == "nhs"
+    assert job.url == nhs_url
 
 
 def test_resolve_job_prefers_job_file_over_url(tmp_path):

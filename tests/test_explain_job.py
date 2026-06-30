@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from job_search_email import job_resolver
 from job_search_email.models import JobAnalysis, JobListing, Profile
 from job_search_email.scorer import AnalysisTrace
 
@@ -50,7 +51,7 @@ def _patches(job, *, verdict="within"):
 def _run_explain(job, **kw):
     from job_search_email import explain_job
     ps = _patches(job, verdict=kw.pop("verdict", "within"))
-    started = [p.start() for p in ps]
+    [p.start() for p in ps]
     try:
         return explain_job.explain("https://www.reed.co.uk/jobs/x/1", **kw)
     finally:
@@ -79,7 +80,7 @@ def test_explain_force_scores_rejected_job():
 def test_main_prints_and_returns_zero(capsys):
     from job_search_email import explain_job
     ps = _patches(_job())
-    started = [p.start() for p in ps]
+    [p.start() for p in ps]
     try:
         code = explain_job.main(["https://www.reed.co.uk/jobs/x/1"])
     finally:
@@ -87,3 +88,17 @@ def test_main_prints_and_returns_zero(capsys):
             p.stop()
     assert code == 0
     assert "Score: 8/10" in capsys.readouterr().out
+
+
+def test_main_returns_2_on_unsupported_source(capsys):
+    from job_search_email import explain_job
+    with (
+        patch("job_search_email.explain_job.load_profile", return_value=_profile()),
+        patch(
+            "job_search_email.explain_job.resolve_job",
+            side_effect=job_resolver.UnsupportedSourceError("cannot auto-fetch jobs from uk.linkedin.com"),
+        ),
+    ):
+        code = explain_job.main(["https://uk.linkedin.com/jobs/view/1"])
+    assert code == 2
+    assert "cannot auto-fetch jobs from uk.linkedin.com" in capsys.readouterr().err

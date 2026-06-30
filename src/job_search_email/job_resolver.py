@@ -10,7 +10,7 @@ from .models import JobListing
 from .search_api.reed import _parse_employment_type
 
 _REED_DETAIL_URL = "https://www.reed.co.uk/api/1.0/jobs/{job_id}"
-_REED_ID_RE = re.compile(r"/(\d+)/?(?:\?|$)")
+_REED_ID_RE = re.compile(r"/(\d+)/?$")
 _NHS_SALARY_RE = re.compile(r"£([\d,]+)")
 
 _BROWSER_HEADERS = {
