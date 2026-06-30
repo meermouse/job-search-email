@@ -1,5 +1,7 @@
+import json
 import os
 import re
+from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
@@ -97,17 +99,62 @@ def load_job_file(path: str) -> JobListing:
     )
 
 
-def resolve_job(url: str | None, job_file: str | None = None) -> JobListing:
+def load_run_data(path) -> dict[str, JobListing]:
+    with Path(path).open("r", encoding="utf-8") as handle:
+        items = json.load(handle)
+    return {item["url"]: JobListing(**item) for item in items}
+
+
+def _normalize_url(url: str) -> str:
+    parts = urlparse(url)
+    return f"{parts.scheme}://{parts.netloc}{parts.path.rstrip('/')}".lower()
+
+
+def lookup_job(url: str, run_data: dict[str, JobListing]) -> JobListing | None:
+    if url in run_data:
+        return run_data[url]
+    target = _normalize_url(url)
+    for stored_url, job in run_data.items():
+        if _normalize_url(stored_url) == target:
+            return job
+    return None
+
+
+def dump_job_file(job: JobListing, path: str) -> None:
+    data = {
+        "title": job.title,
+        "company": job.company,
+        "location": job.location,
+        "salary_min": job.salary_min,
+        "description": job.description,
+        "url": job.url,
+        "source": job.source,
+        "employment_type": job.employment_type,
+    }
+    with open(path, "w", encoding="utf-8") as handle:
+        yaml.safe_dump(data, handle, sort_keys=False, allow_unicode=True)
+
+
+def resolve_job(
+    url: str | None,
+    job_file: str | None = None,
+    *,
+    run_data: dict[str, JobListing] | None = None,
+) -> JobListing:
     if job_file:
         return load_job_file(job_file)
     if not url:
         raise ValueError("a job URL or --job-file is required")
+    if run_data:
+        hit = lookup_job(url, run_data)
+        if hit is not None:
+            return hit
     host = (urlparse(url).hostname or "").lower()
     if "reed.co.uk" in host:
         return fetch_reed_job(url)
     if "jobs.nhs.uk" in host:
         return fetch_nhs_job(url)
     raise UnsupportedSourceError(
-        f"cannot auto-fetch jobs from {host or url!r}; "
-        "supply the job details with --job-file"
+        f"cannot auto-fetch jobs from {host or url!r}; run `job-search-debug` first "
+        "to populate local run data, or supply the job details with --job-file"
     )
