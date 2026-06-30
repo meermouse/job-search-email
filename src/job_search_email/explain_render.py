@@ -40,6 +40,8 @@ def render_explanation(
     gates: list[GateResult],
     scorer_trace: AnalysisTrace | None,
     skipped_reason: str | None,
+    *,
+    run_data_note: str | None = None,
 ) -> str:
     salary = f"£{job.salary_min:,}" if job.salary_min else "not stated"
     header = (
@@ -48,6 +50,8 @@ def render_explanation(
         f"Salary: {salary} | Type: {job.employment_type or 'not stated'} "
         f"| Location: {job.location or 'not stated'}\n"
     )
+    if run_data_note is not None:
+        header += f"Source: {run_data_note}\n"
 
     parts = [header, f"── HARD FILTERS {_RULE}", _gates_block(gates)]
 
