@@ -1,0 +1,480 @@
+{
+  "1ba2977e2409_feb27365383b": {
+    "score": 1,
+    "matched_skills": [],
+    "missing_essentials": [
+      "Concrete pump operation",
+      "Plant machinery operation",
+      "Manual/technical labour",
+      "Equipment maintenance",
+      "Site-based operative work"
+    ],
+    "employment_type_note": "Employment type not stated in description",
+    "verdict": "Fundamentally unsuitable - role is an equipment operative position in construction/concrete supply, completely misaligned with candidate's senior management and digital transformation background. No transferable skills or seniority match.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Wrong profession and seniority level"
+  },
+  "b6e8f85fea4b_feb27365383b": {
+    "score": 1,
+    "matched_skills": [],
+    "missing_essentials": [
+      "Catering/hospitality management experience",
+      "Food service operations",
+      "Kitchen management",
+      "Staff supervision in catering context"
+    ],
+    "employment_type_note": "Employment type not stated in description",
+    "verdict": "Strong mismatch. Assistant Catering Manager is a junior/mid-level operational catering role fundamentally misaligned with candidate's senior-level business management, digital transformation, and strategic background. Candidate targets senior management and strategy roles, not operational catering positions.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; operational catering role unsuitable for senior business/digital transformation candidate"
+  },
+  "65110be2f139_feb27365383b": {
+    "score": 4,
+    "matched_skills": [
+      "Analytical Skills",
+      "Operations and Supply Chain Decisions and Metrics"
+    ],
+    "missing_essentials": [
+      "Insurance/claims management experience",
+      "Property claims expertise",
+      "High Net Worth portfolio handling",
+      "Major loss adjustment background"
+    ],
+    "employment_type_note": "Employment type not stated in job description; unable to confirm permanent status",
+    "verdict": "Weak match. While the candidate has senior management experience and strong analytical capabilities, this role is fundamentally in the insurance/property claims domain\u2014a significant departure from the candidate's digital transformation, business strategy, and operations background. No salary stated, preventing salary verification against minimum requirement. Employment type unclear.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession (insurance claims vs. digital/strategy); salary not stated; employment type not confirmed"
+  },
+  "24429d4668f4_feb27365383b": {
+    "score": 6,
+    "matched_skills": [
+      "Operations and Supply Chain Decisions and Metrics",
+      "Business Strategy",
+      "Project Initiation and Planning",
+      "Analytical Skills",
+      "Digital transformation"
+    ],
+    "missing_essentials": [
+      "Product Management experience not explicitly listed",
+      "Agile/Scrum methodology not mentioned in qualifications",
+      "Specific Product Owner certifications (e.g., PSPO) not held"
+    ],
+    "employment_type_note": "Permanent role confirmed in description; hybrid arrangement (2 days/month onsite) acceptable",
+    "verdict": "Partial match. Strong supply chain and operations background aligns well with the domain focus. Strategic and analytical skills are relevant. However, candidate's profile emphasizes Business Manager, Digital Transformation, and Senior Management roles rather than Product Ownership. No explicit Product Management or Agile/Scrum credentials present. Role is a step sideways rather than aligned with stated target progression.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "f20059a36c3c_feb27365383b": {
+    "score": 2,
+    "matched_skills": [
+      "Project Initiation and Planning",
+      "Operations and Supply Chain Decisions and Metrics"
+    ],
+    "missing_essentials": [
+      "Health and Safety expertise",
+      "Health and Safety qualifications (NEBOSH, IOSH, etc.)",
+      "Veterinary or animal care sector experience",
+      "Safety management systems knowledge"
+    ],
+    "employment_type_note": "Employment type not stated in job description",
+    "verdict": "Poor match. Candidate has project management foundations but lacks the specialized Health and Safety qualifications and sector expertise required for this role. Veterinary care is outside stated target roles and areas of expertise.",
+    "required_qualifications": [
+      "Health and Safety qualification (likely NEBOSH, IOSH, or equivalent)",
+      "Project management experience in H&S context"
+    ],
+    "qualification_gaps": [
+      "No Health and Safety qualifications listed",
+      "No NEBOSH or IOSH certification",
+      "No veterinary or animal care sector background"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Veterinary sector role outside candidate scope; missing Health and Safety qualifications"
+  },
+  "285ac56dae3c_feb27365383b": {
+    "score": 2,
+    "matched_skills": [],
+    "missing_essentials": [
+      "HR operations expertise",
+      "People management focus",
+      "HR processes and administration",
+      "Employee relations experience"
+    ],
+    "employment_type_note": "Employment type not stated in job description",
+    "verdict": "Strong mismatch. This is an HR/People Operations role fundamentally misaligned with the candidate's background in business strategy, digital transformation, and project management. The candidate's skills are in strategic business functions, not HR operations or people administration.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession - HR operations vs. business strategy/management"
+  },
+  "462c0dd4e184_feb27365383b": {
+    "score": 2,
+    "matched_skills": [],
+    "missing_essentials": [
+      "Public health expertise",
+      "Health improvement background",
+      "Population health management experience",
+      "Public health qualifications (e.g., PH diploma, MSc Public Health)"
+    ],
+    "employment_type_note": "Permanent full-time role meets employment type requirement",
+    "verdict": "Poor match. This is a specialist public health consultant role requiring clinical/health sector expertise and public health qualifications. Candidate's background is in business, digital transformation, and project management with no stated public health, health improvement, or clinical credentials.",
+    "required_qualifications": [
+      "Public health specialist qualification or equivalent",
+      "Health improvement expertise"
+    ],
+    "qualification_gaps": [
+      "No public health qualification mentioned (e.g., Diploma in Public Health, MSc Public Health)",
+      "No health improvement or health sector background",
+      "No population health management experience evident"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession - public health specialist role unsuitable for business/digital transformation consultant"
+  },
+  "7260bf0a75ea_feb27365383b": {
+    "score": 3,
+    "matched_skills": [
+      "Analytical Skills",
+      "Operations and Supply Chain Decisions and Metrics"
+    ],
+    "missing_essentials": [
+      "Oracle EPM expertise",
+      "Financial systems support experience",
+      "Technical support background",
+      "ERP/financial software knowledge"
+    ],
+    "employment_type_note": "Employment type not stated in job description",
+    "verdict": "Weak match. While the candidate has strong business management and strategic credentials, this is a technical Oracle EPM support role requiring specialized financial software expertise. The candidate's background is in business strategy and digital transformation, not financial systems technical support or Oracle products. Core technical qualifications are absent.",
+    "required_qualifications": [
+      "Oracle EPM experience (implied)",
+      "Financial systems support experience (implied)"
+    ],
+    "qualification_gaps": [
+      "No Oracle EPM or Oracle products expertise stated",
+      "No ERP/financial systems background evident",
+      "No technical support or systems administration background"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Wrong profession/expertise - technical Oracle support role, not management/strategy"
+  },
+  "13bf296df4a0_feb27365383b": {
+    "score": 6,
+    "matched_skills": [
+      "Operations and Supply Chain Decisions and Metrics",
+      "Business Strategy",
+      "Analytical Skills",
+      "Project Initiation and Planning"
+    ],
+    "missing_essentials": [
+      "Supplier management experience not evidenced",
+      "Financial control/accounting depth unclear for regulated outsourcing context",
+      "Subcontractor governance experience not stated"
+    ],
+    "employment_type_note": "Employment type not stated in job description; unable to confirm permanent full-time status required by candidate",
+    "verdict": "Partial match. The role aligns with candidate's operations, supply chain, and business strategy background, and sits at appropriate seniority level. However, lack of stated employment type is a concern given candidate's strict requirement for full-time permanent only. Supplier management and regulated IT outsourcing governance are not directly evidenced in candidate's profile, though transferable skills in operations and financial oversight exist.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Employment type not confirmed as permanent full-time; salary not stated (cannot verify meets \u00a360k minimum)"
+  },
+  "977331b44e85_feb27365383b": {
+    "score": 3,
+    "matched_skills": [
+      "Analytical Skills",
+      "Business Strategy",
+      "Operations and Supply Chain Decisions and Metrics"
+    ],
+    "missing_essentials": [
+      "Financial accounting/reporting expertise",
+      "Finance function leadership experience",
+      "Cash flow management and forecasting",
+      "Financial control systems",
+      "FP&A (Financial Planning & Analysis)"
+    ],
+    "employment_type_note": "Employment type not stated in job description",
+    "verdict": "Weak match. While the candidate has senior management experience and strategic skills relevant to SLT membership, this is a specialized Financial Controller role requiring deep finance expertise, accounting qualifications (likely ACA/ACCA), and hands-on financial reporting/controls experience. The candidate's background is in digital transformation, operations, and business strategy\u2014not finance. The role is fundamentally misaligned with the candidate's core competencies.",
+    "required_qualifications": [
+      "Financial accounting qualification (e.g., ACA, ACCA, or equivalent - implied by Financial Controller title)"
+    ],
+    "qualification_gaps": [
+      "No accounting or finance-specific qualifications listed (ACA, ACCA, CPA, or similar)"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession (finance specialist role, not management/strategy role)"
+  },
+  "121d8c386754_feb27365383b": {
+    "score": 3,
+    "matched_skills": [
+      "Business Strategy",
+      "Project Initiation and Planning",
+      "Analytical Skills"
+    ],
+    "missing_essentials": [
+      "Scientific research background or domain expertise",
+      "Environmental science knowledge",
+      "Leadership of research organizations",
+      "Science policy or science funding experience",
+      "PhD or research credentials"
+    ],
+    "employment_type_note": "Full-time permanent with open-ended contract; meets candidate's requirement.",
+    "verdict": "Executive Director of Science at a research council is a fundamentally different profession from the candidate's business/management background. While the candidate has senior management and strategic skills, this role requires deep scientific credentials, research leadership, and environmental science domain expertise that are not evident in the candidate's profile.",
+    "required_qualifications": [
+      "Science leadership experience (implied)",
+      "Research or environmental science background (implied)"
+    ],
+    "qualification_gaps": [
+      "No scientific research qualifications or credentials listed",
+      "No PhD or advanced research qualification",
+      "No environmental science expertise",
+      "No experience leading research organizations or funding bodies"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; requires scientific research background and credentials"
+  },
+  "67fb81c81796_feb27365383b": {
+    "score": 3,
+    "matched_skills": [
+      "Digital transformation",
+      "Project Initiation and Planning",
+      "Business Strategy",
+      "Analytical Skills"
+    ],
+    "missing_essentials": [
+      "D365 Finance & Operations (F&O) technical expertise",
+      "ERP system implementation experience",
+      "Solution architecture technical background"
+    ],
+    "employment_type_note": "Permanent, full-time confirmed in description",
+    "verdict": "Partial match. Candidate has strong strategic and digital transformation credentials aligned with the transformation programme aspect. However, the role requires specialist D365 F&O technical expertise and ERP solution architecture experience which are not evidenced in the candidate's profile. The candidate's background is more business-focused strategy and management rather than technical solution design.",
+    "required_qualifications": [
+      "D365 Finance & Operations expertise (implied)",
+      "Solution architecture or ERP implementation experience (implied)"
+    ],
+    "qualification_gaps": [
+      "No D365 F&O certification or experience stated",
+      "No technical solution architecture qualification or experience stated",
+      "No ERP implementation background evident"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "e1bbf726e00e_feb27365383b": {
+    "score": 7,
+    "matched_skills": [
+      "Operations and Supply Chain Decisions and Metrics",
+      "Business Strategy",
+      "Analytical Skills",
+      "Project Initiation and Planning"
+    ],
+    "missing_essentials": [
+      "Lean Manufacturing / continuous improvement expertise not explicitly mentioned in candidate profile",
+      "Multi-site operations leadership experience not confirmed",
+      "Manufacturing sector experience not confirmed"
+    ],
+    "employment_type_note": "Employment type not stated in job description; assuming permanent based on context but lacks explicit confirmation",
+    "verdict": "Partial match. Candidate has strong operations, supply chain, and strategic management qualifications and experience suitable for a senior operations leadership role. However, no explicit Lean Manufacturing background is evident, and manufacturing/multi-site operations experience cannot be confirmed from profile. The role aligns with target responsibilities (Business Manager, Senior Management) and salary meets minimum threshold.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "7eeddc40f395_feb27365383b": {
+    "score": 2,
+    "matched_skills": [
+      "Leadership experience (Group Lead role)"
+    ],
+    "missing_essentials": [
+      "Nuclear sector experience (explicitly required, not stated by candidate)",
+      "Engineering degree (candidate has BA in English Language and Literature, not engineering)",
+      "Manufacturing/quality engineering background",
+      "Regulated engineering environment experience",
+      "Supply chain/supplier management in nuclear context"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; assumed permanent based on language ('salary', 'join us') but lacks explicit confirmation",
+    "verdict": "Weak match. Candidate's background is in business management, digital transformation, and strategy\u2014fundamentally different from the specialized nuclear engineering leadership required. Missing core engineering qualification and sector-specific nuclear experience that are explicit hard requirements.",
+    "required_qualifications": [
+      "Engineering degree or equivalent qualification",
+      "Significant nuclear sector experience including UK project exposure",
+      "Proven leadership experience managing engineering teams"
+    ],
+    "qualification_gaps": [
+      "Engineering degree (candidate holds BA English Language and Literature)",
+      "Nuclear sector experience (not mentioned in candidate profile)",
+      "Engineering team management experience (candidate's leadership is in business/digital contexts, not engineering)"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession (nuclear engineering leadership vs. business management/digital transformation). Missing core engineering qualification and sector-specific nuclear expertise."
+  },
+  "a9bd3615fd3b_feb27365383b": {
+    "score": 3,
+    "matched_skills": [
+      "Business Strategy",
+      "Operations and Supply Chain Decisions and Metrics",
+      "Project Initiation and Planning"
+    ],
+    "missing_essentials": [
+      "Science leadership/research background",
+      "Environmental science expertise or credentials",
+      "Academic or research institution management experience",
+      "Large-scale research portfolio management"
+    ],
+    "employment_type_note": "Role offers both part-time and full-time; candidate requires full-time permanent only. Permanent contract present, but part-time option available may not align with typical permanent full-time expectations.",
+    "verdict": "Weak match. Candidate has general business strategy and project management skills, but this is fundamentally a science leadership role requiring deep environmental research expertise, academic credibility, and research portfolio management experience. Candidate's background is in digital transformation, marketing, and general business management\u2014not science or research leadership. This represents a significant career pivot into a different domain where the candidate lacks essential scientific credentials and research management experience.",
+    "required_qualifications": [
+      "Science leadership experience",
+      "Research portfolio management",
+      "Environmental science background or equivalent research credentials"
+    ],
+    "qualification_gaps": [
+      "No science/research background evidenced",
+      "No environmental science qualifications or expertise",
+      "No research institution or academic management experience documented"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; science leadership role requiring research credentials and expertise candidate does not possess"
+  },
+  "daffe756c6ac_feb27365383b": {
+    "score": 6,
+    "matched_skills": [
+      "Digital transformation",
+      "Project Initiation and Planning",
+      "Business Strategy",
+      "Operations and Supply Chain Decisions and Metrics"
+    ],
+    "missing_essentials": [
+      "D365 Finance & Operations (F&O) technical expertise",
+      "Solution architecture experience",
+      "ERP implementation background",
+      "Microsoft Dynamics 365 platform knowledge"
+    ],
+    "employment_type_note": "Permanent, full-time confirmed in description. Meets candidate requirement.",
+    "verdict": "Partial match. The role aligns with the candidate's senior-level profile and digital transformation target. However, this is a technical solution architect role requiring deep D365 F&O expertise, whereas the candidate's background is in business strategy, operations, and digital transformation management. The candidate lacks stated technical ERP platform experience. Suitable for a transition into ERP transformation leadership, but technical gaps are significant.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "7bfe263b3dd1_feb27365383b": {
+    "score": 3,
+    "matched_skills": [
+      "Analytical Skills",
+      "Operations and Supply Chain Decisions and Metrics"
+    ],
+    "missing_essentials": [
+      "Qualified accountant (CA, ACCA, ACA, CIMA, or equivalent) - not present in profile",
+      "Financial accounting and statutory reporting expertise",
+      "Financial controls and compliance experience",
+      "Audit liaison experience"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; unable to confirm permanent full-time status",
+    "verdict": "Weak match. Candidate is senior management/digital transformation focused with business strategy and project skills, but this is a specialist financial accounting and controls role requiring qualified accountant status. Core accounting qualifications and financial controls expertise are absent from candidate profile.",
+    "required_qualifications": [
+      "Qualified accountant (CA, ACCA, ACA, CIMA or equivalent)"
+    ],
+    "qualification_gaps": [
+      "No accounting qualification listed (CA, ACCA, ACA, CIMA, or equivalent accounting body membership)"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; requires qualified accountant, candidate is business/digital transformation focused"
+  },
+  "2352ad5cf82e_feb27365383b": {
+    "score": 6,
+    "matched_skills": [
+      "Business Strategy",
+      "Digital Transformation",
+      "Digital Marketing",
+      "Project Initiation and Planning",
+      "Analytical Skills",
+      "Operations and Supply Chain Decisions and Metrics"
+    ],
+    "missing_essentials": [
+      "Healthcare/pharmaceutical industry experience",
+      "Clinical governance or healthcare regulation knowledge",
+      "Patient engagement/CRM strategy experience",
+      "Healthcare commercial leadership track record"
+    ],
+    "employment_type_note": "Full-time permanent role as required",
+    "verdict": "Partial match. Candidate has strong commercial strategy, digital transformation, and business management credentials suited to the commercial leadership aspects. However, this is a healthcare-specific role requiring clinical governance understanding, healthcare regulation knowledge, and patient-centric digital healthcare experience. The candidate's profile shows no healthcare/pharmaceutical background and explicitly excludes clinical roles. While the commercial and digital strategy elements align well, the healthcare context and clinical liaison responsibilities present a significant domain mismatch.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Healthcare sector role; candidate excludes clinical/medical domains"
+  },
+  "cd4c1e306a54_feb27365383b": {
+    "score": 2,
+    "matched_skills": [
+      "Analytical Skills",
+      "Project Initiation and Planning"
+    ],
+    "missing_essentials": [
+      "Data Engineering expertise",
+      "Software engineering/technical development background",
+      "Database management",
+      "ETL pipeline development",
+      "Cloud infrastructure experience"
+    ],
+    "employment_type_note": "Employment type not stated in description",
+    "verdict": "Poor match. This is a technical data engineering role requiring specialized software engineering and database expertise. The candidate's background is in business management, strategy, and operations\u2014not data engineering or software development. Core technical skills are absent.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession (data engineering vs. business management)"
+  },
+  "28375b9e71d3_feb27365383b": {
+    "score": 3,
+    "matched_skills": [
+      "Analytical Skills",
+      "Project Initiation and Planning",
+      "Operations and Supply Chain Decisions and Metrics",
+      "Business Strategy"
+    ],
+    "missing_essentials": [
+      "IT/systems infrastructure management experience",
+      "Enterprise application implementation (SAP SuccessFactors, SAP Concur, etc.)",
+      "Application lifecycle management hands-on experience",
+      "Web application management",
+      "Change management and user adoption at enterprise scale",
+      "Technical governance and system architecture"
+    ],
+    "employment_type_note": "Full-time permanent role - aligns with candidate preference",
+    "verdict": "Weak match. While the candidate has strong general management, strategy, and project skills, this is fundamentally an IT/technical operations role requiring specialized hands-on experience in enterprise application implementation and management. The candidate's background is in digital transformation, marketing, and business strategy\u2014not IT infrastructure or systems management. No stated salary creates additional uncertainty against the \u00a360k minimum requirement.",
+    "required_qualifications": [
+      "Degree in information technology, Computer Science, or related field (or equivalent practical experience)",
+      "Hands-on experience implementing, supporting, and optimizing enterprise applications (SAP SuccessFactors, SAP Concur, Health & Safety systems, shop-floor/operations systems)",
+      "Strong background managing and maintaining web-based applications"
+    ],
+    "qualification_gaps": [
+      "No IT/Computer Science degree; candidate holds BA in English Language and Literature and management-related qualifications",
+      "No demonstrated hands-on experience with SAP SuccessFactors, SAP Concur, or equivalent enterprise applications",
+      "No stated background in web-based application management"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession (IT/technical operations vs. business management/strategy). Candidate not open to technical IT roles."
+  }
+}
