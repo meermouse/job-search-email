@@ -13,7 +13,10 @@ from .models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResu
 
 client = anthropic.Anthropic()
 
-_DESCRIPTION_LIMIT = 2500
+# Job descriptions routinely bury the "Essential Qualifications" / "Requirements"
+# section in the second half, after the company blurb and responsibilities. The
+# cap must be generous enough to reach it: real Indeed postings run ~5k chars.
+_DESCRIPTION_LIMIT = 8000
 
 
 @dataclass
