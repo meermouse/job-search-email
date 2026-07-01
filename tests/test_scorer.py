@@ -738,3 +738,11 @@ def test_system_prompt_contains_exclusion_instructions():
     prompt = _build_system_prompt(make_profile())
     assert "exclude" in prompt
     assert "Exclusion instructions" in prompt
+
+
+def test_system_prompt_contains_ftc_exclusion_guidance():
+    from job_search_email.scorer import _build_system_prompt
+    prompt = _build_system_prompt(make_profile())
+    assert "FTC" in prompt
+    assert "fixed-term contract" in prompt
+    assert "Permanent / FTC" in prompt

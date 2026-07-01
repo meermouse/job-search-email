@@ -496,3 +496,43 @@ def test_sponsor_cache_loads_from_real_asset():
     sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH)
     assert isinstance(sponsor_set, frozenset)
     assert len(sponsor_set) > 1000
+
+
+def test_run_pipeline_writes_files_and_returns_tuple(tmp_path, monkeypatch):
+    import sys, importlib
+    importlib.import_module("job_search_email.main")
+    main_mod = sys.modules["job_search_email.main"]
+
+    monkeypatch.setattr(main_mod, "CACHE_PATH", tmp_path / "plan_cache.json")
+    monkeypatch.setattr(main_mod, "PLAN_PATH", tmp_path / "plan.json")
+    monkeypatch.setattr(main_mod, "RESULTS_PATH", tmp_path / "results.json")
+    monkeypatch.setattr(main_mod, "FILTERED_RESULTS_PATH", tmp_path / "filtered.json")
+    monkeypatch.setattr(main_mod, "SCORED_RESULTS_PATH", tmp_path / "scored.json")
+    monkeypatch.setattr(main_mod, "SCORE_CACHE_PATH", tmp_path / "score_cache.json")
+    monkeypatch.setattr(main_mod, "LOCATION_CACHE_PATH", tmp_path / "location_cache.json")
+
+    from job_search_email.models import JobListing, SearchPlan, ScoredResult, JobAnalysis
+    job = JobListing(
+        title="Manager", company="NHS", location="Bristol",
+        salary_min=65000, description="", url="https://x.com/1",
+        source="reed", employment_type="full-time",
+    )
+    plan = SearchPlan(profile_fingerprint="test", queries=["q"],
+                      exclusions={"roles": [], "employment_types": []},
+                      nhs_rules={}, evaluator_notes=[])
+    scored = [ScoredResult(job=job, flags=[], rejected=False, reject_reason=None,
+                           analysis=JobAnalysis(score=7, matched_skills=[], missing_essentials=[],
+                                                employment_type_note="", verdict="ok"))]
+
+    with (
+        patch("job_search_email.main.generate_search_plan", return_value=plan),
+        patch("job_search_email.main.fetch_all_jobs", return_value=[job]),
+        patch("job_search_email.main.classify_locations", return_value={"Bristol": "within"}),
+        patch("job_search_email.main.score_jobs", return_value=scored),
+    ):
+        classification, result = main_mod.run_pipeline(make_profile())
+
+    assert classification == {"Bristol": "within"}
+    assert result == scored
+    assert (tmp_path / "results.json").exists()
+    assert (tmp_path / "scored.json").exists()

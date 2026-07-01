@@ -19,7 +19,8 @@ _CONTRACT_PATTERNS = re.compile(
     r"|\d+[\s\-]month (?:contract|fixed)"
     r"|zero[\s\-]hours"
     r"|bank staff"
-    r"|locum post",
+    r"|locum post"
+    r"|\bftc\b",
     re.IGNORECASE,
 )
 
