@@ -589,3 +589,86 @@ def test_check_sponsor_passes_listed_single_word_company():
     sponsors = frozenset({"nakshatra"})
     job = make_job(source="reed", company="Nakshatra Limited")
     assert _check_sponsor(job, sponsors) is None
+
+
+from job_search_email.filter import _check_recruitment
+
+_RECRUITERS = frozenset({"hays specialist recruitment", "hays specialist", "acme resourcing"})
+_RECRUITMENT_MSG = "recruitment agency — client company not disclosed, cannot verify sponsor"
+
+
+def test_check_recruitment_rejects_reed_agency_flag():
+    job = make_job(source="reed", company="Some Direct Employer Ltd", posted_by_agency=True)
+    result = _check_recruitment(job, _RECRUITERS)
+    assert result is not None and result.rejected is True
+    assert result.reject_reason == _RECRUITMENT_MSG
+
+
+def test_check_recruitment_rejects_name_match():
+    job = make_job(source="reed", company="Hays Specialist Recruitment Ltd", posted_by_agency=None)
+    result = _check_recruitment(job, _RECRUITERS)
+    assert result is not None and result.rejected is True
+    assert result.reject_reason == _RECRUITMENT_MSG
+
+
+def test_check_recruitment_rejects_name_match_with_extra_trailing_words():
+    # Job company carries extra words the listed name omits; prefix match still hits.
+    job = make_job(source="reed", company="Acme Resourcing Solutions UK", posted_by_agency=None)
+    result = _check_recruitment(job, _RECRUITERS)
+    assert result is not None and result.rejected is True
+
+
+def test_check_recruitment_rejects_blank_company_with_agency_flag():
+    job = make_job(source="reed", company="", posted_by_agency=True)
+    result = _check_recruitment(job, _RECRUITERS)
+    assert result is not None and result.rejected is True
+
+
+def test_check_recruitment_passes_non_agency():
+    job = make_job(source="reed", company="Totally Legitimate Widgets", posted_by_agency=False)
+    assert _check_recruitment(job, _RECRUITERS) is None
+
+
+def test_check_recruitment_skips_nhs_source():
+    job = make_job(source="nhs", company="Hays Specialist Recruitment Ltd", posted_by_agency=True)
+    assert _check_recruitment(job, _RECRUITERS) is None
+
+
+def test_check_recruitment_passes_blank_company_no_flag():
+    job = make_job(source="reed", company="", posted_by_agency=None)
+    assert _check_recruitment(job, _RECRUITERS) is None
+
+
+def test_filter_jobs_rejects_recruitment_when_set_given():
+    jobs = [make_job(source="reed", company="Hays Specialist Recruitment Ltd", employment_type="full-time")]
+    results = filter_jobs(
+        jobs, make_plan(), make_profile_stub(),
+        recruitment_set=_RECRUITERS, sponsor_set=_SPONSORS,
+    )
+    assert results[0].rejected is True
+    assert results[0].reject_reason == _RECRUITMENT_MSG
+
+
+def test_filter_jobs_recruitment_checked_before_sponsor():
+    # An agency that is ALSO on the sponsor list must be rejected as recruitment, not passed.
+    sponsors = frozenset({"hays specialist recruitment", "hays specialist"})
+    jobs = [make_job(source="reed", company="Hays Specialist Recruitment Ltd", employment_type="full-time")]
+    results = filter_jobs(
+        jobs, make_plan(), make_profile_stub(),
+        recruitment_set=_RECRUITERS, sponsor_set=sponsors,
+    )
+    assert results[0].rejected is True
+    assert results[0].reject_reason == _RECRUITMENT_MSG
+
+
+def test_filter_jobs_skips_recruitment_when_no_set():
+    jobs = [make_job(source="reed", company="Hays Specialist Recruitment Ltd",
+                     employment_type="full-time", posted_by_agency=True)]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert results[0].rejected is False
+
+
+def test_filter_jobs_employment_type_checked_before_recruitment():
+    jobs = [make_job(source="reed", company="Hays Specialist Recruitment Ltd", employment_type="contract")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub(), recruitment_set=_RECRUITERS)
+    assert results[0].reject_reason == "employment type: contract"
