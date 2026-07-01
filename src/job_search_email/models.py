@@ -44,6 +44,7 @@ class JobListing:
     url: str
     source: str
     employment_type: str | None
+    posted_by_agency: bool | None = None
 
 
 @dataclass

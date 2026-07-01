@@ -110,3 +110,28 @@ def test_employment_type_unknown_returns_none(monkeypatch):
         result = search("manager", PROFILE)
 
     assert result[0].employment_type is None
+
+
+def test_search_sets_posted_by_agency_true(monkeypatch):
+    monkeypatch.setenv("REED_API_KEY", "test-key")
+    response = {"results": [{**REED_RESPONSE["results"][0], "postedByRecruitmentAgency": True}]}
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = response
+    mock_resp.raise_for_status.return_value = None
+
+    with patch("job_search_email.search_api.reed.requests.get", return_value=mock_resp):
+        result = search("manager", PROFILE)
+
+    assert result[0].posted_by_agency is True
+
+
+def test_search_posted_by_agency_absent_defaults_none(monkeypatch):
+    monkeypatch.setenv("REED_API_KEY", "test-key")
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = REED_RESPONSE  # no postedByRecruitmentAgency key
+    mock_resp.raise_for_status.return_value = None
+
+    with patch("job_search_email.search_api.reed.requests.get", return_value=mock_resp):
+        result = search("manager", PROFILE)
+
+    assert result[0].posted_by_agency is None
