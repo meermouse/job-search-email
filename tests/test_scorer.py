@@ -644,6 +644,26 @@ def test_user_message_contains_qualification_schema():
     assert "qualification_status" in msg
 
 
+def test_user_message_keeps_requirements_section_buried_after_2500_chars():
+    # Regression: a real Indeed posting (Senior Project Manager, Kirintec) put
+    # "Essential Qualifications ... PRINCE2" at ~char 2758, past the old 2500-char
+    # cap, so the scorer never saw the qualification and failed to flag the gap.
+    from job_search_email.scorer import _build_user_message
+    from job_search_email.models import JobListing
+    filler = "Blah about the company and responsibilities. " * 60  # ~2700 chars
+    assert len(filler) > 2500
+    description = filler + "\n\nEssential Qualifications\n\n* PRINCE2 Practitioner"
+    job = JobListing(
+        title="Senior Project Manager", company="Kirintec Limited",
+        location="Tewkesbury", salary_min=70000, description=description,
+        url="https://uk.indeed.com/viewjob?jk=b09c0e6aab800526",
+        source="indeed", employment_type="full-time",
+    )
+    msg = _build_user_message(job)
+    assert "PRINCE2" in msg
+    assert "Essential Qualifications" in msg
+
+
 _EXCLUDE_RESPONSE = json.dumps({
     "score": 6,
     "matched_skills": ["digital transformation"],
