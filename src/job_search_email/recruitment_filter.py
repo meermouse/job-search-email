@@ -6,7 +6,7 @@ from .sponsor_filter import _normalize, _build_entries
 
 def load_recruitment_set(csv_path: Path) -> frozenset[str]:
     entries: set[str] = set()
-    with csv_path.open(encoding="utf-8") as fh:
+    with csv_path.open(encoding="utf-8-sig") as fh:
         reader = csv.DictReader(fh)
         for row in reader:
             raw = (row.get("Organisation Name") or "").strip()

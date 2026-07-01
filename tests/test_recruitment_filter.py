@@ -40,3 +40,16 @@ def test_load_recruitment_set_skips_blank_rows(recruitment_csv: Path):
 
 def test_load_recruitment_set_keeps_short_single_word(recruitment_csv: Path):
     assert "short" in load_recruitment_set(recruitment_csv)
+
+
+def test_load_recruitment_set_handles_utf8_bom(tmp_path):
+    # Regression: the real asset ships with a UTF-8 BOM; the loader must not
+    # read the header as '﻿Organisation Name' and drop every row.
+    csv_file = tmp_path / "recruiters_bom.csv"
+    csv_file.write_bytes(
+        b"\xef\xbb\xbf"
+        + b'Organisation Name\n"Hays Specialist Recruitment Limited"\n'
+    )
+    result = load_recruitment_set(csv_file)
+    assert result  # non-empty
+    assert "hays specialist recruitment" in result
