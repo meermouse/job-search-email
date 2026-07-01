@@ -401,6 +401,21 @@ def test_load_profile_reads_explicit_send_flags(tmp_path: Path) -> None:
     assert profile.send_debug_email is True
 
 
+def test_load_profile_filter_recruitment_defaults_true(tmp_path: Path) -> None:
+    profile_path = tmp_path / "profile.yaml"
+    profile_path.write_text(PROFILE_YAML, encoding="utf-8")
+    profile = load_profile(path=profile_path)
+    assert profile.filter_recruitment is True
+
+
+def test_load_profile_filter_recruitment_reads_false(tmp_path: Path) -> None:
+    yaml_with_filter = PROFILE_YAML + "filter_recruitment: false\n"
+    profile_path = tmp_path / "profile.yaml"
+    profile_path.write_text(yaml_with_filter, encoding="utf-8")
+    profile = load_profile(path=profile_path)
+    assert profile.filter_recruitment is False
+
+
 def _run_main_with_toggles(tmp_path: Path, monkeypatch, send_main: bool, send_debug: bool):
     import sys
     import importlib

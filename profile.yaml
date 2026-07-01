@@ -59,3 +59,4 @@ preamble: "Hey Jie, its The Job Mule 2.0. Lets go through todays jobs."
 recipient_email: jillcn@hotmail.com
 send_main_email: true
 send_debug_email: true
+filter_recruitment: true

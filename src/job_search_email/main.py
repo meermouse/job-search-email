@@ -21,6 +21,7 @@ from .scorer import score_jobs
 from .queries import generate_queries
 from .search_api.fetcher import fetch_all_jobs
 from .sponsor_filter import load_sponsor_set
+from .recruitment_filter import load_recruitment_set
 
 ROOT = Path.cwd()
 PROFILE_PATH = ROOT / "profile.yaml"
@@ -32,6 +33,7 @@ SCORED_RESULTS_PATH = ROOT / "job_results_scored.json"
 SCORE_CACHE_PATH = ROOT / "job_score_cache.json"
 LOCATION_CACHE_PATH = ROOT / "location_cache.json"
 SPONSOR_CACHE_PATH = ROOT / "assets" / "sponsor_cache.csv"
+RECRUITMENT_CACHE_PATH = ROOT / "assets" / "recruitment_agencies.csv"
 
 
 def load_profile(path: Path = PROFILE_PATH) -> Profile:
@@ -59,6 +61,7 @@ def load_profile(path: Path = PROFILE_PATH) -> Profile:
         recipient_email=data.get("recipient_email", ""),
         send_main_email=data.get("send_main_email", True),
         send_debug_email=data.get("send_debug_email", False),
+        filter_recruitment=data.get("filter_recruitment", True),
     )
 
 
@@ -203,9 +206,15 @@ def run_pipeline(profile: Profile) -> tuple[dict[str, Any], list[ScoredResult]]:
     print("Filtering jobs...")
     sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH)
     print(f"- sponsor list loaded: {len(sponsor_set):,} entries")
+    recruitment_set = load_recruitment_set(RECRUITMENT_CACHE_PATH) if profile.filter_recruitment else None
+    if recruitment_set is not None:
+        print(f"- recruitment list loaded: {len(recruitment_set):,} entries")
+    else:
+        print("- recruitment filter disabled (filter_recruitment=false)")
     filtered = filter_jobs(
         jobs, plan, profile,
         rejected_locations=rejected_locations,
+        recruitment_set=recruitment_set,
         sponsor_set=sponsor_set,
     )
     write_filtered_results(filtered, FILTERED_RESULTS_PATH)

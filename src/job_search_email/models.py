@@ -23,6 +23,7 @@ class Profile:
     recipient_email: str = ""
     send_main_email: bool = True
     send_debug_email: bool = False
+    filter_recruitment: bool = True
 
 
 @dataclass
