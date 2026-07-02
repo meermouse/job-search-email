@@ -33,6 +33,7 @@ def _to_listing(item: dict) -> JobListing:
         url=item.get("jobUrl", ""),
         source="reed",
         employment_type=_parse_employment_type(item),
+        posted_by_agency=item.get("postedByRecruitmentAgency"),
     )
 
 

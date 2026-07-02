@@ -23,6 +23,7 @@ class Profile:
     recipient_email: str = ""
     send_main_email: bool = True
     send_debug_email: bool = False
+    filter_recruitment: bool = True
 
 
 @dataclass
@@ -44,6 +45,7 @@ class JobListing:
     url: str
     source: str
     employment_type: str | None
+    posted_by_agency: bool | None = None
 
 
 @dataclass
