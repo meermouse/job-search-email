@@ -5,6 +5,7 @@ import time
 import anthropic
 
 from .models import Profile
+from .profile import render_profile
 
 client = anthropic.Anthropic()
 
@@ -23,12 +24,11 @@ Rules:
 - No duplicates or near-duplicates
 
 Candidate profile:
-  Current role: {current_role}
-  Industry: {industry}
+{profile_block}
+
+Search preferences:
   Target roles: {target_roles}
   Open to: {open_to}
-  Key skills: {skills}
-  Previous roles: {previous_roles}
 
 Return a JSON array of exactly 8 strings. No other text.\
 """
@@ -48,12 +48,9 @@ def generate_queries(profile: Profile) -> list[str]:
         name=profile.name,
         seniority=profile.seniority,
         not_open_to=", ".join(profile.not_open_to),
-        current_role=profile.current_role,
-        industry=profile.industry,
+        profile_block=render_profile(profile),
         target_roles=", ".join(profile.target_roles),
         open_to=", ".join(profile.open_to),
-        skills=", ".join(profile.skills),
-        previous_roles=", ".join(profile.previous_roles),
     )
 
     for attempt in range(1, 4):
