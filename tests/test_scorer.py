@@ -5,6 +5,9 @@ from unittest.mock import MagicMock, patch
 
 from job_search_email.models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
 from profile_helpers import make_profile as _shared_profile
+from profile_helpers import make_profile as shared_profile
+from job_search_email.models import EducationEntry, ExperienceEntry
+from job_search_email.scorer import _build_system_prompt
 
 
 def make_job(**kwargs) -> JobListing:
@@ -763,3 +766,27 @@ def test_system_prompt_contains_ftc_exclusion_guidance():
     assert "FTC" in prompt
     assert "fixed-term contract" in prompt
     assert "Permanent / FTC" in prompt
+
+
+def test_build_system_prompt_includes_rendered_profile():
+    profile = shared_profile(
+        about="Governance meets data.",
+        headline="NHS Digital Transformation",
+        experience=[ExperienceEntry(
+            title="Governance Manager", company="Swansea Bay UHB",
+            start="2023-09", end="present",
+        )],
+        education=[EducationEntry(institution="UCL", degree="Masters")],
+        certifications=["Corporate Strategy"],
+        target_roles=["Business Manager"],
+        not_open_to=["nursing"],
+    )
+    prompt = _build_system_prompt(profile)
+    assert "Governance meets data." in prompt
+    assert "- Governance Manager — Swansea Bay UHB (2023-09 – present)" in prompt
+    assert "- Masters — UCL" in prompt
+    assert "- Corporate Strategy" in prompt
+    assert "education and certifications" in prompt
+    assert "Target roles: Business Manager" in prompt
+    assert "Not open to: nursing" in prompt
+    assert "Min salary: £60,000" in prompt
