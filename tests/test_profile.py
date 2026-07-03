@@ -2,7 +2,8 @@
 from pathlib import Path
 
 from job_search_email.models import EducationEntry, ExperienceEntry
-from job_search_email.profile import load_profile
+from job_search_email.profile import load_profile, render_profile
+from profile_helpers import make_profile
 
 FULL_YAML = """\
 profile:
@@ -106,3 +107,55 @@ def test_load_profile_defaults_missing_optional_sections(tmp_path):
     assert profile.radius_miles == 50
     assert profile.send_main_email is True
     assert profile.filter_recruitment is True
+
+
+def _rich_profile():
+    return make_profile(
+        name="Jie Zhou",
+        headline="NHS Digital Transformation",
+        about="Governance meets data.",
+        experience=[
+            ExperienceEntry(
+                title="Governance Manager", company="Swansea Bay UHB",
+                start="2023-09", end="present", location="United Kingdom",
+                description="Leads governance.\nBuilds dashboards.",
+            ),
+            ExperienceEntry(
+                title="Co-Founder", company="Guangxian Education",
+                start="2019-01", end="2021-07",
+            ),
+        ],
+        education=[EducationEntry(institution="UCL", degree="Masters, Strategic Management of Projects")],
+        certifications=["Corporate Strategy"],
+        skills=["SharePoint", "Power BI"],
+        languages=["English", "Chinese"],
+    )
+
+
+def test_render_profile_includes_all_sections():
+    text = render_profile(_rich_profile())
+    assert "Name: Jie Zhou" in text
+    assert "Headline: NHS Digital Transformation" in text
+    assert "Governance meets data." in text
+    assert "Current role: Governance Manager at Swansea Bay UHB" in text
+    assert "- Governance Manager — Swansea Bay UHB (2023-09 – present, United Kingdom)" in text
+    assert "  Leads governance." in text
+    assert "  Builds dashboards." in text
+    assert "- Co-Founder — Guangxian Education (2019-01 – 2021-07)" in text
+    assert "- Masters, Strategic Management of Projects — UCL" in text
+    assert "- Corporate Strategy" in text
+    assert "Skills: SharePoint, Power BI" in text
+    assert "Languages: English, Chinese" in text
+
+
+def test_render_profile_omits_empty_sections():
+    text = render_profile(make_profile(name="Test", about=""))
+    assert text.startswith("Name: Test")
+    assert "Headline:" not in text
+    assert "About:" not in text
+    assert "Current role:" not in text
+    assert "Experience:" not in text
+    assert "Education:" not in text
+    assert "Certifications:" not in text
+    assert "Skills:" not in text
+    assert "Languages:" not in text

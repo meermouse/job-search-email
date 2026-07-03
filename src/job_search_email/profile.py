@@ -62,3 +62,33 @@ def load_profile(path: Path) -> Profile:
         send_debug_email=data.get("send_debug_email", False),
         filter_recruitment=data.get("filter_recruitment", True),
     )
+
+
+def render_profile(profile: Profile) -> str:
+    lines = [f"Name: {profile.name}"]
+    if profile.headline:
+        lines.append(f"Headline: {profile.headline}")
+    if profile.about:
+        lines += ["", "About:", profile.about.strip()]
+    current = next((e for e in profile.experience if e.end == "present"), None)
+    if current:
+        lines += ["", f"Current role: {current.title} at {current.company}"]
+    if profile.experience:
+        lines += ["", "Experience:"]
+        for e in profile.experience:
+            span = f"{e.start} – {e.end}" if e.start else e.end
+            loc = f", {e.location}" if e.location else ""
+            lines.append(f"- {e.title} — {e.company} ({span}{loc})")
+            if e.description:
+                lines += [f"  {d}" for d in e.description.strip().splitlines()]
+    if profile.education:
+        lines += ["", "Education:"]
+        lines += [f"- {ed.degree} — {ed.institution}" for ed in profile.education]
+    if profile.certifications:
+        lines += ["", "Certifications:"]
+        lines += [f"- {c}" for c in profile.certifications]
+    if profile.skills:
+        lines += ["", f"Skills: {', '.join(profile.skills)}"]
+    if profile.languages:
+        lines.append(f"Languages: {', '.join(profile.languages)}")
+    return "\n".join(lines)
