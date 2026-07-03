@@ -37,16 +37,13 @@ def load_profile(path: Path) -> Profile:
     p = data["profile"]
     return Profile(
         name=p["name"],
-        current_role="",
         about=(p.get("about") or "").strip(),
         seniority=p.get("seniority", ""),
         industry=p.get("industry", ""),
         skills=p.get("skills", []),
-        previous_roles=[],
         target_roles=p.get("target_roles", []),
         open_to=p.get("open_to", []),
         not_open_to=p.get("not_open_to", []),
-        qualifications=[],
         employment_type=p.get("employment_type", []),
         location=data.get("location", ""),
         min_salary=data.get("min_salary", 0),

@@ -15,7 +15,7 @@ def _job() -> JobListing:
 
 
 def _profile() -> Profile:
-    return make_profile(skills=["delivery"], target_roles=["Project Manager"], qualifications=["MSc"])
+    return make_profile(skills=["delivery"], target_roles=["Project Manager"])
 
 
 _RESPONSE = json.dumps({

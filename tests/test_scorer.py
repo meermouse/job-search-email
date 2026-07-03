@@ -147,7 +147,7 @@ from job_search_email.scorer import score_jobs
 def make_profile() -> Profile:
     return _shared_profile(
         skills=["digital transformation"], target_roles=["Business Manager"],
-        not_open_to=["clinical roles"], qualifications=["MSc Management"],
+        not_open_to=["clinical roles"],
     )
 
 

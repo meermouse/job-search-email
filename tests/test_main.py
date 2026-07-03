@@ -62,15 +62,12 @@ preamble: "Test preamble"
 def make_profile() -> Profile:
     return make_profile_helper(
         name="Test User",
-        current_role="NHS Project Manager",
         about="Experienced project manager in NHS.",
         industry="NHS / Private Sector",
         skills=["stakeholder management", "digital transformation"],
-        previous_roles=["Business Manager", "Project Lead"],
         target_roles=["Programme Manager", "Digital Lead"],
         open_to=["Strategy Consultant"],
         not_open_to=["clinical roles", "nursing"],
-        qualifications=["MSc Project Management"],
     )
 
 
