@@ -1,14 +1,11 @@
 from unittest.mock import patch
 
 from job_search_email.models import JobAnalysis, JobListing, Profile, ScoredResult
+from profile_helpers import make_profile
 
 
 def _profile() -> Profile:
-    return Profile(
-        name="Test", current_role="", about="", seniority="", industry="",
-        skills=[], previous_roles=[], target_roles=[], open_to=[], not_open_to=[],
-        qualifications=[], employment_type=["full-time"], location="Bristol", min_salary=60000,
-    )
+    return make_profile()
 
 
 def _scored() -> list[ScoredResult]:

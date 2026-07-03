@@ -1,15 +1,11 @@
 # tests/search_api/test_fetcher.py
 from unittest.mock import patch
-from job_search_email.models import JobListing, Profile, SearchPlan
+from job_search_email.models import JobListing, SearchPlan
 from job_search_email.search_api.fetcher import fetch_all_jobs
+from profile_helpers import make_profile
 
 
-PROFILE = Profile(
-    name="Jie", current_role="NHS Digital", about="", seniority="Senior",
-    industry="NHS", skills=[], previous_roles=[], target_roles=[],
-    open_to=[], not_open_to=[], qualifications=[],
-    employment_type=["full-time"], location="Bristol", min_salary=60000,
-)
+PROFILE = make_profile(name="Jie")
 
 PLAN = SearchPlan(
     profile_fingerprint="abc123",

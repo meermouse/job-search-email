@@ -10,18 +10,13 @@ from job_search_email.cache import (
     save_score_cache,
 )
 from job_search_email.models import Profile
+from profile_helpers import make_profile as _shared_profile
 
 
 def make_profile(**kwargs) -> Profile:
-    defaults = dict(
-        name="Test", current_role="Manager", about="", seniority="Senior",
-        industry="NHS", skills=["python"], previous_roles=[],
-        target_roles=["Lead"], open_to=[], not_open_to=[],
-        qualifications=[], employment_type=["full-time"],
-        location="Bristol", min_salary=60000,
-    )
+    defaults = dict(skills=["python"], target_roles=["Lead"])
     defaults.update(kwargs)
-    return Profile(**defaults)
+    return _shared_profile(**defaults)
 
 
 def test_load_score_cache_returns_empty_when_missing(tmp_path: Path):

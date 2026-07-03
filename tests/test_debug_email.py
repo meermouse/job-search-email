@@ -1,13 +1,10 @@
 from job_search_email.debug_email import build_debug_email_html
 from job_search_email.models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
+from profile_helpers import make_profile
 
 
 def _make_profile() -> Profile:
-    return Profile(
-        name="Jie", current_role="", about="", seniority="", industry="",
-        skills=[], previous_roles=[], target_roles=[], open_to=[], not_open_to=[],
-        qualifications=[], employment_type=[], location="Bristol", min_salary=60000,
-    )
+    return make_profile(name="Jie", employment_type=[])
 
 
 def _make_job(location: str = "Bristol") -> JobListing:

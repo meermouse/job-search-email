@@ -16,6 +16,7 @@ from job_search_email.main import (
     save_cached_plan,
 )
 from job_search_email.models import Profile, SearchPlan
+from profile_helpers import make_profile as make_profile_helper
 
 
 PROFILE_YAML = """
@@ -51,11 +52,10 @@ preamble: "Test preamble"
 
 
 def make_profile() -> Profile:
-    return Profile(
+    return make_profile_helper(
         name="Test User",
         current_role="NHS Project Manager",
         about="Experienced project manager in NHS.",
-        seniority="Senior",
         industry="NHS / Private Sector",
         skills=["stakeholder management", "digital transformation"],
         previous_roles=["Business Manager", "Project Lead"],
@@ -63,9 +63,6 @@ def make_profile() -> Profile:
         open_to=["Strategy Consultant"],
         not_open_to=["clinical roles", "nursing"],
         qualifications=["MSc Project Management"],
-        employment_type=["full-time"],
-        location="Bristol",
-        min_salary=60000,
     )
 
 

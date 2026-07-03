@@ -5,6 +5,7 @@ from unittest.mock import patch
 from job_search_email import job_resolver
 from job_search_email.models import JobAnalysis, JobListing, Profile
 from job_search_email.scorer import AnalysisTrace
+from profile_helpers import make_profile
 
 
 def _job(**kw) -> JobListing:
@@ -18,12 +19,7 @@ def _job(**kw) -> JobListing:
 
 
 def _profile() -> Profile:
-    return Profile(
-        name="Test", current_role="Manager", about="", seniority="Senior",
-        industry="NHS", skills=[], previous_roles=[], target_roles=[],
-        open_to=[], not_open_to=[], qualifications=[],
-        employment_type=["full-time"], location="Bristol", min_salary=60000,
-    )
+    return make_profile()
 
 
 def _trace() -> AnalysisTrace:

@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from job_search_email.models import JobListing, Profile
 from job_search_email.scorer import AnalysisTrace, analyse_job
+from profile_helpers import make_profile
 
 
 def _job() -> JobListing:
@@ -14,13 +15,7 @@ def _job() -> JobListing:
 
 
 def _profile() -> Profile:
-    return Profile(
-        name="Test", current_role="Manager", about="", seniority="Senior",
-        industry="NHS", skills=["delivery"], previous_roles=[],
-        target_roles=["Project Manager"], open_to=[], not_open_to=[],
-        qualifications=["MSc"], employment_type=["full-time"],
-        location="Bristol", min_salary=60000,
-    )
+    return make_profile(skills=["delivery"], target_roles=["Project Manager"], qualifications=["MSc"])
 
 
 _RESPONSE = json.dumps({

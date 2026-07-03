@@ -4,6 +4,7 @@ from dataclasses import asdict
 from unittest.mock import MagicMock, patch
 
 from job_search_email.models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
+from profile_helpers import make_profile as _shared_profile
 
 
 def make_job(**kwargs) -> JobListing:
@@ -141,13 +142,9 @@ from job_search_email.scorer import score_jobs
 
 
 def make_profile() -> Profile:
-    return Profile(
-        name="Test", current_role="Manager", about="", seniority="Senior",
-        industry="NHS", skills=["digital transformation"],
-        previous_roles=[], target_roles=["Business Manager"],
-        open_to=[], not_open_to=["clinical roles"],
-        qualifications=["MSc Management"],
-        employment_type=["full-time"], location="Bristol", min_salary=60000,
+    return _shared_profile(
+        skills=["digital transformation"], target_roles=["Business Manager"],
+        not_open_to=["clinical roles"], qualifications=["MSc Management"],
     )
 
 

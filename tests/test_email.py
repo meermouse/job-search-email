@@ -2,18 +2,16 @@ import pytest
 from unittest.mock import patch
 from job_search_email.email import build_email_html, send_email, send_debug_report, _quals_badge
 from job_search_email.models import JobAnalysis, JobListing, Profile, ScoredResult
+from profile_helpers import make_profile
 
 
 def _make_profile(**kwargs) -> Profile:
     defaults = dict(
-        name="Jie", current_role="Manager", about="", seniority="Senior",
-        industry="NHS", skills=[], previous_roles=[], target_roles=[],
-        open_to=[], not_open_to=[], qualifications=[], employment_type=[],
-        location="Bristol", min_salary=60000,
+        name="Jie", employment_type=[],
         preamble="Hey Jie!", recipient_email="jie@example.com",
     )
     defaults.update(kwargs)
-    return Profile(**defaults)
+    return make_profile(**defaults)
 
 
 def _make_result(
