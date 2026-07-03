@@ -3,6 +3,22 @@ from typing import Any
 
 
 @dataclass
+class ExperienceEntry:
+    title: str
+    company: str
+    start: str
+    end: str  # "present" for current roles
+    location: str = ""
+    description: str = ""
+
+
+@dataclass
+class EducationEntry:
+    institution: str
+    degree: str
+
+
+@dataclass
 class Profile:
     name: str
     current_role: str
@@ -18,6 +34,11 @@ class Profile:
     employment_type: list[str]
     location: str
     min_salary: int
+    headline: str = ""
+    experience: list[ExperienceEntry] = field(default_factory=list)
+    education: list[EducationEntry] = field(default_factory=list)
+    certifications: list[str] = field(default_factory=list)
+    languages: list[str] = field(default_factory=list)
     radius_miles: int = 50
     preamble: str = ""
     recipient_email: str = ""
