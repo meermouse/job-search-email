@@ -2,13 +2,9 @@ profile:
   name: Jie
   current_role: NHS Digital Transformation
   about: |
-    Experienced with health care project management, digital transformation and education
-    facilities management. Technology and consulting acumen. Works closely with practitioners
-    and IT professionals to develop new ways of working in order to improve patient access
-    and patient experience. Works with stakeholders such as health providers, and local
-    education and training boards to deliver value. Understands and responds to patients
-    needs by positioning appropriate solutions and services to meet best outcomes. Sets up
-    and leads projects that are vital to patient care being of the highest possible standard.
+    I work where governance meets data — managing governance frameworks, workforce planning, and policy while building the digital infrastructure that makes them actually useful.
+    My career has spanned NHS Wales, an NHS Foundation Trust, and an international private hospital in China. In every setting, I have solved the same problem: governance, day-to-day operating and reporting that are manual, fragmented, and hard to act on.
+    I fix it by implementing systems people can trust. By combining end-to-end project management with direct line management, I build high-performing teams. By bridging the gap between strict statutory compliance and digital innovation — specifically leveraging Power BI and automated data infrastructures — I transform legacy manual governance processes into streamlined, actionable operations.
   seniority: Senior
   industry: NHS / Private Sector / Business
   skills:
@@ -19,10 +15,10 @@ profile:
     - Operations and Supply Chain Decisions and Metrics
     - Business Strategy
   previous_roles:
-    - Executive Secretary to the General Manager
     - Business Manager of Research Centre
     - Instructor of Clinical Skills
     - Workforce and Governance Manager for Digital Services
+    - Cheshire & Wirral Partnership NHS Foundation Trust
   target_roles:
     - Business Manager
     - Digital Transformation
@@ -58,5 +54,5 @@ min_salary: 60000
 preamble: "Hey Jie, its The Job Mule 2.0. Lets go through todays jobs."
 recipient_email: jillcn@hotmail.com
 send_main_email: true
-send_debug_email: true
+send_debug_email: false
 filter_recruitment: true
