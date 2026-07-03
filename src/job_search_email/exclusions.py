@@ -33,7 +33,7 @@ Generate a list of role title keywords that would be UNSUITABLE for this candida
 Focus especially on NHS clinical and ward-based titles that a non-clinical NHS manager might surface in searches.
 
 Candidate:
-  Current role: {current_role}
+  Headline: {headline}
   Industry: {industry}
   Target roles: {target_roles}
   Not open to: {not_open_to}
@@ -48,7 +48,7 @@ No other text.\
 def _generate_exclusion_roles(profile: Profile) -> list[str]:
     prompt = _EXCLUSION_ROLES_PROMPT.format(
         name=profile.name,
-        current_role=profile.current_role,
+        headline=profile.headline,
         industry=profile.industry,
         target_roles=", ".join(profile.target_roles),
         not_open_to=", ".join(profile.not_open_to),
