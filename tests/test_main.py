@@ -12,9 +12,9 @@ from job_search_email.cache import fingerprint_profile
 from job_search_email.main import (
     generate_search_plan,
     load_cached_plan,
-    load_profile,
     save_cached_plan,
 )
+from job_search_email.profile import load_profile
 from job_search_email.models import Profile, SearchPlan
 from profile_helpers import make_profile as make_profile_helper
 
@@ -22,16 +22,26 @@ from profile_helpers import make_profile as make_profile_helper
 PROFILE_YAML = """
 profile:
   name: Test User
-  current_role: NHS Project Manager
+  headline: "NHS Project Manager | Digital"
   about: Experienced project manager in NHS.
   seniority: Senior
   industry: NHS / Private Sector
+  experience:
+    - title: NHS Project Manager
+      company: Test Trust
+      start: "2022-01"
+      end: present
+      description: Delivers digital projects.
+  education:
+    - institution: Test University
+      degree: MSc Project Management
+  certifications:
+    - PRINCE2
   skills:
     - stakeholder management
     - digital transformation
-  previous_roles:
-    - Business Manager
-    - Project Lead
+  languages:
+    - English
   target_roles:
     - Programme Manager
     - Digital Lead
@@ -40,8 +50,6 @@ profile:
   not_open_to:
     - clinical roles
     - nursing
-  qualifications:
-    - MSc Project Management
   employment_type:
     - full-time
 
@@ -73,7 +81,11 @@ def test_load_profile(tmp_path: Path) -> None:
     profile = load_profile(path=profile_path)
 
     assert profile.name == "Test User"
-    assert profile.current_role == "NHS Project Manager"
+    assert profile.headline == "NHS Project Manager | Digital"
+    assert profile.experience[0].company == "Test Trust"
+    assert profile.experience[0].end == "present"
+    assert profile.education[0].institution == "Test University"
+    assert profile.certifications == ["PRINCE2"]
     assert profile.seniority == "Senior"
     assert profile.location == "Bristol"
     assert profile.min_salary == 60000
@@ -311,10 +323,7 @@ def test_main_loads_and_saves_location_cache(tmp_path, monkeypatch):
 
     # Write a minimal profile.yaml
     (tmp_path / "profile.yaml").write_text(
-        "profile:\n  name: Test\n  current_role: ''\n  about: ''\n"
-        "  seniority: ''\n  industry: ''\n  skills: []\n  previous_roles: []\n"
-        "  target_roles: []\n  open_to: []\n  not_open_to: []\n"
-        "  qualifications: []\n  employment_type: [full-time]\n"
+        "profile:\n  name: Test\n  employment_type: [full-time]\n"
         "location: Bristol\nmin_salary: 60000\n",
         encoding="utf-8",
     )
@@ -420,10 +429,7 @@ def _run_main_with_toggles(tmp_path: Path, monkeypatch, send_main: bool, send_de
     main_mod = sys.modules["job_search_email.main"]
 
     (tmp_path / "profile.yaml").write_text(
-        "profile:\n  name: Test\n  current_role: ''\n  about: ''\n"
-        "  seniority: ''\n  industry: ''\n  skills: []\n  previous_roles: []\n"
-        "  target_roles: []\n  open_to: []\n  not_open_to: []\n"
-        "  qualifications: []\n  employment_type: [full-time]\n"
+        "profile:\n  name: Test\n  employment_type: [full-time]\n"
         "location: Bristol\nmin_salary: 60000\n"
         f"send_main_email: {'true' if send_main else 'false'}\n"
         f"send_debug_email: {'true' if send_debug else 'false'}\n",
