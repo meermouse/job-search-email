@@ -4,7 +4,6 @@ from dataclasses import asdict
 from unittest.mock import MagicMock, patch
 
 from job_search_email.models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
-from profile_helpers import make_profile as _shared_profile
 from profile_helpers import make_profile as shared_profile
 from job_search_email.models import EducationEntry, ExperienceEntry
 from job_search_email.scorer import _build_system_prompt
@@ -145,7 +144,7 @@ from job_search_email.scorer import score_jobs
 
 
 def make_profile() -> Profile:
-    return _shared_profile(
+    return shared_profile(
         skills=["digital transformation"], target_roles=["Business Manager"],
         not_open_to=["clinical roles"],
     )
@@ -623,7 +622,6 @@ def test_score_jobs_qualification_fields_default_when_absent():
 
 
 def test_system_prompt_contains_qualification_instructions():
-    from job_search_email.scorer import _build_system_prompt
     prompt = _build_system_prompt(make_profile())
     assert "qualification_status" in prompt
     assert "exact or near-exact" in prompt
@@ -754,14 +752,12 @@ def test_user_message_contains_exclude_schema():
 
 
 def test_system_prompt_contains_exclusion_instructions():
-    from job_search_email.scorer import _build_system_prompt
     prompt = _build_system_prompt(make_profile())
     assert "exclude" in prompt
     assert "Exclusion instructions" in prompt
 
 
 def test_system_prompt_contains_ftc_exclusion_guidance():
-    from job_search_email.scorer import _build_system_prompt
     prompt = _build_system_prompt(make_profile())
     assert "FTC" in prompt
     assert "fixed-term contract" in prompt

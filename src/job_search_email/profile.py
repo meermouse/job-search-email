@@ -1,4 +1,3 @@
-# src/job_search_email/profile.py
 from pathlib import Path
 
 import yaml

@@ -1,4 +1,3 @@
-# tests/test_profile.py
 from pathlib import Path
 
 from job_search_email.models import EducationEntry, ExperienceEntry
@@ -159,3 +158,12 @@ def test_render_profile_omits_empty_sections():
     assert "Certifications:" not in text
     assert "Skills:" not in text
     assert "Languages:" not in text
+
+
+def test_render_profile_experience_without_start_renders_end_only():
+    profile = make_profile(
+        name="Test",
+        experience=[ExperienceEntry(title="Advisor", company="Acme", start="", end="present")],
+    )
+    text = render_profile(profile)
+    assert "- Advisor — Acme (present)" in text
