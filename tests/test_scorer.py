@@ -810,3 +810,12 @@ def test_build_system_prompt_includes_rendered_profile():
     assert "Target roles: Business Manager" in prompt
     assert "Not open to: nursing" in prompt
     assert "Min salary: £60,000" in prompt
+
+
+def test_system_prompt_contains_calibration_instruction():
+    prompt = _build_system_prompt(make_profile())
+    assert "Calibration: " in prompt
+    assert "gatekeeping" in prompt
+    assert "score it 6 or below" in prompt
+    # calibration must sit with the score guidance, before qualification analysis
+    assert prompt.index("Score guidance:") < prompt.index("Calibration: ") < prompt.index("Qualification analysis instructions:")
