@@ -14,8 +14,9 @@ from .job_resolver import (
     resolve_job,
 )
 from .location_filter import classify_locations
-from .main import SPONSOR_CACHE_PATH, load_profile
+from .main import SPONSOR_CACHE_PATH
 from .nhs_rules import get_nhs_rules
+from .profile import load_profile
 from .scorer import analyse_job
 from .sponsor_filter import load_sponsor_set
 

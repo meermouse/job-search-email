@@ -1,5 +1,6 @@
 from dataclasses import asdict
-from job_search_email.models import FilteredResult, JobListing, Profile, SearchPlan
+from job_search_email.models import FilteredResult, JobListing, SearchPlan
+from profile_helpers import make_profile
 
 
 def make_job(**kwargs) -> JobListing:
@@ -290,12 +291,7 @@ def make_plan(roles: list[str] | None = None, nhs_rules: dict | None = None) -> 
 
 
 def make_profile_stub():
-    return Profile(
-        name="Test", current_role="Manager", about="", seniority="Senior",
-        industry="NHS", skills=[], previous_roles=[], target_roles=[],
-        open_to=[], not_open_to=[], qualifications=[],
-        employment_type=["full-time"], location="Bristol", min_salary=60000,
-    )
+    return make_profile()
 
 
 def test_filter_jobs_rejects_contract_role():
@@ -490,12 +486,7 @@ def test_filter_jobs_rejects_outside_location():
         nhs_rules={},
         evaluator_notes=[],
     )
-    profile = Profile(
-        name="Test", current_role="", about="", seniority="", industry="",
-        skills=[], previous_roles=[], target_roles=[], open_to=[], not_open_to=[],
-        qualifications=[], employment_type=["full-time"],
-        location="Bristol", min_salary=0,
-    )
+    profile = make_profile(min_salary=0)
     results = filter_jobs(
         jobs, plan, profile,
         rejected_locations=frozenset({"Reading, RG1"}),
@@ -513,12 +504,7 @@ def test_filter_jobs_default_no_location_rejection():
         profile_fingerprint="fp", queries=[],
         exclusions={"roles": []}, nhs_rules={}, evaluator_notes=[],
     )
-    profile = Profile(
-        name="Test", current_role="", about="", seniority="", industry="",
-        skills=[], previous_roles=[], target_roles=[], open_to=[], not_open_to=[],
-        qualifications=[], employment_type=["full-time"],
-        location="Bristol", min_salary=0,
-    )
+    profile = make_profile(min_salary=0)
     results = filter_jobs(jobs, plan, profile)
     assert results[0].rejected is False
 

@@ -2,15 +2,14 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
-import yaml
-
 from .cache import fingerprint_profile
 from .email import build_email_html
 from .evaluator_notes import get_evaluator_notes
 from .filter import filter_jobs
 from .fixtures import fixture_jobs, fixture_queries, fixture_scores
-from .models import FilteredResult, Profile, SearchPlan, ScoredResult
+from .models import FilteredResult, SearchPlan, ScoredResult
 from .nhs_rules import get_nhs_rules
+from .profile import load_profile
 
 _EXCLUSION_ROLES = [
     "locum", "gp", "surgeon", "nurse", "clinical", "surgical", "physician",
@@ -18,30 +17,6 @@ _EXCLUSION_ROLES = [
     "paramedic", "theatre", "ward", "medical officer", "occupational therapist",
     "nursing", "ward-based", "gp / medical practitioner",
 ]
-
-
-def _load_profile(path: Path) -> Profile:
-    with path.open("r", encoding="utf-8") as stream:
-        data = yaml.safe_load(stream)
-    p = data["profile"]
-    return Profile(
-        name=p["name"],
-        current_role=p.get("current_role", ""),
-        about=p.get("about", ""),
-        seniority=p.get("seniority", ""),
-        industry=p.get("industry", ""),
-        skills=p.get("skills", []),
-        previous_roles=p.get("previous_roles", []),
-        target_roles=p.get("target_roles", []),
-        open_to=p.get("open_to", []),
-        not_open_to=p.get("not_open_to", []),
-        qualifications=p.get("qualifications", []),
-        employment_type=p.get("employment_type", []),
-        location=data.get("location", ""),
-        min_salary=data.get("min_salary", 0),
-        preamble=data.get("preamble", ""),
-        recipient_email=data.get("recipient_email", ""),
-    )
 
 
 def _write_search_plan(plan: SearchPlan, path: Path) -> None:
@@ -92,7 +67,7 @@ def _write_scored_results(results: list[ScoredResult], path: Path) -> None:
 
 def main() -> None:
     root = Path.cwd()
-    profile = _load_profile(root / "profile.yaml")
+    profile = load_profile(root / "profile.yaml")
     fingerprint = fingerprint_profile(profile)
 
     exclusion_roles = sorted(set(_EXCLUSION_ROLES + [t.lower() for t in profile.not_open_to]))

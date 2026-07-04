@@ -6,8 +6,6 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from .cache import fingerprint_profile, load_score_cache
 from .email import build_email_html, send_email, send_debug_report
 from .debug_email import build_debug_email_html
@@ -17,6 +15,7 @@ from .filter import filter_jobs
 from .location_filter import classify_locations, load_location_cache, save_location_cache
 from .models import FilteredResult, JobListing, Profile, SearchPlan, ScoredResult
 from .nhs_rules import get_nhs_rules
+from .profile import load_profile
 from .scorer import score_jobs
 from .queries import generate_queries
 from .search_api.fetcher import fetch_all_jobs
@@ -34,35 +33,6 @@ SCORE_CACHE_PATH = ROOT / "job_score_cache.json"
 LOCATION_CACHE_PATH = ROOT / "location_cache.json"
 SPONSOR_CACHE_PATH = ROOT / "assets" / "sponsor_cache.csv"
 RECRUITMENT_CACHE_PATH = ROOT / "assets" / "recruitment_agencies.csv"
-
-
-def load_profile(path: Path = PROFILE_PATH) -> Profile:
-    with path.open("r", encoding="utf-8") as stream:
-        data = yaml.safe_load(stream)
-
-    p = data["profile"]
-    return Profile(
-        name=p["name"],
-        current_role=p.get("current_role", ""),
-        about=p.get("about", ""),
-        seniority=p.get("seniority", ""),
-        industry=p.get("industry", ""),
-        skills=p.get("skills", []),
-        previous_roles=p.get("previous_roles", []),
-        target_roles=p.get("target_roles", []),
-        open_to=p.get("open_to", []),
-        not_open_to=p.get("not_open_to", []),
-        qualifications=p.get("qualifications", []),
-        employment_type=p.get("employment_type", []),
-        location=data.get("location", ""),
-        min_salary=data.get("min_salary", 0),
-        radius_miles=data.get("radius_miles", 50),
-        preamble=data.get("preamble", ""),
-        recipient_email=data.get("recipient_email", ""),
-        send_main_email=data.get("send_main_email", True),
-        send_debug_email=data.get("send_debug_email", False),
-        filter_recruitment=data.get("filter_recruitment", True),
-    )
 
 
 def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:

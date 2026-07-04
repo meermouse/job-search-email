@@ -1,8 +1,9 @@
 from pathlib import Path
 
 from .debug_email import build_debug_email_html
-from .main import PROFILE_PATH, load_profile, run_pipeline
+from .main import PROFILE_PATH, run_pipeline
 from .models import ScoredResult
+from .profile import load_profile
 
 DEBUG_REPORT_PATH = Path.cwd() / "debug_report.html"
 

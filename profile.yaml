@@ -1,24 +1,96 @@
 profile:
-  name: Jie
-  current_role: NHS Digital Transformation
+  name: Jie Zhou
+  headline: "NHS Digital Transformation | Strategic Workforce Planning | Business Governance | UCL"
   about: |
     I work where governance meets data — managing governance frameworks, workforce planning, and policy while building the digital infrastructure that makes them actually useful.
     My career has spanned NHS Wales, an NHS Foundation Trust, and an international private hospital in China. In every setting, I have solved the same problem: governance, day-to-day operating and reporting that are manual, fragmented, and hard to act on.
     I fix it by implementing systems people can trust. By combining end-to-end project management with direct line management, I build high-performing teams. By bridging the gap between strict statutory compliance and digital innovation — specifically leveraging Power BI and automated data infrastructures — I transform legacy manual governance processes into streamlined, actionable operations.
   seniority: Senior
-  industry: NHS / Private Sector / Business
-  skills:
-    - Analytical Skills
-    - digital transformation
-    - Digital Marketing
-    - Project Initiation and Planning
+  industry: NHS / Healthcare / Business
+
+  experience:
+    - title: Workforce and Governance Manager for Digital Services
+      company: Swansea Bay University Health Board
+      location: United Kingdom
+      start: "2023-09"
+      end: present
+      description: |
+        1. Governance, Committees & Assurance Reporting
+        - Leads business governance and workforce planning — owning the governance framework, policies and processes, ensuring compliance with statutory requirements, national policy and internal standards, and providing expert advice to senior management.
+        - Owns and runs the governance arrangements end-to-end: Risk Register, incident and complaint, FOIA, audit responses and policy management. Maintains a single, consistent governance framework across the function.
+        - Builds dashboards to analyse workforce and governance data to identify risks and trends, producing reports for the Senior Leaders, Business Meeting, Digital Leadership Group, and Audit Committee to support decision-making, contributing to board-level governance assurance.
+        2. Infrastructure Design & Data Analytics
+        - Architects and maintains the Directorate's infrastructure for records, repositories and data, to be compliant with the Health Board's information governance and cyber security policies — embedding access controls, version control and audit trails by design.
+        - Initiated and leads the digitisation and re-designing of the governance reporting processes by replacing manual document-based processes with automated Power BI dashboards, Power Automate and a structured SharePoint data infrastructure, improving data accuracy, security and leadership visibility of risk.
+        3. Policy Management & Regulatory Compliance
+        - Manages the Directorate's policy framework in line with the Health Board's Policy on Policies — ensuring all policies are reviewed, updated and kept current against review cycles and legislative framework.
+        - Coordinates responses to internal and external audit, monitoring outstanding recommendations through to completion and providing assurance on consistency and timeliness.
+        4. Line management & stakeholder engagement
+        - Provides line management to staff and maintains effective relationships with stakeholders including service directors and other NHS bodies.
+    - title: Instructor of Clinical Skills
+      company: Zhejiang University
+      start: "2020-01"
+      end: present
+      description: |
+        Responsible for the training of medical students; evaluates students' practical application of clinical skills, proficiency in required techniques, quality of communication, and ability to deliver high quality care.
+    - title: Business Manager of Research Centre in Mental Health
+      company: Cheshire & Wirral Partnership NHS Foundation Trust
+      location: United Kingdom
+      start: "2022-04"
+      end: "2023-09"
+      description: |
+        1. Governance & Reporting & Financial Control
+        - Owned risk management, project governance, and performed as the department budget holder to manage budget control across a portfolio of academic and research projects, defining change-control processes and ensuring delivery against scope, deadlines and the Trust's Standing Financial Instructions.
+        - Prepared and presented regular progress and performance reports to senior stakeholders and funders, supporting decision-making and oversight.
+        - Provided operational governance and business management to a complex mental-health and neurodevelopmental research centre, advising senior leadership and coordinating a network of clinical, academic and partner organisations.
+        2. Digital Transformation & Improvement
+        - Led cross-disciplinary teams to deliver projects end-to-end, identifying improvements to how teams worked; introduced collaborative digital platforms and remote-working tools that cut coordination and administrative workload by 50%.
+        3. Operational & Stakeholder Management
+        - Provided operational leadership across workforce, planning and service delivery, and managed relationships with a complex network of clinical, academic and partner organisations across the Northwest region.
+        - Line-managed department and project teams in line with Trust policy, with responsibility for recruitment, retention and appraisals.
+    - title: Executive Secretary to the General Manager
+      company: American-Sino Healthcare
+      location: China
+      start: "2018-01"
+      end: "2021-08"
+      description: |
+        Operational management of acute medical services. Responsibilities include digital transformation, project management, workforce management, finance oversight, hospital information systems and service improvement & redesign.
+    - title: Co-Founder
+      company: Guangxian Education
+      start: "2019-01"
+      end: "2021-07"
+
+  education:
+    - institution: UCL
+      degree: Masters, Strategic Management of Projects
+    - institution: University of Illinois Urbana-Champaign
+      degree: Master's degree, Management
+    - institution: Zhejiang University
+      degree: Bachelor of Arts (BA), English Language and Literature
+
+  certifications:
     - Operations and Supply Chain Decisions and Metrics
-    - Business Strategy
-  previous_roles:
-    - Business Manager of Research Centre
-    - Instructor of Clinical Skills
-    - Workforce and Governance Manager for Digital Services
-    - Cheshire & Wirral Partnership NHS Foundation Trust
+    - "Managerial Accounting: Cost Behaviors, Systems, and Analysis (with Honors)"
+    - Corporate Strategy
+    - "Leading Teams: Developing as a Leader"
+    - Digital Marketing (DMS4all)
+
+  skills:
+    - SharePoint
+    - Microsoft Power Automate
+    - Microsoft Power BI
+    - Digital Transformation
+    - Workforce Planning
+    - Business Governance
+    - Project Management
+    - Data Analytics / Dashboards
+
+  languages:
+    - English (Native or Bilingual)
+    - Chinese (Native or Bilingual)
+    - Japanese (Elementary)
+    - French (Elementary)
+
   target_roles:
     - Business Manager
     - Digital Transformation
@@ -32,18 +104,6 @@ profile:
     - GP / medical practitioner
     - ward-based roles
     - surgical / theatre roles
-  qualifications:
-    - Digital Marketing (DMS4all)
-    - Project Initiation and Planning
-    - Project Execution and Control
-    - "Leading Teams: Developing as a Leader"
-    - "Managerial Accounting: Cost Behaviors, Systems, and Analysis (with Honors)"
-    - Operations and Supply Chain Decisions and Metrics
-    - Business Strategy
-    - Corporate Strategy
-    - Masters Strategic Management of Projects
-    - Master's degree Management
-    - Bachelor of Arts - BA, English Language and Literature, General
   employment_type:
     - full-time
 

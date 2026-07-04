@@ -1,6 +1,7 @@
 from job_search_email.filter_trace import GateResult, run_filter_gates
 from job_search_email.models import JobListing, Profile
 from job_search_email.nhs_rules import get_nhs_rules
+from profile_helpers import make_profile
 
 
 def _job(**kw) -> JobListing:
@@ -14,12 +15,7 @@ def _job(**kw) -> JobListing:
 
 
 def _profile() -> Profile:
-    return Profile(
-        name="Test", current_role="Manager", about="", seniority="Senior",
-        industry="NHS", skills=[], previous_roles=[], target_roles=[],
-        open_to=[], not_open_to=[], qualifications=[],
-        employment_type=["full-time"], location="Bristol", min_salary=60000,
-    )
+    return make_profile()
 
 
 _SPONSORS = frozenset({"acme industries"})

@@ -1,14 +1,9 @@
 from unittest.mock import patch, MagicMock
-from job_search_email.models import Profile
 from job_search_email.search_api.nhs_jobs import search, _parse_salary
+from profile_helpers import make_profile
 
 
-PROFILE = Profile(
-    name="Jie", current_role="NHS Digital", about="", seniority="Senior",
-    industry="NHS", skills=[], previous_roles=[], target_roles=[],
-    open_to=[], not_open_to=[], qualifications=[],
-    employment_type=["full-time"], location="Bristol", min_salary=60000,
-)
+PROFILE = make_profile(name="Jie")
 
 NHS_HTML = """
 <html><body><ul>

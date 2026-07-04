@@ -10,6 +10,7 @@ import anthropic
 
 from .cache import fingerprint_profile, make_score_key, save_score_cache
 from .models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
+from .profile import render_profile
 
 client = anthropic.Anthropic()
 
@@ -32,12 +33,12 @@ def _build_system_prompt(profile: Profile) -> str:
         "You are a job suitability analyst. Evaluate whether the following job is a good "
         "match for this candidate. Respond only with valid JSON matching the schema provided.\n\n"
         "Candidate profile:\n"
+        f"{render_profile(profile)}\n\n"
+        "Search preferences:\n"
         f"- Seniority: {profile.seniority}\n"
         f"- Target roles: {', '.join(profile.target_roles)}\n"
         f"- Open to: {', '.join(profile.open_to)}\n"
         f"- Not open to: {', '.join(profile.not_open_to)}\n"
-        f"- Skills: {', '.join(profile.skills)}\n"
-        f"- Qualifications: {', '.join(profile.qualifications)}\n"
         "- Employment type wanted: full-time permanent only\n"
         f"- Min salary: £{profile.min_salary:,}\n\n"
         "Score guidance: 8-10 = strong match (profile clearly fits). "
@@ -45,7 +46,7 @@ def _build_system_prompt(profile: Profile) -> str:
         "1-4 = weak (missing essentials or significant misalignment).\n\n"
         "Qualification analysis instructions:\n"
         "- Extract any explicitly stated qualification requirements from the job description\n"
-        "- Compare each against the candidate's qualifications using exact or near-exact matching only\n"
+        "- Compare each against the candidate's education and certifications using exact or near-exact matching only\n"
         '- "PRINCE2 required" is a gap if the candidate does not list PRINCE2 specifically\n'
         "- A Master's degree satisfies \"degree required\" but not \"MBA required\"\n"
         "- Set qualification_status to:\n"

@@ -4,6 +4,9 @@ from dataclasses import asdict
 from unittest.mock import MagicMock, patch
 
 from job_search_email.models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
+from profile_helpers import make_profile as shared_profile
+from job_search_email.models import EducationEntry, ExperienceEntry
+from job_search_email.scorer import _build_system_prompt
 
 
 def make_job(**kwargs) -> JobListing:
@@ -141,13 +144,9 @@ from job_search_email.scorer import score_jobs
 
 
 def make_profile() -> Profile:
-    return Profile(
-        name="Test", current_role="Manager", about="", seniority="Senior",
-        industry="NHS", skills=["digital transformation"],
-        previous_roles=[], target_roles=["Business Manager"],
-        open_to=[], not_open_to=["clinical roles"],
-        qualifications=["MSc Management"],
-        employment_type=["full-time"], location="Bristol", min_salary=60000,
+    return shared_profile(
+        skills=["digital transformation"], target_roles=["Business Manager"],
+        not_open_to=["clinical roles"],
     )
 
 
@@ -623,7 +622,6 @@ def test_score_jobs_qualification_fields_default_when_absent():
 
 
 def test_system_prompt_contains_qualification_instructions():
-    from job_search_email.scorer import _build_system_prompt
     prompt = _build_system_prompt(make_profile())
     assert "qualification_status" in prompt
     assert "exact or near-exact" in prompt
@@ -754,15 +752,37 @@ def test_user_message_contains_exclude_schema():
 
 
 def test_system_prompt_contains_exclusion_instructions():
-    from job_search_email.scorer import _build_system_prompt
     prompt = _build_system_prompt(make_profile())
     assert "exclude" in prompt
     assert "Exclusion instructions" in prompt
 
 
 def test_system_prompt_contains_ftc_exclusion_guidance():
-    from job_search_email.scorer import _build_system_prompt
     prompt = _build_system_prompt(make_profile())
     assert "FTC" in prompt
     assert "fixed-term contract" in prompt
     assert "Permanent / FTC" in prompt
+
+
+def test_build_system_prompt_includes_rendered_profile():
+    profile = shared_profile(
+        about="Governance meets data.",
+        headline="NHS Digital Transformation",
+        experience=[ExperienceEntry(
+            title="Governance Manager", company="Swansea Bay UHB",
+            start="2023-09", end="present",
+        )],
+        education=[EducationEntry(institution="UCL", degree="Masters")],
+        certifications=["Corporate Strategy"],
+        target_roles=["Business Manager"],
+        not_open_to=["nursing"],
+    )
+    prompt = _build_system_prompt(profile)
+    assert "Governance meets data." in prompt
+    assert "- Governance Manager — Swansea Bay UHB (2023-09 – present)" in prompt
+    assert "- Masters — UCL" in prompt
+    assert "- Corporate Strategy" in prompt
+    assert "education and certifications" in prompt
+    assert "Target roles: Business Manager" in prompt
+    assert "Not open to: nursing" in prompt
+    assert "Min salary: £60,000" in prompt
