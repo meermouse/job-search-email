@@ -66,15 +66,20 @@ def _check_nhs_band_salary(
     nhs_rules: dict[str, Any],
     min_salary: int,
 ) -> FilteredResult | None:
-    search_text = f"{job.title} {(job.description or '')[:500]}"  # title unbounded; description capped at 500 chars
-    match = _NHS_BAND_RE.search(search_text)
+    search_text = f"{job.title} {job.description or ''}"  # full body scanned; NHS ads state the band well past the intro
+    bands = _NHS_BAND_RE.findall(search_text)
 
-    if match is None:
+    if not bands:
         return None
 
-    band_key = f"Band {match.group(1).lower()}"  # "Band" capitalisation matches nhs_rules band_salary_map keys
     band_map: dict[str, int] = nhs_rules.get("band_salary_map", {})
-    base_salary = band_map.get(band_key, 0)  # 0 for out-of-map bands (Bands 1-6) — guarantees rejection
+    # When several bands are named, estimate at the LOWEST: a passing reference
+    # to a junior band (e.g. "line-manage Band 5 staff") must not lift the role
+    # above the threshold. 0 for out-of-map bands (1-6) — guarantees rejection.
+    band_key, base_salary = min(
+        ((f"Band {b.lower()}", band_map.get(f"Band {b.lower()}", 0)) for b in bands),
+        key=lambda kv: kv[1],
+    )
 
     is_london = "london" in (job.location or "").lower()
     if is_london:

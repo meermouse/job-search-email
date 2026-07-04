@@ -419,9 +419,27 @@ def test_nhs_band_detected_in_description():
     assert result.rejected is True
 
 
-def test_nhs_band_beyond_500_chars_not_detected():
-    job = make_job(source="reed", title="Digital Manager", description=("A" * 500) + " Band 7 post.")
-    assert _check_nhs_band_salary(job, _NHS_RULES, 60000) is None
+def test_nhs_band_beyond_500_chars_detected():
+    # Band designations routinely appear deep in NHS descriptions (e.g. Indeed
+    # repostings state the band ~1000 chars in). The gate scans the full body.
+    job = make_job(source="reed", title="Digital Manager", description=("A" * 1000) + " Band 7 post.")
+    result = _check_nhs_band_salary(job, _NHS_RULES, 60000)
+    assert result is not None
+    assert result.rejected is True
+    assert "Band 7" in result.reject_reason
+
+
+def test_nhs_multiple_bands_uses_lowest():
+    # A passing reference to a junior band must not lift the role above the
+    # threshold: an ad naming both Band 8b and Band 5 is estimated at Band 5.
+    job = make_job(
+        source="reed", title="Digital Lead",
+        description="This Band 8b post will line-manage a team of Band 5 analysts.",
+    )
+    result = _check_nhs_band_salary(job, _NHS_RULES, 60000)
+    assert result is not None
+    assert result.rejected is True
+    assert "Band 5" in result.reject_reason
 
 
 def test_nhs_jobs_source_no_band_in_text_returns_none():
