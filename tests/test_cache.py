@@ -5,6 +5,7 @@ from pathlib import Path
 
 from job_search_email.cache import (
     fingerprint_profile,
+    fingerprint_prompt,
     load_score_cache,
     make_score_key,
     save_score_cache,
@@ -59,29 +60,36 @@ def test_save_score_cache_overwrites_existing(tmp_path: Path):
 
 
 def test_make_score_key_is_deterministic():
-    key1 = make_score_key("https://example.com/job/1", "abc123fingerprint")
-    key2 = make_score_key("https://example.com/job/1", "abc123fingerprint")
+    key1 = make_score_key("https://example.com/job/1", "abc123fingerprint", "promptfp")
+    key2 = make_score_key("https://example.com/job/1", "abc123fingerprint", "promptfp")
     assert key1 == key2
 
 
 def test_make_score_key_differs_by_url():
-    key1 = make_score_key("https://example.com/job/1", "fp")
-    key2 = make_score_key("https://example.com/job/2", "fp")
+    key1 = make_score_key("https://example.com/job/1", "fp", "pfp")
+    key2 = make_score_key("https://example.com/job/2", "fp", "pfp")
     assert key1 != key2
 
 
 def test_make_score_key_differs_by_fingerprint():
-    key1 = make_score_key("https://example.com/job/1", "fp_a")
-    key2 = make_score_key("https://example.com/job/1", "fp_b")
+    key1 = make_score_key("https://example.com/job/1", "fp_a", "pfp")
+    key2 = make_score_key("https://example.com/job/1", "fp_b", "pfp")
+    assert key1 != key2
+
+
+def test_make_score_key_differs_by_prompt_fingerprint():
+    key1 = make_score_key("https://example.com/job/1", "fp", "prompt_fp_a")
+    key2 = make_score_key("https://example.com/job/1", "fp", "prompt_fp_b")
     assert key1 != key2
 
 
 def test_make_score_key_format():
-    key = make_score_key("https://example.com/job/1", "abcdef123456789")
+    key = make_score_key("https://example.com/job/1", "abcdef123456789", "9876543210fedcba")
     parts = key.split("_")
-    assert len(parts) == 2
+    assert len(parts) == 3
     assert len(parts[0]) == 12
     assert len(parts[1]) == 12
+    assert len(parts[2]) == 12
 
 
 def test_fingerprint_profile_is_deterministic():
@@ -99,3 +107,15 @@ def test_fingerprint_profile_is_hex_string():
     fp = fingerprint_profile(make_profile())
     assert len(fp) == 64
     int(fp, 16)  # raises ValueError if not valid hex
+
+
+def test_fingerprint_prompt_is_deterministic():
+    assert fingerprint_prompt("some prompt") == fingerprint_prompt("some prompt")
+
+
+def test_fingerprint_prompt_changes_with_text_and_is_hex():
+    fp1 = fingerprint_prompt("prompt A")
+    fp2 = fingerprint_prompt("prompt B")
+    assert fp1 != fp2
+    assert len(fp1) == 64
+    int(fp1, 16)  # raises ValueError if not valid hex

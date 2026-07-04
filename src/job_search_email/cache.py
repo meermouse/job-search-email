@@ -12,9 +12,13 @@ def fingerprint_profile(profile: Profile) -> str:
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
-def make_score_key(url: str, profile_fingerprint: str) -> str:
+def fingerprint_prompt(system_prompt: str) -> str:
+    return hashlib.sha256(system_prompt.encode("utf-8")).hexdigest()
+
+
+def make_score_key(url: str, profile_fingerprint: str, prompt_fingerprint: str) -> str:
     url_hash = hashlib.sha256(url.encode("utf-8")).hexdigest()[:12]
-    return f"{url_hash}_{profile_fingerprint[:12]}"
+    return f"{url_hash}_{profile_fingerprint[:12]}_{prompt_fingerprint[:12]}"
 
 
 def load_score_cache(path: Path) -> dict:

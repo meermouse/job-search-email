@@ -403,14 +403,14 @@ def test_write_scored_results_analysis_failed_counted(tmp_path: Path):
     assert data["summary"]["unanalysed"] == 0
 
 
-from job_search_email.cache import load_score_cache, make_score_key, fingerprint_profile
+from job_search_email.cache import load_score_cache, make_score_key, fingerprint_profile, fingerprint_prompt
 
 
 def test_score_jobs_cache_hit_skips_claude():
     job = make_job(url="https://example.com/cached")
     profile = make_profile()
     fp = fingerprint_profile(profile)
-    key = make_score_key(job.url, fp)
+    key = make_score_key(job.url, fp, fingerprint_prompt(_build_system_prompt(profile)))
     cached_analysis = {
         "score": 9,
         "matched_skills": ["python"],
@@ -437,7 +437,7 @@ def test_score_jobs_cache_hit_with_mismatch_keeps_cached_score():
     job = make_job(url="https://example.com/cached-mismatch")
     profile = make_profile()
     fp = fingerprint_profile(profile)
-    key = make_score_key(job.url, fp)
+    key = make_score_key(job.url, fp, fingerprint_prompt(_build_system_prompt(profile)))
     cached_analysis = {
         "score": 3,
         "matched_skills": [],
@@ -468,7 +468,7 @@ def test_score_jobs_cache_miss_calls_claude_and_populates_cache():
         score_jobs(results, profile, score_cache=score_cache)
 
     fp = fingerprint_profile(profile)
-    key = make_score_key(job.url, fp)
+    key = make_score_key(job.url, fp, fingerprint_prompt(_build_system_prompt(profile)))
     assert key in score_cache
     assert score_cache[key]["score"] == 8
 
@@ -697,7 +697,7 @@ def test_score_jobs_cache_hit_exclude_applies():
     job = make_job(url="https://example.com/cached-exclude")
     profile = make_profile()
     fp = fingerprint_profile(profile)
-    key = make_score_key(job.url, fp)
+    key = make_score_key(job.url, fp, fingerprint_prompt(_build_system_prompt(profile)))
     cached_analysis = {
         "score": 6,
         "matched_skills": [],
@@ -724,7 +724,7 @@ def test_score_jobs_cache_hit_without_exclude_fields_defaults_to_kept():
     job = make_job(url="https://example.com/cached-stale")
     profile = make_profile()
     fp = fingerprint_profile(profile)
-    key = make_score_key(job.url, fp)
+    key = make_score_key(job.url, fp, fingerprint_prompt(_build_system_prompt(profile)))
     cached_analysis = {
         "score": 8,
         "matched_skills": [],
@@ -742,6 +742,30 @@ def test_score_jobs_cache_hit_without_exclude_fields_defaults_to_kept():
     assert scored[0].reject_reason is None
     assert scored[0].analysis.exclude is False
     assert scored[0].analysis.exclude_reason == ""
+
+
+def test_score_jobs_prompt_change_invalidates_cache():
+    # A cache entry keyed under a different prompt fingerprint must be a miss:
+    # the job is re-scored by Claude instead of served from cache.
+    job = make_job(url="https://example.com/stale-prompt")
+    profile = make_profile()
+    fp = fingerprint_profile(profile)
+    stale_key = make_score_key(job.url, fp, "0" * 64)
+    score_cache = {stale_key: {
+        "score": 9,
+        "matched_skills": [],
+        "missing_essentials": [],
+        "employment_type_note": "Permanent",
+        "verdict": "Stale cached verdict",
+    }}
+    results = [make_kept(job)]
+    m = _mock_client()
+    with patch("job_search_email.scorer.client", m):
+        scored = score_jobs(results, profile, score_cache=score_cache)
+    m.messages.create.assert_called_once()
+    assert scored[0].analysis.verdict != "Stale cached verdict"
+    current_key = make_score_key(job.url, fp, fingerprint_prompt(_build_system_prompt(profile)))
+    assert current_key in score_cache
 
 
 def test_user_message_contains_exclude_schema():

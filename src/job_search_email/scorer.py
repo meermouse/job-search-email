@@ -8,7 +8,7 @@ from pathlib import Path
 
 import anthropic
 
-from .cache import fingerprint_profile, make_score_key, save_score_cache
+from .cache import fingerprint_profile, fingerprint_prompt, make_score_key, save_score_cache
 from .models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
 from .profile import render_profile
 
@@ -211,11 +211,12 @@ def score_jobs(
     beyond_cap = kept_sorted[limit:]
 
     system_prompt = _build_system_prompt(profile)
+    prompt_fp = fingerprint_prompt(system_prompt)
     scored_map: dict[int, ScoredResult] = {}
     to_call: list[tuple[int, FilteredResult]] = []
 
     for i, r in enumerate(to_analyse):
-        key = make_score_key(r.job.url, profile_fp)
+        key = make_score_key(r.job.url, profile_fp, prompt_fp)
         if key in score_cache:
             scored_map[i] = _build_scored_result(r, JobAnalysis(**score_cache[key]))
         else:
@@ -231,7 +232,7 @@ def score_jobs(
             try:
                 analysis = future.result()
                 scored_map[idx] = _build_scored_result(r, analysis)
-                score_cache[make_score_key(r.job.url, profile_fp)] = asdict(analysis)
+                score_cache[make_score_key(r.job.url, profile_fp, prompt_fp)] = asdict(analysis)
             except Exception as exc:
                 print(f"[scorer] analysis failed for {r.job.url!r}: {exc}", file=sys.stderr)
                 scored_map[idx] = ScoredResult(
