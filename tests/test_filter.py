@@ -577,6 +577,60 @@ def test_check_sponsor_passes_listed_single_word_company():
     assert _check_sponsor(job, sponsors) is None
 
 
+from job_search_email.filter import _check_salary
+
+
+def test_check_salary_rejects_stated_below_minimum():
+    job = make_job(salary_min=45000)
+    result = _check_salary(job, 60000)
+    assert result is not None
+    assert result.rejected is True
+    assert result.reject_reason == "salary below minimum: £45,000 < £60,000"
+
+
+def test_check_salary_passes_at_minimum():
+    # boundary: exactly at the floor is acceptable
+    job = make_job(salary_min=60000)
+    assert _check_salary(job, 60000) is None
+
+
+def test_check_salary_passes_above_minimum():
+    job = make_job(salary_min=75000)
+    assert _check_salary(job, 60000) is None
+
+
+def test_check_salary_passes_unknown_salary():
+    # No stated salary must NOT be rejected here — defers to the LLM scorer.
+    job = make_job(salary_min=None)
+    assert _check_salary(job, 60000) is None
+
+
+def test_filter_jobs_rejects_salary_below_minimum():
+    jobs = [make_job(salary_min=45000, employment_type="full-time")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert results[0].rejected is True
+    assert results[0].reject_reason == "salary below minimum: £45,000 < £60,000"
+
+
+def test_filter_jobs_keeps_unknown_salary():
+    jobs = [make_job(salary_min=None, employment_type="full-time")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert results[0].rejected is False
+
+
+def test_filter_jobs_keeps_salary_at_minimum():
+    jobs = [make_job(salary_min=60000, employment_type="full-time")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert results[0].rejected is False
+
+
+def test_filter_jobs_employment_type_checked_before_salary():
+    # A below-minimum contract role: reject reason should be employment type.
+    jobs = [make_job(salary_min=45000, employment_type="contract")]
+    results = filter_jobs(jobs, make_plan(), make_profile_stub())
+    assert results[0].reject_reason == "employment type: contract"
+
+
 from job_search_email.filter import _check_recruitment
 
 _RECRUITERS = frozenset({"hays specialist recruitment", "hays specialist", "acme resourcing"})

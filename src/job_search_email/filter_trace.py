@@ -5,6 +5,7 @@ from .filter import (
     _check_location,
     _check_nhs_band_salary,
     _check_role_suitability,
+    _check_salary,
     _check_sponsor,
 )
 from .models import JobListing, Profile
@@ -57,6 +58,14 @@ def run_filter_gates(
     gates.append(GateResult(
         "NHS band salary", nhs is None,
         "n/a (no NHS band in title/description)" if nhs is None else (nhs.reject_reason or ""),
+        False,
+    ))
+
+    salary = _check_salary(job, profile.min_salary)
+    gates.append(GateResult(
+        "Salary", salary is None,
+        f"£{job.salary_min:,} ≥ £{profile.min_salary:,}" if salary is None and job.salary_min is not None
+        else ("not stated" if salary is None else (salary.reject_reason or "")),
         False,
     ))
 

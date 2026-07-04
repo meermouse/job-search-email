@@ -95,6 +95,20 @@ def _check_nhs_band_salary(
     return None
 
 
+def _check_salary(job: JobListing, min_salary: int) -> FilteredResult | None:
+    # A stated salary below the floor is a hard reject. Jobs whose salary could
+    # not be parsed (salary_min is None) are deferred to the AI scorer rather
+    # than dropped here, so genuine postings that omit pay are not lost.
+    if job.salary_min is not None and job.salary_min < min_salary:
+        return FilteredResult(
+            job=job,
+            flags=[],
+            rejected=True,
+            reject_reason=f"salary below minimum: £{job.salary_min:,} < £{min_salary:,}",
+        )
+    return None
+
+
 def _check_recruitment(job: JobListing, recruitment_set: frozenset[str]) -> FilteredResult | None:
     if job.source == "nhs":
         return None
@@ -178,6 +192,11 @@ def filter_jobs(
         nhs_result = _check_nhs_band_salary(job, plan.nhs_rules, profile.min_salary)
         if nhs_result is not None:
             results.append(nhs_result)
+            continue
+
+        salary_result = _check_salary(job, profile.min_salary)
+        if salary_result is not None:
+            results.append(salary_result)
             continue
 
         if recruitment_set is not None:

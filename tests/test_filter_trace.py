@@ -33,7 +33,7 @@ def test_all_gates_reported_in_order():
     names = [g.name for g in gates]
     assert names == [
         "Location", "Employment type", "Role suitability",
-        "NHS band salary", "Sponsor list",
+        "NHS band salary", "Salary", "Sponsor list",
     ]
 
 
@@ -50,6 +50,14 @@ def test_contract_job_fails_employment_gate():
     assert by_name["Employment type"].is_first_reject is True
 
 
+def test_below_minimum_salary_fails_salary_gate():
+    gates = _gates(_job(salary_min=45000))
+    by_name = {g.name: g for g in gates}
+    assert by_name["Salary"].passed is False
+    assert by_name["Salary"].is_first_reject is True
+    assert by_name["Salary"].detail == "salary below minimum: £45,000 < £60,000"
+
+
 def test_reports_all_gates_even_after_first_reject():
     # Outside location AND non-sponsor: both fail, but only the first is flagged.
     job = _job(location="Aberdeen", company="Tiny")
@@ -59,4 +67,4 @@ def test_reports_all_gates_even_after_first_reject():
     assert by_name["Location"].is_first_reject is True
     assert by_name["Sponsor list"].passed is False
     assert by_name["Sponsor list"].is_first_reject is False
-    assert len(gates) == 5  # every gate still reported
+    assert len(gates) == 6  # every gate still reported
