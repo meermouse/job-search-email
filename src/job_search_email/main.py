@@ -24,11 +24,8 @@ from .recruitment_filter import load_recruitment_set
 
 ROOT = Path.cwd()
 PROFILE_PATH = ROOT / "profile.yaml"
+RUNS_DIR = ROOT / "runs"
 CACHE_PATH = ROOT / "search_plan_cache.json"
-PLAN_PATH = ROOT / "search_plan.json"
-RESULTS_PATH = ROOT / "job_results.json"
-FILTERED_RESULTS_PATH = ROOT / "job_results_filtered.json"
-SCORED_RESULTS_PATH = ROOT / "job_results_scored.json"
 SCORE_CACHE_PATH = ROOT / "job_score_cache.json"
 LOCATION_CACHE_PATH = ROOT / "location_cache.json"
 SPONSOR_CACHE_PATH = ROOT / "assets" / "sponsor_cache.csv"
@@ -70,12 +67,12 @@ def save_cached_plan(plan: SearchPlan, cache_path: Path = CACHE_PATH) -> None:
     os.replace(tmp, cache_path)
 
 
-def write_search_plan(plan: SearchPlan, path: Path = PLAN_PATH) -> None:
+def write_search_plan(plan: SearchPlan, path: Path) -> None:
     with path.open("w", encoding="utf-8") as handle:
         json.dump(asdict(plan), handle, indent=2)
 
 
-def write_filtered_results(results: list[FilteredResult], path: Path = FILTERED_RESULTS_PATH) -> None:
+def write_filtered_results(results: list[FilteredResult], path: Path) -> None:
     kept = [r for r in results if not r.rejected]
     rejected = [r for r in results if r.rejected]
     flagged = [r for r in kept if r.flags]
@@ -95,7 +92,7 @@ def write_filtered_results(results: list[FilteredResult], path: Path = FILTERED_
         json.dump(output, handle, indent=2)
 
 
-def write_scored_results(results: list[ScoredResult], path: Path = SCORED_RESULTS_PATH) -> None:
+def write_scored_results(results: list[ScoredResult], path: Path) -> None:
     kept = [r for r in results if not r.rejected]
     rejected = [r for r in results if r.rejected]
     analysed = [r for r in kept if r.analysis is not None and "analysis_failed" not in r.flags]
@@ -134,7 +131,13 @@ def _print_location_summary(jobs: list[JobListing]) -> None:
         print(f"  {location:<40} {count:>4}  ({source_detail})")
 
 
-def run_pipeline(profile: Profile) -> tuple[dict[str, Any], list[ScoredResult]]:
+def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], list[ScoredResult]]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    plan_path = output_dir / "search_plan.json"
+    results_path = output_dir / "job_results.json"
+    filtered_results_path = output_dir / "job_results_filtered.json"
+    scored_results_path = output_dir / "job_results_scored.json"
+
     fingerprint = fingerprint_profile(profile)
     cached = load_cached_plan(cache_path=CACHE_PATH, fingerprint=fingerprint)
 
@@ -143,7 +146,7 @@ def run_pipeline(profile: Profile) -> tuple[dict[str, Any], list[ScoredResult]]:
     else:
         plan = generate_search_plan(profile, fingerprint)
         save_cached_plan(plan, cache_path=CACHE_PATH)
-    write_search_plan(plan, PLAN_PATH)
+    write_search_plan(plan, plan_path)
 
     print("Job search plan ready:")
     print(f"- profile: {profile.name}")
@@ -152,10 +155,10 @@ def run_pipeline(profile: Profile) -> tuple[dict[str, Any], list[ScoredResult]]:
 
     print("Fetching jobs...")
     jobs = fetch_all_jobs(plan, profile)
-    with RESULTS_PATH.open("w", encoding="utf-8") as handle:
+    with results_path.open("w", encoding="utf-8") as handle:
         json.dump([asdict(job) for job in jobs], handle, indent=2)
     print(f"- jobs fetched: {len(jobs)}")
-    print(f"- results written to: {RESULTS_PATH}")
+    print(f"- results written to: {results_path}")
     _print_location_summary(jobs)
 
     print("Classifying job locations...")
@@ -174,8 +177,12 @@ def run_pipeline(profile: Profile) -> tuple[dict[str, Any], list[ScoredResult]]:
         print(f"- {outside_count} location(s) classified as outside radius: {sorted(rejected_locations)}")
 
     print("Filtering jobs...")
-    sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH)
-    print(f"- sponsor list loaded: {len(sponsor_set):,} entries")
+    if profile.filter_sponsors:
+        sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH)
+        print(f"- sponsor list loaded: {len(sponsor_set):,} entries")
+    else:
+        sponsor_set = None
+        print("- sponsor filter disabled (filter_sponsors=false)")
     recruitment_set = load_recruitment_set(RECRUITMENT_CACHE_PATH) if profile.filter_recruitment else None
     if recruitment_set is not None:
         print(f"- recruitment list loaded: {len(recruitment_set):,} entries")
@@ -187,27 +194,27 @@ def run_pipeline(profile: Profile) -> tuple[dict[str, Any], list[ScoredResult]]:
         recruitment_set=recruitment_set,
         sponsor_set=sponsor_set,
     )
-    write_filtered_results(filtered, FILTERED_RESULTS_PATH)
+    write_filtered_results(filtered, filtered_results_path)
     kept = [r for r in filtered if not r.rejected]
     flagged = [r for r in kept if r.flags]
     print(f"- filtered: {len(kept)} kept, {len(filtered) - len(kept)} rejected ({len(flagged)} flagged unknown employment type)")
-    print(f"- filtered results written to: {FILTERED_RESULTS_PATH}")
+    print(f"- filtered results written to: {filtered_results_path}")
 
     print("Scoring jobs...")
     score_cache = load_score_cache(SCORE_CACHE_PATH)
     scored = score_jobs(filtered, profile, score_cache=score_cache, cache_path=SCORE_CACHE_PATH)
-    write_scored_results(scored, SCORED_RESULTS_PATH)
+    write_scored_results(scored, scored_results_path)
     kept_scored = [r for r in scored if not r.rejected]
     top_score = max((r.analysis.score for r in kept_scored if r.analysis), default="n/a")
     print(f"- scored: {len(kept_scored)} kept, top score: {top_score}")
-    print(f"- scored results written to: {SCORED_RESULTS_PATH}")
+    print(f"- scored results written to: {scored_results_path}")
 
     return classification, scored
 
 
 def main() -> None:
     profile = load_profile(PROFILE_PATH)
-    classification, scored = run_pipeline(profile)
+    classification, scored = run_pipeline(profile, RUNS_DIR / PROFILE_PATH.stem)
 
     print("Sending emails...")
     main_html, top_n = build_email_html(scored, profile)
