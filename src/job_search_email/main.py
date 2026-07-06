@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import traceback
 from collections import Counter, defaultdict
 from dataclasses import asdict
 from pathlib import Path
@@ -24,6 +25,7 @@ from .recruitment_filter import load_recruitment_set
 
 ROOT = Path.cwd()
 PROFILE_PATH = ROOT / "profile.yaml"
+PROFILES_DIR = ROOT / "profiles"
 RUNS_DIR = ROOT / "runs"
 CACHE_PATH = ROOT / "search_plan_cache.json"
 SCORE_CACHE_PATH = ROOT / "job_score_cache.json"
@@ -212,9 +214,13 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
     return classification, scored
 
 
-def main() -> None:
-    profile = load_profile(PROFILE_PATH)
-    classification, scored = run_pipeline(profile, RUNS_DIR / PROFILE_PATH.stem)
+def discover_profiles(profiles_dir: Path = PROFILES_DIR) -> list[Path]:
+    return sorted(profiles_dir.glob("*.yaml"))
+
+
+def process_profile(profile_path: Path) -> None:
+    profile = load_profile(profile_path)
+    classification, scored = run_pipeline(profile, RUNS_DIR / profile_path.stem)
 
     print("Sending emails...")
     main_html, top_n = build_email_html(scored, profile)
@@ -231,6 +237,27 @@ def main() -> None:
     if profile.send_debug_email:
         debug_html = build_debug_email_html(classification, scored, profile)
         send_debug_report(debug_html)
+
+
+def main() -> None:
+    profile_paths = discover_profiles(PROFILES_DIR)
+    if not profile_paths:
+        print(f"[main] no profiles found in {PROFILES_DIR}", file=sys.stderr)
+        raise SystemExit(1)
+
+    failed: list[str] = []
+    for profile_path in profile_paths:
+        print(f"\n=== Profile: {profile_path.stem} ===")
+        try:
+            process_profile(profile_path)
+        except Exception:
+            print(f"[main] profile {profile_path.name} failed:", file=sys.stderr)
+            traceback.print_exc()
+            failed.append(profile_path.name)
+
+    if failed:
+        print(f"[main] {len(failed)} profile(s) failed: {', '.join(failed)}", file=sys.stderr)
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

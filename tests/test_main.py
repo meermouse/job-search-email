@@ -311,18 +311,18 @@ def test_main_loads_and_saves_location_cache(tmp_path, monkeypatch):
 
     # Point all file paths to tmp_path
     monkeypatch.setattr(main_mod, "ROOT", tmp_path)
-    monkeypatch.setattr(main_mod, "PROFILE_PATH", tmp_path / "profile.yaml")
-    monkeypatch.setattr(main_mod, "RUNS_DIR", tmp_path / "runs")
-    monkeypatch.setattr(main_mod, "CACHE_PATH", tmp_path / "plan_cache.json")
-    monkeypatch.setattr(main_mod, "SCORE_CACHE_PATH", tmp_path / "score_cache.json")
-    monkeypatch.setattr(main_mod, "LOCATION_CACHE_PATH", tmp_path / "location_cache.json")
-
-    # Write a minimal profile.yaml
-    (tmp_path / "profile.yaml").write_text(
+    profiles_dir = tmp_path / "profiles"
+    profiles_dir.mkdir()
+    (profiles_dir / "test.yaml").write_text(
         "profile:\n  name: Test\n  employment_type: [full-time]\n"
         "location: Bristol\nmin_salary: 60000\n",
         encoding="utf-8",
     )
+    monkeypatch.setattr(main_mod, "PROFILES_DIR", profiles_dir)
+    monkeypatch.setattr(main_mod, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(main_mod, "CACHE_PATH", tmp_path / "plan_cache.json")
+    monkeypatch.setattr(main_mod, "SCORE_CACHE_PATH", tmp_path / "score_cache.json")
+    monkeypatch.setattr(main_mod, "LOCATION_CACHE_PATH", tmp_path / "location_cache.json")
 
     from job_search_email.models import JobListing
 
@@ -439,7 +439,9 @@ def _run_main_with_toggles(tmp_path: Path, monkeypatch, send_main: bool, send_de
     importlib.import_module("job_search_email.main")
     main_mod = sys.modules["job_search_email.main"]
 
-    (tmp_path / "profile.yaml").write_text(
+    profiles_dir = tmp_path / "profiles"
+    profiles_dir.mkdir()
+    (profiles_dir / "test.yaml").write_text(
         "profile:\n  name: Test\n  employment_type: [full-time]\n"
         "location: Bristol\nmin_salary: 60000\n"
         f"send_main_email: {'true' if send_main else 'false'}\n"
@@ -448,7 +450,7 @@ def _run_main_with_toggles(tmp_path: Path, monkeypatch, send_main: bool, send_de
     )
 
     for attr, val in [
-        ("ROOT", tmp_path), ("PROFILE_PATH", tmp_path / "profile.yaml"),
+        ("ROOT", tmp_path), ("PROFILES_DIR", profiles_dir),
         ("RUNS_DIR", tmp_path / "runs"),
         ("CACHE_PATH", tmp_path / "plan_cache.json"),
         ("SCORE_CACHE_PATH", tmp_path / "score_cache.json"),
@@ -609,3 +611,94 @@ def test_run_pipeline_sponsor_filter_off_passes_none(tmp_path, monkeypatch):
         tmp_path, monkeypatch, make_profile(filter_sponsors=False))
     mock_load.assert_not_called()
     assert kwargs["sponsor_set"] is None
+
+
+MINIMAL_PROFILE_TMPL = (
+    "profile:\n  name: {name}\n  employment_type: [full-time]\n"
+    "location: Bristol\nmin_salary: 60000\n"
+)
+
+
+def _setup_multi_profile_main(tmp_path, monkeypatch, profile_names):
+    import sys, importlib
+    importlib.import_module("job_search_email.main")
+    main_mod = sys.modules["job_search_email.main"]
+
+    profiles_dir = tmp_path / "profiles"
+    profiles_dir.mkdir()
+    for name in profile_names:
+        (profiles_dir / f"{name}.yaml").write_text(
+            MINIMAL_PROFILE_TMPL.format(name=name), encoding="utf-8")
+
+    monkeypatch.setattr(main_mod, "ROOT", tmp_path)
+    monkeypatch.setattr(main_mod, "PROFILES_DIR", profiles_dir)
+    monkeypatch.setattr(main_mod, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(main_mod, "CACHE_PATH", tmp_path / "plan_cache.json")
+    monkeypatch.setattr(main_mod, "SCORE_CACHE_PATH", tmp_path / "score_cache.json")
+    monkeypatch.setattr(main_mod, "LOCATION_CACHE_PATH", tmp_path / "location_cache.json")
+    return main_mod
+
+
+def _multi_profile_patches(fetch_side_effect):
+    from job_search_email.models import SearchPlan
+    dummy_plan = SearchPlan(
+        profile_fingerprint="test", queries=["q"],
+        exclusions={"roles": [], "employment_types": []},
+        nhs_rules={}, evaluator_notes=[],
+    )
+    return (
+        _patch("job_search_email.main.fetch_all_jobs", side_effect=fetch_side_effect),
+        _patch("job_search_email.main.generate_search_plan", return_value=dummy_plan),
+        _patch("job_search_email.main.classify_locations", return_value={"Bristol": "within"}),
+        _patch("job_search_email.main.score_jobs", return_value=[]),
+        _patch("job_search_email.main.build_email_html", return_value=("<html/>", 0)),
+        _patch("job_search_email.main.send_email"),
+    )
+
+
+def test_discover_profiles_returns_sorted_yaml(tmp_path):
+    from job_search_email.main import discover_profiles
+    profiles_dir = tmp_path / "profiles"
+    profiles_dir.mkdir()
+    (profiles_dir / "zeta.yaml").write_text("x", encoding="utf-8")
+    (profiles_dir / "alpha.yaml").write_text("x", encoding="utf-8")
+    (profiles_dir / "notes.txt").write_text("x", encoding="utf-8")
+
+    result = discover_profiles(profiles_dir)
+
+    assert [p.name for p in result] == ["alpha.yaml", "zeta.yaml"]
+
+
+def test_main_processes_all_profiles(tmp_path, monkeypatch):
+    main_mod = _setup_multi_profile_main(tmp_path, monkeypatch, ["alice", "bob"])
+    fetch, plan, classify, score, build, send = _multi_profile_patches([[], []])
+    with fetch as mock_fetch, plan, classify, score, build, send as mock_send:
+        main_mod.main()
+
+    assert mock_fetch.call_count == 2
+    assert mock_send.call_count == 2
+    assert (tmp_path / "runs" / "alice" / "job_results.json").exists()
+    assert (tmp_path / "runs" / "bob" / "job_results.json").exists()
+
+
+def test_main_isolates_profile_failure(tmp_path, monkeypatch):
+    import pytest
+    main_mod = _setup_multi_profile_main(tmp_path, monkeypatch, ["alice", "bob"])
+    # alice's fetch blows up; bob's succeeds
+    fetch, plan, classify, score, build, send = _multi_profile_patches(
+        [RuntimeError("scrape failed"), []])
+    with fetch, plan, classify, score, build, send as mock_send:
+        with pytest.raises(SystemExit) as excinfo:
+            main_mod.main()
+
+    assert excinfo.value.code == 1
+    assert mock_send.call_count == 1  # bob's email still went out
+    assert (tmp_path / "runs" / "bob" / "job_results.json").exists()
+
+
+def test_main_exits_nonzero_when_no_profiles(tmp_path, monkeypatch):
+    import pytest
+    main_mod = _setup_multi_profile_main(tmp_path, monkeypatch, [])
+    with pytest.raises(SystemExit) as excinfo:
+        main_mod.main()
+    assert excinfo.value.code == 1
