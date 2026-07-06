@@ -214,7 +214,7 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
     return classification, scored
 
 
-def discover_profiles(profiles_dir: Path = PROFILES_DIR) -> list[Path]:
+def discover_profiles(profiles_dir: Path) -> list[Path]:
     return sorted(profiles_dir.glob("*.yaml"))
 
 
