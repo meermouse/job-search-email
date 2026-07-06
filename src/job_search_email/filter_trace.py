@@ -24,7 +24,7 @@ def run_filter_gates(
     profile: Profile,
     *,
     location_verdict: str,
-    sponsor_set: frozenset[str],
+    sponsor_set: frozenset[str] | None,
     nhs_rules: dict,
     exclusion_roles: list[str],
 ) -> list[GateResult]:
@@ -69,13 +69,14 @@ def run_filter_gates(
         False,
     ))
 
-    sponsor = _check_sponsor(job, sponsor_set)
-    gates.append(GateResult(
-        "Sponsor list", sponsor is None,
-        "n/a (NHS source)" if job.source == "nhs" and sponsor is None
-        else ("on approved sponsor list" if sponsor is None else (sponsor.reject_reason or "")),
-        False,
-    ))
+    sponsor = _check_sponsor(job, sponsor_set) if sponsor_set is not None else None
+    if sponsor_set is None:
+        sponsor_detail = "disabled (filter_sponsors=false)"
+    elif sponsor is None:
+        sponsor_detail = "n/a (NHS source)" if job.source == "nhs" else "on approved sponsor list"
+    else:
+        sponsor_detail = sponsor.reject_reason or ""
+    gates.append(GateResult("Sponsor list", sponsor is None, sponsor_detail, False))
 
     for gate in gates:
         if not gate.passed:

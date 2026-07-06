@@ -66,7 +66,7 @@ def explain(
     # NOTE: classify_locations and get_exclusions both make live LLM calls and
     # therefore require ANTHROPIC_API_KEY to be set, even when the job is
     # ultimately rejected by a hard filter gate (sponsor, employment-type, etc.).
-    sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH)
+    sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH) if profile.filter_sponsors else None
     gates = run_filter_gates(
         job, profile,
         location_verdict=verdict,

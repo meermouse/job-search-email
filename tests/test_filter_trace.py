@@ -68,3 +68,20 @@ def test_reports_all_gates_even_after_first_reject():
     assert by_name["Sponsor list"].passed is False
     assert by_name["Sponsor list"].is_first_reject is False
     assert len(gates) == 6  # every gate still reported
+
+
+def test_sponsor_gate_disabled_when_sponsor_set_none():
+    job = _job()
+    profile = make_profile(filter_sponsors=False, min_salary=80000, location="Bristol")
+
+    gates = run_filter_gates(
+        job, profile,
+        location_verdict="within",
+        sponsor_set=None,
+        nhs_rules={},
+        exclusion_roles=[],
+    )
+
+    sponsor_gate = next(g for g in gates if g.name == "Sponsor list")
+    assert sponsor_gate.passed is True
+    assert sponsor_gate.detail == "disabled (filter_sponsors=false)"
