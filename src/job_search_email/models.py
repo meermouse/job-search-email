@@ -42,6 +42,7 @@ class Profile:
     send_main_email: bool = True
     send_debug_email: bool = False
     filter_recruitment: bool = True
+    filter_sponsors: bool = True
 
 
 @dataclass
