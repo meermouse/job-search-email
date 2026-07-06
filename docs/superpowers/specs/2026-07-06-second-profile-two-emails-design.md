@@ -105,6 +105,25 @@ unchanged: it still installs the package and runs `job-search-email` once per
 day (and on push to main). The command now loops over `profiles/` internally.
 Cache paths are unchanged.
 
+## Sponsor filter becomes per-profile
+
+The sponsor-company filter (only surface UK visa-sponsor-licensed employers) is
+essential for Jie but wrong for Marc, who does not need visa sponsorship —
+leaving it on would exclude most valid employers. It becomes a per-profile
+toggle mirroring the existing `filter_recruitment`:
+
+- `Profile` gains `filter_sponsors: bool = True` (default ON, preserving current
+  behaviour for existing/silent profiles);
+  [profile.py](../../../src/job_search_email/profile.py) reads
+  `data.get("filter_sponsors", True)`.
+- [main.py](../../../src/job_search_email/main.py) loads the sponsor set and
+  passes it to `filter_jobs` only when `profile.filter_sponsors` is true,
+  otherwise passes `sponsor_set=None`.
+
+No filter-logic change is needed: `filter_jobs` already accepts
+`sponsor_set: frozenset[str] | None` and skips the sponsor check when it is
+`None` (the same pattern `filter_recruitment` uses for `recruitment_set`).
+
 ## Second profile content (the "PDF import")
 
 There is no automated importer — "PDF import" is the established manual,
@@ -121,6 +140,30 @@ Claude-assisted transcription flow from the enhanced-linkedin-profile work
 4. The PDF is **deleted — not committed** (the YAML already carries the personal
    data the pipeline needs).
 
+### Marc's profile (`profiles/marc-brookes.yaml`)
+
+LinkedIn-derived content is transcribed from the provided PDF (Senior Software
+Engineer at Siemens; full experience history Siemens → The Safeguarding Company
+→ Web.com → WCBS → Accelero Digital → Tata Steel placement; MSc Computing and BSc
+Applied Mathematics, Cardiff University; top skills Web Services / Software
+Development / Software Engineering; language English). The non-LinkedIn search
+preferences are set as follows:
+
+- `location`: Cardiff · `radius_miles`: 40
+- `min_salary`: 80000
+- `employment_type`: [full-time]
+- `filter_sponsors`: false (Marc does not need visa sponsorship)
+- `filter_recruitment`: true
+- `recipient_email`: marc.j.brookes@gmail.com
+- `send_main_email`: true · `send_debug_email`: false
+- `seniority`: Senior · `industry`: Software / Technology
+- `target_roles`, `open_to`, `not_open_to`: seeded from the software-engineering
+  profile (e.g. Software Engineer / Senior Software Engineer / Frontend /
+  Full-stack; open to React, Angular, Software Architect; not open to
+  graduate/junior, pure QA/test, first-line support) — reviewed with Marc during
+  implementation.
+- `preamble`: greeting in the established "Job Mule" style, addressed to Marc.
+
 ## Testing
 
 - `main()` multi-profile loop: discovers all `profiles/*.yaml`, runs the
@@ -129,6 +172,9 @@ Claude-assisted transcription flow from the enhanced-linkedin-profile work
   `PROFILE_PATH` — repoint at the `profiles/` discovery and `runs/<stem>/`
   outputs.
 - `run_pipeline` writes its four artifacts under the given `output_dir`.
+- `filter_sponsors` toggle: `profile.py` defaults it to `True`; when a profile
+  sets it `false`, `main.py` passes `sponsor_set=None` and no job is dropped for
+  being off the sponsor register.
 - Update tests that reference the moved `profile.yaml`
   (`tests/test_local_testing.py` copies it; `explain-job` default tests) to the
   new paths.
