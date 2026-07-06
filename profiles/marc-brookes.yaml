@@ -1,0 +1,100 @@
+profile:
+  name: Marc Brookes
+  headline: "Senior Software Engineer at Siemens"
+  about: |
+    Skilled and experienced software developer with a wide variety of technologies. Worked on projects using C# and VB .net, Java, Javascript, Flex among other technologies. Competent with SQL database querying and maintenance. Throughout working with model based architectures has now picked up the knowledge and understanding required for using AI to build maintainable and fast software solutions.
+    More recently I've specialized in front end development. Overseeing large scale projects in React and Angular whilst working on AI ready applications for Siemens.
+  seniority: Senior
+  industry: Software / Technology
+
+  experience:
+    - title: Senior Software Engineer
+      company: Siemens Digital Industries Customer Service UK&I
+      start: "2023-10"
+      end: present
+    - title: Software Engineer
+      company: The Safeguarding Company
+      location: Talbot Green
+      start: "2020-01"
+      end: "2023-10"
+    - title: Software Developer
+      company: Web.com
+      location: Cardiff, United Kingdom
+      start: "2017-06"
+      end: "2020-01"
+    - title: Team Lead
+      company: WCBS
+      location: Cardiff
+      start: "2016-06"
+      end: "2017-05"
+    - title: Software Developer
+      company: WCBS
+      location: Cardiff
+      start: "2015-10"
+      end: "2017-05"
+    - title: Software Engineer
+      company: Accelero Digital
+      location: Bridgend
+      start: "2009-09"
+      end: "2015-10"
+      description: |
+        Software Engineer for Accelero Digital Solutions. I was involved in a wide variety of projects including software development, database management, software deployment and customer support. I also worked closely with many of the customers and sub contractors in turning their varied and complex requirements into reliable and suitable software solutions.
+    - title: Placement Student
+      company: Tata Steel
+      location: Llanwern
+      start: "2007-09"
+      end: "2008-09"
+      description: |
+        Spent an industrial placement year working for Corus (now Tata Steel) Strip Products in the Materials Management department in Llanwern. Spent the year in a programming and modelling role using Visual Basic behind Microsoft Excel and mathematical skills at an advanced level for the duration, developing analysis, monitoring and modelling tools to solve industrial problems.
+
+  education:
+    - institution: Cardiff University / Prifysgol Caerdydd
+      degree: Master of Science (MSc), Computing
+    - institution: Cardiff University / Prifysgol Caerdydd
+      degree: Bachelor of Science (BSc), Applied Mathematics
+
+  certifications: []
+
+  # LinkedIn top-3 skills + skill-like terms from the summary/experience
+  # (LinkedIn's PDF export only lists the top 3 skills)
+  skills:
+    - Web Services
+    - Software Development
+    - Software Engineering
+    - C#
+    - JavaScript
+    - React
+    - Angular
+    - Java
+    - SQL
+    - Front-end Development
+    - AI-assisted development
+
+  languages:
+    - English
+
+  target_roles:
+    - Senior Software Engineer
+    - Frontend Developer
+    - Full-stack Developer
+  open_to:
+    - Software Architect
+    - Lead Developer
+    - Technical Lead
+  not_open_to:
+    - graduate / junior roles
+    - QA / test analyst
+    - first-line support / helpdesk
+  employment_type:
+    - full-time
+
+location: Cardiff
+radius_miles: 40
+min_salary: 80000
+
+preamble: "Hey Marc, its The Job Mule 2.0. Lets go through todays jobs."
+recipient_email: marc.j.brookes@gmail.com
+send_main_email: true
+send_debug_email: false
+filter_recruitment: true
+filter_sponsors: false

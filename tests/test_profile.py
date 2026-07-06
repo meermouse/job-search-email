@@ -167,3 +167,25 @@ def test_render_profile_experience_without_start_renders_end_only():
     )
     text = render_profile(profile)
     assert "- Advisor — Acme (present)" in text
+
+
+def test_all_repo_profiles_load_and_are_complete():
+    from pathlib import Path
+    profiles_dir = Path(__file__).parent.parent / "profiles"
+    paths = sorted(profiles_dir.glob("*.yaml"))
+    assert [p.name for p in paths] == ["jie-zhou.yaml", "marc-brookes.yaml"]
+    for path in paths:
+        profile = load_profile(path)
+        assert profile.name, path.name
+        assert profile.recipient_email, path.name
+        assert profile.location, path.name
+        assert profile.min_salary > 0, path.name
+        assert profile.experience, path.name
+
+
+def test_marc_profile_has_sponsor_filter_off():
+    from pathlib import Path
+    profile = load_profile(Path(__file__).parent.parent / "profiles" / "marc-brookes.yaml")
+    assert profile.filter_sponsors is False
+    assert profile.filter_recruitment is True
+    assert profile.min_salary == 80000
