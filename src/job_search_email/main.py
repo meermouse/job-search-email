@@ -24,8 +24,8 @@ from .sponsor_filter import load_sponsor_set
 from .recruitment_filter import load_recruitment_set
 
 ROOT = Path.cwd()
-PROFILE_PATH = ROOT / "profile.yaml"
 PROFILES_DIR = ROOT / "profiles"
+DEFAULT_PROFILE_PATH = PROFILES_DIR / "jie-zhou.yaml"
 RUNS_DIR = ROOT / "runs"
 CACHE_PATH = ROOT / "search_plan_cache.json"
 SCORE_CACHE_PATH = ROOT / "job_score_cache.json"

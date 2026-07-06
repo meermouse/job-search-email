@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from .debug_email import build_debug_email_html
-from .main import PROFILE_PATH, RUNS_DIR, run_pipeline
+from .main import DEFAULT_PROFILE_PATH, RUNS_DIR, run_pipeline
 from .models import ScoredResult
 from .profile import load_profile
 
@@ -21,8 +21,8 @@ def _print_decisions(scored: list[ScoredResult]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    profile = load_profile(PROFILE_PATH)
-    classification, scored = run_pipeline(profile, RUNS_DIR / PROFILE_PATH.stem)
+    profile = load_profile(DEFAULT_PROFILE_PATH)
+    classification, scored = run_pipeline(profile, RUNS_DIR / DEFAULT_PROFILE_PATH.stem)
 
     html = build_debug_email_html(classification, scored, profile)
     DEBUG_REPORT_PATH.write_text(html, encoding="utf-8")

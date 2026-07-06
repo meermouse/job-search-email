@@ -32,10 +32,10 @@ def _format_age(seconds: float) -> str:
 def explain(
     url: str | None,
     *,
-    profile_path: str = "profile.yaml",
+    profile_path: str = "profiles/jie-zhou.yaml",
     job_file: str | None = None,
     force_score: bool = False,
-    run_data_path: str = "job_results.json",
+    run_data_path: str = "runs/jie-zhou/job_results.json",
     dump_job_file_path: str | None = None,
 ) -> str:
     profile = load_profile(Path(profile_path))
@@ -92,14 +92,14 @@ def main(argv: list[str] | None = None) -> int:
         description="Explain why a job got its rating by replaying the pipeline.",
     )
     parser.add_argument("url", nargs="?", help="Job URL (from the email).")
-    parser.add_argument("--profile", default="profile.yaml",
-                        help="Path to the profile YAML (default: profile.yaml).")
+    parser.add_argument("--profile", default="profiles/jie-zhou.yaml",
+                        help="Path to the profile YAML (default: profiles/jie-zhou.yaml).")
     parser.add_argument("--job-file",
                         help="YAML with job fields; fallback for LinkedIn/Indeed.")
     parser.add_argument("--force-score", action="store_true",
                         help="Run the AI scorer even if a hard filter rejected the job.")
-    parser.add_argument("--run-data", default="job_results.json",
-                        help="Path to a local run's job_results.json (default: job_results.json).")
+    parser.add_argument("--run-data", default="runs/jie-zhou/job_results.json",
+                        help="Path to a run's job_results.json (default: runs/jie-zhou/job_results.json).")
     parser.add_argument("--dump-job-file",
                         help="Write the resolved job's data to this YAML path.")
     args = parser.parse_args(argv)
