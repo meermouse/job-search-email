@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 from .debug_email import build_debug_email_html
@@ -21,8 +22,16 @@ def _print_decisions(scored: list[ScoredResult]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    profile = load_profile(DEFAULT_PROFILE_PATH)
-    classification, scored = run_pipeline(profile, RUNS_DIR / DEFAULT_PROFILE_PATH.stem)
+    parser = argparse.ArgumentParser(
+        prog="job-search-debug",
+        description="Run the real pipeline and write a decisions report instead of emailing.",
+    )
+    parser.add_argument("--profile", type=Path, default=DEFAULT_PROFILE_PATH,
+                        help=f"Path to the profile YAML (default: {DEFAULT_PROFILE_PATH}).")
+    args = parser.parse_args(argv)
+
+    profile = load_profile(args.profile)
+    classification, scored = run_pipeline(profile, RUNS_DIR / args.profile.stem)
 
     html = build_debug_email_html(classification, scored, profile)
     DEBUG_REPORT_PATH.write_text(html, encoding="utf-8")

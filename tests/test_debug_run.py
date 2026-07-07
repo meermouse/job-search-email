@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import patch
 
 from job_search_email.models import JobAnalysis, JobListing, Profile, ScoredResult
@@ -22,6 +23,39 @@ def _scored() -> list[ScoredResult]:
         ScoredResult(job=rej, flags=[], rejected=True,
                      reject_reason="employment type: contract", analysis=None),
     ]
+
+
+def test_debug_run_profile_flag_selects_profile_and_run_dir(tmp_path, monkeypatch):
+    from job_search_email import debug_run
+    monkeypatch.setattr(debug_run, "DEBUG_REPORT_PATH", tmp_path / "debug_report.html")
+
+    with (
+        patch("job_search_email.debug_run.load_profile", return_value=_profile()) as mock_load,
+        patch("job_search_email.debug_run.run_pipeline", return_value=({}, [])) as mock_run,
+        patch("job_search_email.debug_run.build_debug_email_html", return_value="<html/>"),
+    ):
+        code = debug_run.main(["--profile", "profiles/marc-brookes.yaml"])
+
+    assert code == 0
+    assert mock_load.call_args.args[0] == Path("profiles/marc-brookes.yaml")
+    assert mock_run.call_args.args[1] == debug_run.RUNS_DIR / "marc-brookes"
+
+
+def test_debug_run_defaults_to_primary_profile(tmp_path, monkeypatch):
+    from job_search_email import debug_run
+    from job_search_email.main import DEFAULT_PROFILE_PATH
+    monkeypatch.setattr(debug_run, "DEBUG_REPORT_PATH", tmp_path / "debug_report.html")
+
+    with (
+        patch("job_search_email.debug_run.load_profile", return_value=_profile()) as mock_load,
+        patch("job_search_email.debug_run.run_pipeline", return_value=({}, [])) as mock_run,
+        patch("job_search_email.debug_run.build_debug_email_html", return_value="<html/>"),
+    ):
+        code = debug_run.main([])
+
+    assert code == 0
+    assert mock_load.call_args.args[0] == DEFAULT_PROFILE_PATH
+    assert mock_run.call_args.args[1] == debug_run.RUNS_DIR / DEFAULT_PROFILE_PATH.stem
 
 
 def test_debug_run_writes_report_summary_and_never_emails(tmp_path, capsys, monkeypatch):
