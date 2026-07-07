@@ -945,5 +945,609 @@
     "qualification_status": "mismatch",
     "exclude": true,
     "exclude_reason": "Healthcare/NHS sector role (not aligned with candidate profile); missing PRINCE2 certification (explicitly required)"
+  },
+  "67fb81c81796_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Digital Transformation",
+      "Project Management",
+      "Governance frameworks",
+      "Stakeholder management"
+    ],
+    "missing_essentials": [
+      "D365 Finance & Operations (F&O) expertise",
+      "ERP systems implementation experience",
+      "Solutions architecture for ERP platforms",
+      "Microsoft Dynamics 365 technical knowledge"
+    ],
+    "employment_type_note": "Permanent, full-time role confirmed in description.",
+    "verdict": "Weak match. Candidate has strong governance, digital transformation and project management credentials, but lacks the specialist D365 F&O and ERP solutions architecture experience that is the core requirement for this role. The position requires deep technical expertise in Microsoft Dynamics 365 Finance & Operations; Jie's background is in NHS governance, workforce planning, and business process automation via Power BI/Power Automate, not ERP implementation. This is a fundamental domain mismatch at solution architect level.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Specialist ERP/D365 F&O domain expertise required; candidate's background is NHS governance and business process automation, not ERP solutions architecture."
+  },
+  "daffe756c6ac_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Digital Transformation",
+      "Project Management",
+      "Data Analytics",
+      "Governance & Compliance"
+    ],
+    "missing_essentials": [
+      "D365 Finance & Operations (F&O) expertise",
+      "ERP systems implementation experience",
+      "Microsoft Dynamics 365 hands-on delivery",
+      "Solutions architecture in ERP domain",
+      "Fee-earning or client-delivery track record"
+    ],
+    "employment_type_note": "Permanent, full-time role confirmed in description",
+    "verdict": "Poor match. This is a specialist technical architecture role in D365 F&O ERP systems. The candidate's background is NHS governance, workforce planning, and business process automation (Power BI/Power Automate) \u2014 not enterprise resource planning systems or ERP delivery. While both roles involve digital transformation, they operate in different technical domains. The candidate lacks the gatekeeping requirement: hands-on D365 F&O implementation and solutions architecture experience essential for a senior technical architect role.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different technical specialism; no D365 F&O or ERP systems background"
+  },
+  "880c6f0409aa_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Data Analytics / Dashboards",
+      "Microsoft Power BI",
+      "Digital Transformation",
+      "Project Management"
+    ],
+    "missing_essentials": [
+      "Hands-on Microsoft Fabric experience (Data Factory, Lakehouse, Warehouse, Notebooks)",
+      "Proven data engineering role (2-5 years)",
+      "Strong SQL skills and relational/analytical data modeling",
+      "ETL/ELT pipeline design and maintenance",
+      "Azure data services and cloud architecture experience",
+      "Data governance implementation in technical capacity"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; cannot confirm permanent status",
+    "verdict": "Poor match. This is a technical data engineering role requiring 2-5 years of hands-on experience with Microsoft Fabric, SQL, ETL/ELT pipelines, and Azure cloud architecture. The candidate's background is governance, workforce planning, and business management with Power BI dashboarding experience\u2014fundamentally different from data engineering. While the candidate has deployed Power BI dashboards and automated processes, they lack the core technical engineering skills (Fabric, SQL, pipeline architecture, cloud platforms) that are essential for this mid-level engineering position. The candidate's seniority and career trajectory do not align with a technical data engineering track.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession\u2014business governance/management role vs. technical data engineering"
+  },
+  "bf8bf23e57dc_805b3836d78d_fb665247ec50": {
+    "score": 1,
+    "matched_skills": [],
+    "missing_essentials": [
+      "Medical degree (MBBS/MD)",
+      "Psychiatry specialization and training",
+      "GMC registration as Consultant Psychiatrist",
+      "Responsible Clinician (RC) certification under Mental Health Act",
+      "Section 12 MHA approval",
+      "Clinical patient care experience",
+      "On-call medical duties capability"
+    ],
+    "employment_type_note": "Full-time permanent role meets employment type requirement.",
+    "verdict": "Fundamentally incompatible. This is a clinical medical consultant role requiring psychiatric registration, medical licensing, and direct patient care responsibilities. Candidate's profile is entirely non-clinical (governance, workforce planning, digital transformation, business management). Candidate explicitly states they are 'not open to clinical roles'.",
+    "required_qualifications": [
+      "Medical degree (MBBS/equivalent)",
+      "GMC registration",
+      "Consultant-level psychiatry training",
+      "Responsible Clinician status",
+      "Section 12 MHA approval"
+    ],
+    "qualification_gaps": [
+      "No medical degree",
+      "No GMC registration",
+      "No psychiatry specialization",
+      "No Responsible Clinician certification",
+      "No Section 12 MHA approval"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Clinical psychiatry role; candidate explicitly not open to clinical roles"
+  },
+  "5f27fafbbb02_805b3836d78d_fb665247ec50": {
+    "score": 4,
+    "matched_skills": [
+      "Leadership and team management",
+      "Performance management",
+      "Financial accountability and budget control",
+      "Governance and compliance oversight",
+      "Stakeholder management",
+      "Operational planning",
+      "Project management"
+    ],
+    "missing_essentials": [
+      "Extensive UK security industry experience (candidate has NHS/healthcare background only)",
+      "SIA regulations and ACS standards knowledge",
+      "Security sector commercial experience",
+      "Managing large security contract portfolios",
+      "Security operations management",
+      "Full UK driving licence (not stated in candidate profile)"
+    ],
+    "employment_type_note": "Full-time permanent role confirmed.",
+    "verdict": "Poor match. While the candidate has strong senior leadership, governance, and financial management credentials, this is a fundamentally different sector (security services vs. healthcare/NHS). The role requires extensive UK security industry experience as a gatekeeping requirement, which the candidate lacks entirely. No security sector background, SIA/ACS knowledge, or security operations management experience. The candidate's stated exclusions and career focus are healthcare and digital transformation, not security services.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Wrong sector; security industry experience required but candidate is healthcare-focused"
+  },
+  "206001bb7f93_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Business Governance",
+      "Data Analytics / Dashboards",
+      "Project Management",
+      "Workforce Planning"
+    ],
+    "missing_essentials": [
+      "Financial accounting and reporting expertise",
+      "Management accounts preparation",
+      "General Ledger and accounts payable/receivable management",
+      "Statutory financial compliance and audit",
+      "Cost accounting and financial analysis",
+      "CFO-level financial strategy experience"
+    ],
+    "employment_type_note": "Permanent, full-time confirmed in description",
+    "verdict": "Weak match. While the candidate has governance and data analytics strengths, a Financial Controller role requires deep financial accounting, reporting, and statutory compliance expertise. Jie Zhou's background is in governance frameworks, workforce planning, and digital transformation\u2014not financial accounting or controller-level financial management. This represents a fundamentally different specialism within business management.",
+    "required_qualifications": [
+      "Financial accounting expertise (implied)",
+      "Management accounting experience (implied)"
+    ],
+    "qualification_gaps": [
+      "No accounting qualification mentioned (ACA, ACCA, CIMA, etc.)",
+      "No demonstrable financial controller or finance manager background",
+      "Background is governance/digital transformation, not financial accounting"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Role requires financial accounting expertise; candidate's background is governance and digital transformation"
+  },
+  "1775d2c8078a_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Project Management",
+      "Workforce Planning",
+      "Budget Management",
+      "Business Governance",
+      "Data Analytics / Dashboards",
+      "Digital Transformation",
+      "Leadership and team management"
+    ],
+    "missing_essentials": [
+      "Proven senior production or operations management experience in manufacturing",
+      "Lean manufacturing, Six Sigma, OEE or continuous improvement methodologies",
+      "Flow line and cell-based manufacturing knowledge",
+      "Health, safety, quality and regulatory requirements in production environments",
+      "Production environment cost control and productivity optimization",
+      "Multi-programme/project delivery in production context",
+      "Experience with standard and bespoke product manufacturing",
+      "Unionised workforce management",
+      "EHS and manufacturing compliance knowledge"
+    ],
+    "employment_type_note": "Full-time permanent role as stated; no exclusion on employment type grounds.",
+    "verdict": "Weak match. Candidate's career is rooted in NHS healthcare governance, digital transformation, and strategic workforce planning\u2014not manufacturing operations. While leadership, budget management, and project delivery skills overlap nominally, the role requires deep manufacturing operations expertise (Lean, Six Sigma, production scheduling, quality/regulatory compliance in manufacturing, unionised environments) which is entirely absent from the candidate's profile. The candidate is explicitly not open to roles outside healthcare/governance/digital strategy, and this manufacturing operations role is fundamentally misaligned with both their experience and stated career interests.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; manufacturing operations vs. healthcare governance/digital transformation. Outside candidate's stated career domain."
+  },
+  "3d7f2418dfe8_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Digital Transformation",
+      "Project Management",
+      "Business Governance",
+      "Data Analytics / Dashboards",
+      "Power BI",
+      "Process improvement mindset",
+      "Stakeholder engagement",
+      "Team leadership"
+    ],
+    "missing_essentials": [
+      "Qualified accountant (ACA, ACCA, or CIMA) \u2014 candidate has no accounting qualification",
+      "Finance operations expertise \u2014 candidate has no finance background",
+      "ERP systems implementation experience \u2014 no evidence of ERP delivery",
+      "Financial control and budget management at enterprise scale",
+      "Knowledge of R2R, P2P, O2C finance processes",
+      "Experience leading finance transformation specifically"
+    ],
+    "employment_type_note": "Permanent role, meets candidate's requirement",
+    "verdict": "Poor fit. This is a specialist finance leadership role requiring a qualified accountant with proven finance operations and transformation delivery experience. Candidate's background is in NHS governance, workforce planning, and digital infrastructure \u2014 a fundamentally different domain. While candidate has relevant digital transformation and project leadership skills, the absence of professional accounting qualification (ACA/ACCA/CIMA), any finance operations experience, and ERP systems expertise are disqualifying gatekeeping requirements at this seniority level. Candidate is not positioned for a Head of Finance role.",
+    "required_qualifications": [
+      "Qualified accountant (ACA, ACCA or CIMA)",
+      "Proven experience leading finance transformation and operating model design",
+      "Strong knowledge of finance operations, systems and control environments",
+      "Experience with ERP systems and finance platforms"
+    ],
+    "qualification_gaps": [
+      "No accounting qualification listed (ACA, ACCA, CIMA absent)",
+      "No finance operations background",
+      "No ERP system delivery experience",
+      "No finance transformation delivery track record"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; lacks gatekeeping finance qualifications and operations background"
+  },
+  "eb2972629eb3_805b3836d78d_fb665247ec50": {
+    "score": 2,
+    "matched_skills": [
+      "Project Management",
+      "Stakeholder Engagement",
+      "Business Governance",
+      "Strategic Planning",
+      "Cross-functional Team Leadership"
+    ],
+    "missing_essentials": [
+      "Royal Air Force service or equivalent air-domain operational experience",
+      "Defence/aerospace business development track record",
+      "RAF operations, capability development and stakeholder structure knowledge",
+      "Air-domain technical credibility (UAS, ISR, EW, airspace integration)",
+      "Senior military and MOD stakeholder engagement experience",
+      "Demonstrable bid shaping and opportunity conversion in defence markets"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; treated as potential permanent role based on description wording, but unable to confirm.",
+    "verdict": "Strong misalignment. This is a defence sector business development role requiring RAF operational or air-domain military service as a gatekeeping requirement. The candidate has NHS healthcare governance and digital transformation experience with no defence, aerospace, military, or air-domain background. While they have generic project management and stakeholder engagement skills, they lack the specialist credibility, sector experience, and operational military knowledge that would make them credible to RAF stakeholders. This is a fundamentally different profession from the candidate's healthcare sector focus.",
+    "required_qualifications": [
+      "Former Royal Air Force service or equivalent air-domain experience",
+      "Service in RAF with operational, capability, requirements, programme or staff experience",
+      "Proven BD, stakeholder engagement or customer relationship experience in defence, aerospace or national security markets",
+      "Understanding of air-domain operations, UAS employment, ISR, electronic warfare, airspace integration and capability development"
+    ],
+    "qualification_gaps": [
+      "No RAF service or military background",
+      "No defence or aerospace sector experience",
+      "No air-domain technical or operational knowledge",
+      "No demonstrated BD experience in defence/aerospace/national security",
+      "Healthcare sector background, not defence"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; lacks gatekeeping requirement of RAF/air-domain military service and defence sector BD experience"
+  },
+  "43b0bb4133b7_805b3836d78d_fb665247ec50": {
+    "score": 4,
+    "matched_skills": [
+      "Project management",
+      "Data analytics / dashboards (Power BI)",
+      "Digital transformation",
+      "Stakeholder engagement",
+      "Systems implementation",
+      "Process improvement",
+      "Multi-country operations experience"
+    ],
+    "missing_essentials": [
+      "Finance systems / ERP platform ownership (no hands-on Yardi, SAP, Oracle, or comparable ERP experience)",
+      "Finance or accounting background / financial controls expertise",
+      "Finance process and data flow knowledge",
+      "Hands-on systems configuration, troubleshooting, and technical ERP support",
+      "Line management of finance systems team (candidate managed governance/business teams, not IT/systems teams)"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; salary also not stated. Cannot confirm permanent status or salary meets minimum \u00a360k threshold.",
+    "verdict": "Weak match. While the candidate has strong project management, transformation leadership, and data analytics skills (Power BI), this is a specialist finance systems role requiring hands-on ERP/accounting platform expertise. The candidate's background is in governance, workforce planning, and general business management\u2014not finance systems administration, ERP configuration, or financial controls. No evidence of Yardi, SAP, Oracle or similar ERP platform ownership. No demonstrated finance or accounting background. The role is a gatekeeping mismatch on domain expertise (finance systems specialist vs. governance/strategy generalist).",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different domain: finance systems specialist role vs. candidate's governance/strategy background; no hands-on ERP or finance systems experience"
+  },
+  "1c3639cc749f_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Data Analytics / Dashboards",
+      "Business Governance",
+      "Project Management",
+      "Stakeholder engagement",
+      "Communications",
+      "Strategic thinking"
+    ],
+    "missing_essentials": [
+      "Economics degree or equivalent work experience",
+      "Experience conducting analysis to answer economic and policy questions",
+      "Experience delivering presentations on economic/policy topics",
+      "Understanding of monetary policy and Bank of England policy frameworks",
+      "Experience conducting qualitative interviews and analysis",
+      "No track record in economic intelligence or central banking"
+    ],
+    "employment_type_note": "Full-time permanent role meets candidate's employment preferences.",
+    "verdict": "Poor match. This is a specialist central banking role requiring deep economics expertise and monetary policy knowledge. The candidate's background is entirely in healthcare governance and digital transformation\u2014a different sector with no demonstrated economics education, policy analysis experience, or central banking exposure. The role's gatekeeping requirement is an economics degree or equivalent substantive work experience in economic analysis; the candidate's qualifications are in management, project management and healthcare governance. While communication and stakeholder management skills overlap, they are insufficient for a role that fundamentally requires economic expertise to contribute to the Monetary Policy Committee's decision-making.",
+    "required_qualifications": [
+      "Economics to degree level or equivalent work experience"
+    ],
+    "qualification_gaps": [
+      "No economics degree listed; candidate holds Masters in Strategic Management of Projects (UCL) and Management (UIUC), and BA in English Language and Literature",
+      "No equivalent substantive work experience in economics, policy analysis, or economic intelligence gathering",
+      "No demonstrated experience in monetary policy or financial policy analysis"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; lacks gatekeeping requirement (economics expertise) for specialist central banking role"
+  },
+  "483ca0becb2f_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Operational management and leadership",
+      "Workforce planning and management",
+      "Business governance and compliance",
+      "Strategic planning and transformation",
+      "Performance management and reporting",
+      "Cross-organisational stakeholder engagement",
+      "Team development and mentoring",
+      "Data-driven decision-making"
+    ],
+    "missing_essentials": [
+      "Direct clinical or social care professional background (the role explicitly seeks 'experienced health and or social care professional')",
+      "Community services operational experience",
+      "Health and social care integration experience",
+      "Person-centred care delivery leadership"
+    ],
+    "employment_type_note": "Full-time permanent role confirmed.",
+    "verdict": "Partial match. Jie has strong governance, strategic management, workforce planning, and transformation credentials that align with the operational and leadership aspects of this Directorate Manager role. However, the job description explicitly targets 'an experienced health and or social care professional' with direct service delivery or clinical/social care background. Jie's expertise is in business operations, governance infrastructure, and digital transformation within NHS settings, but lacks the clinical/social care professional identity and community services operational track record that appears to be a gatekeeping criterion for this role. The role requires deep understanding of integrated community care models, person-centred care, and direct patient/service-user impact\u2014areas where Jie's background is administrative/strategic rather than frontline. While Jie could potentially manage the operational and performance aspects, the hiring manager would likely screen for candidates with active health/social care registration or hands-on community services management experience first.",
+    "required_qualifications": [
+      "Health and/or social care professional background (implied as primary requirement)",
+      "Operational management experience in community or health/social care services"
+    ],
+    "qualification_gaps": [
+      "No evidence of health or social care professional registration or qualification",
+      "No stated community services or integrated health/social care operational background",
+      "Background is in governance and digital transformation, not clinical or direct service delivery leadership"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "7af9939a0e10_805b3836d78d_fb665247ec50": {
+    "score": 6,
+    "matched_skills": [
+      "Power BI (dashboards, data modelling)",
+      "Data Analytics / Dashboards",
+      "SQL (implicit from governance and data infrastructure work)",
+      "Digital Transformation",
+      "Data governance and quality management",
+      "Stakeholder engagement and communication",
+      "Project management",
+      "Business intelligence reporting"
+    ],
+    "missing_essentials": [
+      "Python and/or PySpark experience (not mentioned in profile)",
+      "Cloud data platform hands-on experience (Azure Data Factory, Synapse, Databricks, Microsoft Fabric) - no explicit evidence",
+      "Modern data pipeline design (lakehouse, medallion architecture) - no evidence",
+      "Git and CI/CD practices - not mentioned",
+      "Data engineering role seniority (3\u20136 years in Data Engineering or Analytics Engineering specifically) - candidate's background is governance/business management, not data engineering"
+    ],
+    "employment_type_note": "Employment type not stated in posting; salary not stated (candidate minimum \u00a360,000 cannot be verified). These are risks but not explicit exclusions.",
+    "verdict": "Partial match. Candidate has strong Power BI and data governance expertise, stakeholder management, and digital transformation experience. However, the role is fundamentally a Data Engineering position requiring 3\u20136 years of hands-on data pipeline, cloud platform, and Python/PySpark experience. Candidate's background is in business governance, workforce planning, and governance reporting\u2014not data engineering. The Power BI skills are valuable but insufficient to bridge the gap in engineering infrastructure fundamentals (cloud platforms, ETL/ELT, Git/CI-CD, Python). This is a seniority mismatch: the role expects a mid-level data engineer; candidate is a business governance manager with analytical capabilities, not a data platform engineer. Realistic shortlist odds are low.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "c9e265768eca_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Business Governance",
+      "Strategic Planning",
+      "Project Management",
+      "Data Analytics / Dashboards",
+      "Digital Transformation",
+      "Workforce Planning",
+      "Line Management",
+      "Stakeholder Engagement",
+      "Process Improvement"
+    ],
+    "missing_essentials": [
+      "Procurement leadership experience in shipbuilding, defence, engineering, construction, manufacturing, or heavy industry",
+      "Strategic sourcing expertise and RFQ/ITT process leadership",
+      "Contract negotiation experience for high-value commercial agreements",
+      "Supplier relationship management and performance management frameworks",
+      "SAP ERP system experience",
+      "Commercial acumen specific to procurement",
+      "Multi-site procurement operations management"
+    ],
+    "employment_type_note": "Full-time permanent role confirmed. No exclusion on employment type.",
+    "verdict": "Weak match. Candidate has strong governance, digital transformation, and workforce management capabilities, but lacks the essential procurement, contract management, and supplier relationship experience that is foundational to this senior procurement leadership role. The candidate's background is NHS healthcare governance and digital transformation, not procurement or defence/shipbuilding supply chain. While project management and data analytics skills are transferable, the domain and functional expertise gap is substantial. A hiring manager would likely view this as a career pivot lacking the required procurement pedigree for a strategic senior procurement role in defence shipbuilding.",
+    "required_qualifications": [
+      "Extensive procurement leadership experience in shipbuilding, defence, engineering, construction, manufacturing, or heavy industry",
+      "Strong expertise in procurement governance, strategic sourcing, contract management, and supplier relationship management",
+      "Proven track record of leading complex RFQ/ITT processes and negotiating high-value commercial agreements",
+      "Experience with ERP systems (preferably SAP)",
+      "Strong commercial acumen"
+    ],
+    "qualification_gaps": [
+      "No stated procurement leadership experience; background is healthcare governance and digital transformation",
+      "No RFQ/ITT process or strategic sourcing experience documented",
+      "No contract negotiation or commercial agreement experience in procurable goods/services",
+      "No SAP ERP experience (Power BI and SharePoint are different platforms)",
+      "No supplier relationship management or supplier performance management framework experience",
+      "No defence, maritime, naval, or shipbuilding sector experience",
+      "No document management system experience (OpenText not mentioned)"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; lacks essential procurement and supply chain leadership experience required for senior role in defence shipbuilding. Domain mismatch between healthcare governance and procurement/defence."
+  },
+  "b31f0093a18b_805b3836d78d_fb665247ec50": {
+    "score": 6,
+    "matched_skills": [
+      "Power BI",
+      "Data analytics and dashboards",
+      "Business governance and data infrastructure",
+      "Project management",
+      "Workforce planning and reporting",
+      "Stakeholder communication",
+      "Line management and team development",
+      "Microsoft Office proficiency",
+      "Digital transformation",
+      "Strategic thinking"
+    ],
+    "missing_essentials": [
+      "SQL expertise (not demonstrated in profile)",
+      "Python expertise (not demonstrated in profile)",
+      "Statistical modelling and advanced data science techniques (not demonstrated)",
+      "Proven track record leading data science projects or analytics teams",
+      "Domain experience in blood supply, transplant, or clinical operations"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; unable to confirm permanent status.",
+    "verdict": "Partial match. Candidate has strong governance, data infrastructure, Power BI, and team leadership experience, but lacks demonstrated expertise in core data science technical skills (SQL, Python, statistical modelling) that are central to a Senior Data Scientist role. The role requires advanced analytics and predictive modelling capability; candidate's background is primarily in governance, business intelligence reporting, and digital transformation project delivery rather than data science research or modelling. Team management experience is relevant, but the technical depth expected at senior data scientist level is not evident. Candidate's seniority and strategic thinking align, but the technical skill gaps are significant for this specialised role.",
+    "required_qualifications": [
+      "Master's degree in a relevant numerate subject, or equivalent experience working at a similar level",
+      "Advanced training or experience in data analysis and relevant software tools",
+      "Evidence of continued professional development"
+    ],
+    "qualification_gaps": [
+      "Master's degree listed (Strategic Management of Projects from UCL, plus Management degree), but neither is explicitly in a 'numerate subject' (e.g., statistics, mathematics, data science, computer science); however, 'equivalent experience' clause may apply given 6+ years in data-driven governance roles",
+      "No evidence of advanced training in statistical modelling, Python, or SQL provided",
+      "CPD evidence present (certifications listed) but limited to business management rather than data science"
+    ],
+    "qualification_status": "partial",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "7e03d32803c6_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Stakeholder engagement and relationship management",
+      "Business governance and strategic planning",
+      "Project management",
+      "Data analytics and reporting",
+      "Digital transformation",
+      "Cross-functional team collaboration"
+    ],
+    "missing_essentials": [
+      "Enterprise B2B SaaS sales experience \u2014 no track record of selling or expanding six- and seven-figure ARR accounts",
+      "Financial services / RegTech / compliance software sales experience \u2014 candidate's background is NHS/healthcare operations and governance, not commercial sales",
+      "Direct experience selling into MLRO, financial crime, sanctions, or trust & safety functions",
+      "Demonstrated commercial instinct and revenue expansion within customer accounts \u2014 candidate's role is operational governance, not account growth or sales",
+      "Forecasting discipline and CRM experience (Salesforce) in a sales context \u2014 candidate has data analytics skills but not sales pipeline/forecasting discipline",
+      "Executive presence in high-stakes commercial negotiations with banking and corporate leaders \u2014 candidate has executive communication skills but in NHS governance context, not commercial sales",
+      "Channel partner acquisition and vendor relationship development experience",
+      "Exposure to selling AI, data, or analytics products into regulated financial institutions"
+    ],
+    "employment_type_note": "Full-time permanent role \u2014 meets candidate's employment preference",
+    "verdict": "Weak match. This is a senior commercial account management and channel sales role requiring a demonstrable track record in enterprise B2B SaaS sales expansion and financial services sector experience. The candidate's strength lies in governance, workforce planning, operational management, and internal business systems within NHS settings. While they have strong stakeholder management, project delivery, and data analytics capabilities, they lack the essential gatekeeping requirement for this seniority: proven experience expanding six- and seven-figure ARR accounts, selling into financial crime/compliance functions, and navigating complex enterprise procurement and commercial negotiations. This is a fundamentally different professional track (operations/governance vs. commercial sales) and the candidate is explicitly not open to roles outside their stated target profile of Business Manager, Digital Transformation, and Senior Management in non-clinical settings. A hiring manager would treat prior B2B SaaS sales success and financial services sector experience as non-negotiable at senior account manager level.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession (commercial B2B SaaS sales vs. healthcare governance/operations); lacks gatekeeping requirement: no track record of enterprise account expansion or financial services sales"
+  },
+  "66acffdaae19_805b3836d78d_fb665247ec50": {
+    "score": 2,
+    "matched_skills": [
+      "Workforce planning and coordination",
+      "Multi-agency collaboration and stakeholder engagement",
+      "Problem-solving and process improvement",
+      "Communication and relationship-building"
+    ],
+    "missing_essentials": [
+      "Direct experience working with children and young people in educational or safeguarding contexts",
+      "Knowledge of SEND, behaviour, attendance and emotional wellbeing",
+      "Experience in school-based interventions or educational support services",
+      "Background in education, safeguarding, or child-focused services"
+    ],
+    "employment_type_note": "Full-time permanent role \u2014 meets candidate's stated requirement.",
+    "verdict": "Fundamental domain mismatch. Candidate's expertise is in NHS governance, digital transformation, and healthcare business management. This is a front-line, child-facing practitioner role in education and safeguarding. The candidate has explicitly stated they are not open to clinical roles, and this role, while not clinical, requires lived experience of working directly with vulnerable children and young people in educational settings \u2014 a domain entirely outside the candidate's career history. The candidate's governance and digital infrastructure skills are not transferable to the core frontline responsibilities (direct work with schools, families, children at risk of exclusion, attendance intervention, emotional wellbeing support). Candidate is overqualified structurally but fundamentally misaligned professionally.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession and domain expertise. Candidate's background is NHS governance/digital transformation, not education, child safeguarding, or SEND support. Not open to clinical/care roles; this is education-sector frontline work."
+  },
+  "a8de4bda8708_805b3836d78d_fb665247ec50": {
+    "score": 4,
+    "matched_skills": [
+      "Governance and assurance frameworks",
+      "Stakeholder management and executive engagement",
+      "Risk management and compliance oversight",
+      "Digital transformation and programme delivery",
+      "Project and operational governance",
+      "Data and infrastructure design"
+    ],
+    "missing_essentials": [
+      "End-to-end solution architecture leadership (no evidence of technical architecture role)",
+      "Enterprise networking, security, cloud and integration technologies expertise",
+      "Design authority experience on large-scale technical programmes",
+      "Technical breadth across multiple domains (networking, security, cloud)",
+      "Service provider technologies knowledge",
+      "Architecture frameworks and governance methodologies (TOGAF, etc.)",
+      "HLD/LLD artefact direction and technical design authority"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; treated as potentially permanent pending confirmation.",
+    "verdict": "Weak match. The candidate has strong governance, compliance, and programme management experience but lacks the core technical architecture expertise and technical depth required for this Solution Architect role. This is fundamentally a technical architecture position requiring deep knowledge of enterprise networking, security, cloud and integration technologies. The candidate's background is in business governance, workforce planning and digital transformation enablement\u2014governance and process-heavy roles\u2014not technical solution design or architecture. While stakeholder management and governance experience transfer, the missing technical credentials (no evidence of enterprise architecture, cloud infrastructure, networking or security technology expertise) represent a gatekeeping gap for a senior architect role at BT. The candidate would be better positioned for a Digital Transformation Manager or Business Governance role.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession (technical architecture vs. business governance/transformation)"
+  },
+  "76e3fdb9a565_805b3836d78d_fb665247ec50": {
+    "score": 4,
+    "matched_skills": [
+      "Business Governance",
+      "Digital Transformation",
+      "Project Management",
+      "Data Analytics / Dashboards",
+      "Workforce Planning",
+      "Strategic leadership and planning",
+      "Stakeholder engagement",
+      "Risk management and assurance"
+    ],
+    "missing_essentials": [
+      "Deep technical infrastructure expertise (Server, Network, Data Centre architecture)",
+      "IT Service Management (ITIL) framework experience",
+      "Critical Incident Management (CIM) command and technical leadership",
+      "Core infrastructure platform management (not just governance reporting)",
+      "Service Desk and Telephony operational leadership",
+      "Technical systems administration and infrastructure resilience",
+      "Disaster Recovery/Business Continuity technical planning",
+      "IT security and infrastructure-level compliance assurance"
+    ],
+    "employment_type_note": "Full-time permanent role confirmed.",
+    "verdict": "Poor match. This is a senior technical operations and infrastructure leadership role requiring deep hands-on technical expertise in server, network, and data centre platforms, ITIL service management, and critical incident management. The candidate's background is in governance frameworks, workforce planning, digital transformation strategy, and business process automation using Power BI and SharePoint. While governance and strategic planning experience overlaps, the role's core 50% infrastructure strategy and resilience component demands infrastructure engineering and technical architecture expertise the candidate does not demonstrate. The salary is also unstated, creating additional uncertainty. This role requires a CTO/infrastructure-track leader, not a governance and business systems specialist.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Role fundamentally misaligned: requires deep technical infrastructure & ITIL expertise; candidate's track record is governance/business systems/digital transformation, not infrastructure operations"
+  },
+  "826320e5b700_805b3836d78d_fb665247ec50": {
+    "score": 4,
+    "matched_skills": [
+      "Power BI dashboards",
+      "Data Analytics",
+      "Digital Transformation",
+      "Process improvement and modernisation",
+      "Governance and compliance frameworks",
+      "Stakeholder engagement",
+      "Project management"
+    ],
+    "missing_essentials": [
+      "Charity accounting expertise (Charity SORP)",
+      "Financial reporting and analysis (core to role)",
+      "Oracle financial systems experience",
+      "Advanced Excel skills for financial analysis",
+      "Fund accounting and donor-restricted funds management",
+      "Charity Commission compliance knowledge",
+      "Monthly/annual financial statements preparation",
+      "External audit support and working papers",
+      "Treasury management",
+      "Income reconciliation and ledger management"
+    ],
+    "employment_type_note": "Full-time permanent role confirmed.",
+    "verdict": "Weak match. Candidate has governance, digital transformation, and Power BI skills that align with modernisation aspects of the role. However, this is fundamentally a specialist charity finance role requiring core financial accounting competencies (Charity SORP, Oracle, fund accounting, external audit support, treasury). Candidate's background is in NHS workforce planning, governance frameworks, and digital infrastructure\u2014not financial reporting, accounting, or charitable fund management. The salary is unstated, which may fall below the \u00a360k minimum. This represents a significant career pivot into a specialist finance domain where the candidate lacks essential qualifications and direct experience.",
+    "required_qualifications": [],
+    "qualification_gaps": [
+      "No evidence of accounting qualifications (e.g., CCAB, AAT, ACCA, ACA, CPA, or equivalent)",
+      "No charity accounting or Charity SORP training mentioned",
+      "No Oracle financial systems experience stated"
+    ],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Specialist finance role; candidate lacks core financial accounting background and charity-specific expertise. Not a realistic match despite some digital/governance overlap."
   }
 }
