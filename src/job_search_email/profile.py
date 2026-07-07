@@ -57,6 +57,7 @@ def load_profile(path: Path) -> Profile:
         send_main_email=data.get("send_main_email", True),
         send_debug_email=data.get("send_debug_email", False),
         filter_recruitment=data.get("filter_recruitment", True),
+        filter_sponsors=data.get("filter_sponsors", True),
     )
 
 

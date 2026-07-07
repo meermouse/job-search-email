@@ -68,9 +68,11 @@ def test_fixture_scores_rejected_jobs_have_no_analysis():
 def test_local_run_writes_email_preview(tmp_path, monkeypatch):
     import shutil
 
-    # Copy profile.yaml into the temp directory
+    # Copy the profile YAML into the temp directory
     project_root = Path(__file__).parent.parent
-    shutil.copy(project_root / "profile.yaml", tmp_path / "profile.yaml")
+    profiles_dir = tmp_path / "profiles"
+    profiles_dir.mkdir()
+    shutil.copy(project_root / "profiles" / "jie-zhou.yaml", profiles_dir / "jie-zhou.yaml")
 
     # Point cwd at tmp_path so all file writes land there
     monkeypatch.chdir(tmp_path)
@@ -89,7 +91,9 @@ def test_local_run_writes_json_artefacts(tmp_path, monkeypatch):
     import shutil
 
     project_root = Path(__file__).parent.parent
-    shutil.copy(project_root / "profile.yaml", tmp_path / "profile.yaml")
+    profiles_dir = tmp_path / "profiles"
+    profiles_dir.mkdir()
+    shutil.copy(project_root / "profiles" / "jie-zhou.yaml", profiles_dir / "jie-zhou.yaml")
     monkeypatch.chdir(tmp_path)
 
     from job_search_email import local_run

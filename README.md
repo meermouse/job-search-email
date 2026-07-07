@@ -4,13 +4,14 @@ A minimal Python application that generates a structured job search plan from a 
 
 ## What it does
 
-- loads a user profile from `profile.yaml`
+- loads user profiles from `profiles/*.yaml` — one email per profile, each to its own recipient
 - generates a structured search plan with:
   - 8 tailored search queries
   - exclusion keywords for clinical roles
   - employment type exclusion terms
   - NHS band floor rules
   - evaluator notes for scoring
+- filters to UK licensed sponsor companies per profile (disable with `filter_sponsors: false` in that profile's YAML)
 - caches the plan in `search_plan_cache.json` keyed by a profile fingerprint
 - writes the active plan to `search_plan.json`
 
@@ -46,7 +47,7 @@ jobs.
 
 ### Reed and NHS URLs (fetch automatically)
 
-Just pass the URL. `profile.yaml` in the repo root is used by default.
+Just pass the URL. `profiles/jie-zhou.yaml` is used by default; pass `--profile profiles/<name>.yaml` for another profile.
 
 ```powershell
 explain-job https://www.reed.co.uk/jobs/senior-project-manager/53819371
@@ -91,9 +92,10 @@ replay.
 | Flag | Default | Purpose |
 | --- | --- | --- |
 | `<url>` | — | Job URL (omit only when using `--job-file`). |
-| `--profile` | `profile.yaml` | Candidate profile to evaluate against. |
+| `--profile` | `profiles/jie-zhou.yaml` | Candidate profile to evaluate against. |
 | `--job-file` | — | YAML job details; fallback for LinkedIn/Indeed. Takes precedence over the URL. |
 | `--force-score` | off | Run the AI scorer even when a hard filter rejected the job ("what would the AI have said?"). |
+| `--run-data` | `runs/jie-zhou/job_results.json` | Local run data to resolve the job from (written by the pipeline under `runs/<profile>/`). |
 
 ## GitHub Actions
 

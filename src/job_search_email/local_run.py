@@ -67,7 +67,7 @@ def _write_scored_results(results: list[ScoredResult], path: Path) -> None:
 
 def main() -> None:
     root = Path.cwd()
-    profile = load_profile(root / "profile.yaml")
+    profile = load_profile(root / "profiles" / "jie-zhou.yaml")
     fingerprint = fingerprint_profile(profile)
 
     exclusion_roles = sorted(set(_EXCLUSION_ROLES + [t.lower() for t in profile.not_open_to]))
