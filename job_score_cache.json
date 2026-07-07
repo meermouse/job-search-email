@@ -1549,5 +1549,523 @@
     "qualification_status": "",
     "exclude": true,
     "exclude_reason": "Specialist finance role; candidate lacks core financial accounting background and charity-specific expertise. Not a realistic match despite some digital/governance overlap."
+  },
+  "1415592d059c_087ef008101c_ea62c52e0813": {
+    "score": 1,
+    "matched_skills": [
+      "C#",
+      ".NET Framework",
+      "ASP.NET Core",
+      "TypeScript",
+      "Angular",
+      "React",
+      "JavaScript",
+      "Node.js",
+      "HTML5",
+      "CSS",
+      "SQL",
+      "Git",
+      "Cloud computing",
+      "Azure",
+      "RESTful APIs",
+      "Agile methodologies",
+      "Test-Driven Development"
+    ],
+    "missing_essentials": [],
+    "employment_type_note": "Full-time permanent role as stated",
+    "verdict": "Graduate Developer role explicitly misaligned with candidate's seniority and search preferences. Marc Brookes is a Senior Software Engineer with 15+ years of experience, currently at Siemens. This is a graduate entry-level position designed for early-career developers. The candidate has explicitly stated they are not open to graduate/junior roles.",
+    "required_qualifications": [
+      "Degree level education (preferably IT-related)"
+    ],
+    "qualification_gaps": [],
+    "qualification_status": "met",
+    "exclude": true,
+    "exclude_reason": "Graduate role (candidate explicitly not open to junior/graduate positions; seeking Senior level only)"
+  },
+  "7c574c2709b9_087ef008101c_ea62c52e0813": {
+    "score": 3,
+    "matched_skills": [
+      "Software Engineering",
+      "Software Development",
+      "C#",
+      "JavaScript",
+      "React",
+      "Angular",
+      "SQL",
+      "Web Services",
+      "AI-assisted development"
+    ],
+    "missing_essentials": [
+      "Platform Engineering specialization",
+      "Cloud-native architecture experience",
+      "Infrastructure/DevOps focus",
+      "Security clearance (SC cleared or SC eligible)"
+    ],
+    "employment_type_note": "Employment type not stated in job description; cannot confirm permanent status",
+    "verdict": "Partial match. Candidate has strong senior software engineering credentials and relevant technical skills, but lacks explicit Platform Engineering and cloud-native systems experience. Security clearance requirement is a gatekeeping factor not met. Seniority level (Principal) aligns with candidate's current Senior role, but the specialization gap and missing clearance create material risk of rejection at hiring stage.",
+    "required_qualifications": [
+      "SC security clearance (SC cleared or SC eligible)"
+    ],
+    "qualification_gaps": [
+      "No security clearance mentioned in candidate profile"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Security clearance required (SC cleared or SC eligible) \u2014 candidate does not hold this gatekeeping qualification"
+  },
+  "ae21f1a6cca6_087ef008101c_ea62c52e0813": {
+    "score": 1,
+    "matched_skills": [],
+    "missing_essentials": [
+      "Talent acquisition / recruitment experience",
+      "Technical recruitment specialization",
+      "Resume sourcing and candidate screening",
+      "ATS and recruitment tools management",
+      "Staffing targets and pipeline management"
+    ],
+    "employment_type_note": "Contract/Regular employment type stated; unclear if permanent role guaranteed. Salary not stated\u2014below candidate's \u00a380k minimum.",
+    "verdict": "Fundamentally different profession. Candidate is a Senior Software Engineer; this is a Technical Recruiter role. No software development, engineering, or technical delivery skills are relevant to HR/recruitment functions. This fails the candidate's seniority expectations and career direction.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Wrong profession (recruitment vs. software engineering); salary not stated; employment type unclear"
+  },
+  "39aeac84b124_087ef008101c_ea62c52e0813": {
+    "score": 7,
+    "matched_skills": [
+      "Senior Software Engineer experience",
+      "C# / .NET background",
+      "Software architecture knowledge",
+      "Legacy system modernization",
+      "Front-end development (React, Angular)",
+      "Full-stack capability",
+      "AI-assisted development"
+    ],
+    "missing_essentials": [
+      "Demonstrated people leadership / team management at scale",
+      "Budget ownership or P&L responsibility",
+      "Microsoft Power Platform / Dataverse experience",
+      "Digital transformation programme leadership track record"
+    ],
+    "employment_type_note": "Permanent role confirmed in description",
+    "verdict": "Partial match. Strong technical foundation and seniority level align well; however, the Head of Software Engineering role is a leadership / management position requiring demonstrated people leadership, budget ownership, and strategic programme delivery experience. Candidate's background shows technical seniority but lacks explicit evidence of leading large engineering teams or owning P&L at this scale. Technical skills in .NET are present but Power Platform / Dataverse are not mentioned. Realistic shortlisting odds are moderate\u2014hiring manager may view lack of explicit leadership track record as a gatekeeping gap for a Head-level role.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "b92f4b8fca17_087ef008101c_ea62c52e0813": {
+    "score": 8,
+    "matched_skills": [
+      "C# / .NET Framework",
+      "JavaScript / TypeScript",
+      "React",
+      "Angular",
+      "SQL database design and querying",
+      "RESTful API design",
+      "Agile development experience",
+      "Test-Driven Development awareness",
+      "Clean code principles",
+      "Source control (Git)",
+      "Cloud computing platforms",
+      "Software architecture",
+      "Enterprise solution delivery",
+      "Code review and mentoring",
+      "Front-end development expertise"
+    ],
+    "missing_essentials": [
+      "Apache Kafka or message queue technologies (not explicitly mentioned)",
+      "NoSQL database experience (not explicitly mentioned)",
+      "Docker / Kubernetes (not mentioned, though listed as desirable)",
+      "Azure DevOps (not mentioned, though listed as desirable)"
+    ],
+    "employment_type_note": "Full-time permanent role confirmed",
+    "verdict": "Strong match. Candidate has 16+ years software development experience, proven expertise in C#, JavaScript, React, Angular, SQL, and enterprise-scale solutions. Meets senior level expectations and search criteria. Missing explicit mention of Kafka/message brokers and NoSQL, but these are learnable and candidate's track record suggests quick capability pickup. No salary stated is a minor administrative gap but does not disqualify.",
+    "required_qualifications": [
+      "Degree level education, preferably IT-related"
+    ],
+    "qualification_gaps": [],
+    "qualification_status": "met",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "f92599e4b886_087ef008101c_ea62c52e0813": {
+    "score": 3,
+    "matched_skills": [
+      "SQL",
+      "Software engineering",
+      "Systems thinking",
+      "Team leadership",
+      "Technical communication"
+    ],
+    "missing_essentials": [
+      "Python (not listed in candidate profile)",
+      "Data architecture (no demonstrated experience)",
+      "Data engineering (no demonstrated experience)",
+      "Cloud platform experience (AWS, Azure, GCP not mentioned)",
+      "Data modeling (not evidenced)",
+      "Data pipeline design (not evidenced)",
+      "DataOps practices (not evidenced)",
+      "Modern data platforms (Snowflake, Databricks, Redshift not mentioned)"
+    ],
+    "employment_type_note": "Full-time permanent; matches candidate requirement",
+    "verdict": "Weak match. This is a specialist data architecture and data engineering role requiring 7+ years of hands-on experience with cloud data platforms, Python, and DataOps practices. The candidate is a frontend-focused software engineer with React/Angular expertise and no demonstrated background in data architecture, data engineering, cloud platforms, or Python. The role requires deep technical depth in a fundamentally different domain (data platform engineering vs. application frontend development). While the candidate has senior software engineering credentials and SQL knowledge, these do not bridge the substantial gap in data-specific expertise that is core to this Principal-level role.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Domain mismatch\u2014data architect role, candidate is application/frontend engineer"
+  },
+  "d6cc5c7fb497_087ef008101c_ea62c52e0813": {
+    "score": 4,
+    "matched_skills": [
+      "Software Engineering",
+      "C#",
+      "JavaScript",
+      "SQL",
+      "Web Services",
+      "AI-assisted development"
+    ],
+    "missing_essentials": [
+      "Backend specialization (candidate's recent focus is frontend/React/Angular)",
+      "Explicit backend technology stack experience not detailed",
+      "No stated backend architecture or microservices experience"
+    ],
+    "employment_type_note": "Employment type not stated in job description; cannot confirm permanent full-time role",
+    "verdict": "Weak match. While the candidate has foundational backend skills (C#, SQL, Web Services) and senior-level experience, their recent specialization is explicitly frontend-focused (React, Angular). The job description lacks detail, but a Senior Backend Engineer role typically requires demonstrated backend specialization and architecture experience. The candidate's last 2+ years have been frontend-oriented at Siemens. No salary or employment terms stated, creating additional uncertainty against stated preferences (\u00a380k+ permanent only).",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Seniority mismatch: candidate is frontend-specialized; role is backend-focused. Salary and employment type not stated."
+  },
+  "4e50bad543ca_087ef008101c_ea62c52e0813": {
+    "score": 7,
+    "matched_skills": [
+      "Full-stack development",
+      "React / TypeScript front-end",
+      "Python back-end capability",
+      "Software engineering practices",
+      "Agile team collaboration",
+      "Test-driven development",
+      "AI-assisted development"
+    ],
+    "missing_essentials": [
+      "Demonstrated FastAPI experience (role explicitly requires 'strong understanding of agentic Python frameworks')",
+      "Proven production-level Python backend delivery (candidate's background is primarily front-end focused in recent roles)"
+    ],
+    "employment_type_note": "Permanent, full-time role confirmed \u2014 matches candidate's requirement",
+    "verdict": "Partial match. Candidate has strong front-end credentials (React, TypeScript, senior level) and AI awareness, but lacks explicit Python/FastAPI backend experience that the role treats as core. Role describes 'agentic Python frameworks' and FastAPI as primary requirements for owning features 'end-to-end' across both back and front ends. Candidate's recent specialization is front-end focused; earlier work touches multiple languages but no FastAPI portfolio evident. Salary not stated, which introduces minor uncertainty against \u00a380k minimum.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "df27c50e608d_087ef008101c_ea62c52e0813": {
+    "score": 4,
+    "matched_skills": [
+      "Senior-level software engineering experience",
+      "Software development with object-oriented design",
+      "AI-assisted development background",
+      "Master's degree in quantitative discipline"
+    ],
+    "missing_essentials": [
+      "Production-level PyTorch or TensorFlow experience",
+      "Deep learning architecture expertise (CNNs, U-Net)",
+      "Machine learning model development and deployment experience",
+      "Python scientific and ML ecosystem expertise",
+      "Computer vision and image processing specialization",
+      "ML theory and mathematics foundation"
+    ],
+    "employment_type_note": "Permanent full-time role confirmed; location is Belfast HQ or remote within UK",
+    "verdict": "Weak match. Candidate is a senior frontend/web developer with C# and JavaScript expertise, not a machine learning engineer. While they have mentioned 'AI-assisted development', this is fundamentally different from the core requirement of building, training, deploying and optimizing ML models for computer vision. The role requires deep ML specialization (PyTorch/TensorFlow, CNNs, image processing mathematics) which is not evident in their profile. No ML project delivery track record demonstrated.",
+    "required_qualifications": [
+      "MSc in Computer Science, Data Science, Mathematics, Physics, Engineering or related quantitative discipline, or equivalent industry experience"
+    ],
+    "qualification_gaps": [
+      "No MSc in data science or ML-focused discipline; MSc is in Computing but no evidence of ML specialization",
+      "No demonstrated equivalent industry experience in machine learning development"
+    ],
+    "qualification_status": "partial",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession - ML engineer vs frontend developer; core gatekeeping requirement (ML specialization) absent"
+  },
+  "a52c93be9e66_087ef008101c_ea62c52e0813": {
+    "score": 7,
+    "matched_skills": [
+      "React",
+      "TypeScript (implied from JavaScript mastery)",
+      "Full-stack development",
+      "Node.js ecosystem (software engineering background)",
+      "Frontend development",
+      "Software architecture",
+      "Senior-level experience"
+    ],
+    "missing_essentials": [
+      "TypeScript explicitly listed in candidate skills (only JavaScript mentioned)",
+      "Node.js backend specialization (candidate specializes in frontend; backend experience not detailed)",
+      "Startup/scale-up experience (all roles at large/established organizations)"
+    ],
+    "employment_type_note": "Employment type not stated in job description. Candidate requires full-time permanent only. This is a risk factor requiring clarification before proceeding.",
+    "verdict": "Partial match. Candidate has strong React and full-stack credentials with appropriate seniority for a lead role. However, TypeScript is not explicitly listed (though JavaScript proficiency is strong), backend specialization is unclear, and startup scaling experience is absent. The unstated employment type creates uncertainty. Realistic shortlist odds: moderate\u2014technical fit is good but gaps in backend focus and startup context may disadvantage against candidates with explicit Node/TypeScript and scale-up backgrounds.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "d596d5f97fc2_087ef008101c_ea62c52e0813": {
+    "score": 2,
+    "matched_skills": [
+      "Programming experience (C#, JavaScript)",
+      "Software development and engineering background",
+      "Analytical thinking"
+    ],
+    "missing_essentials": [
+      "Hardware design concepts (RTL, Verilog, VHDL)",
+      "Computer architecture or digital systems understanding",
+      "SoC design experience",
+      "Modelling and simulation for hardware",
+      "Electronics or hardware engineering background",
+      "Python, Rust, or C++ programming",
+      "PCIe, Ethernet, or memory systems familiarity"
+    ],
+    "employment_type_note": "Employment type not stated in posting; assuming permanent based on standard graduate programme structure, but unconfirmed",
+    "verdict": "Strong exclusion: this is a graduate/entry-level role. Candidate is a Senior Software Engineer with 15+ years' experience, actively seeking senior and lead positions only. Candidate has explicitly stated they are 'not open to graduate / junior roles'. Additionally, candidate lacks the hardware/silicon architecture specialism required (no RTL, Verilog, VHDL, or SoC design experience evident). Career level mismatch is disqualifying.",
+    "required_qualifications": [
+      "Degree in Electronic Engineering, Computer Science, or related field"
+    ],
+    "qualification_gaps": [
+      "Electronic Engineering background (candidate has BSc Applied Mathematics and MSc Computing, not electronics)",
+      "No demonstrated hardware design or silicon architecture experience"
+    ],
+    "qualification_status": "partial",
+    "exclude": true,
+    "exclude_reason": "Graduate/junior role; candidate not open to junior positions"
+  },
+  "bb63b5083b30_087ef008101c_ea62c52e0813": {
+    "score": 3,
+    "matched_skills": [
+      "Software development experience",
+      "AI-assisted development knowledge",
+      "Web services",
+      "SQL database competency"
+    ],
+    "missing_essentials": [
+      "Backend specialization (candidate specializes in front-end)",
+      "Python or other back-end languages (candidate's stack is C#, Java, JavaScript, React, Angular)",
+      "AI infrastructure experience (candidate has AI-ready application knowledge, not infrastructure)",
+      "Distributed systems / cloud infrastructure expertise",
+      "DevOps or infrastructure-as-code experience"
+    ],
+    "employment_type_note": "Employment type not stated in posting",
+    "verdict": "Weak match. Candidate is a senior front-end specialist (React, Angular) seeking front-end, full-stack, or architectural roles. This is a back-end AI infrastructure role\u2014a fundamentally different specialization. While candidate has AI knowledge and software engineering depth, the role targets backend infrastructure expertise the candidate's profile does not demonstrate. Location (Bristol) is geographically feasible. Salary not stated, creating uncertainty against \u00a380k minimum.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Wrong seniority/specialization: front-end specialist vs. back-end infrastructure role; salary not stated"
+  },
+  "93b41a8c4f5d_087ef008101c_ea62c52e0813": {
+    "score": 3,
+    "matched_skills": [
+      "JavaScript/TypeScript",
+      "React",
+      "Software development",
+      "SQL databases",
+      "Frontend development",
+      "AI-assisted development",
+      "Web services"
+    ],
+    "missing_essentials": [
+      "3+ years production AI/agentic development (no agentic systems or LLM orchestration mentioned)",
+      "Hands-on agent wiring (LangGraph, AutoGen, Claude Agent SDK, OpenAI Assistants)",
+      "Structured AI-assisted development workflows with demonstrated discipline",
+      "Python expertise (required; candidate lists JavaScript/C# primarily)",
+      "Vector database implementation and retrieval pipelines",
+      "Cloud-native deployment at scale (Docker, Kubernetes, GitHub Actions)",
+      "Deep LLM behavior understanding and optimization",
+      "Recent portfolio/GitHub trail of AI/agentic projects",
+      "Healthcare or life sciences domain exposure"
+    ],
+    "employment_type_note": "Contract role; candidate requires full-time permanent only",
+    "verdict": "Excluded: Contract employment type conflicts with candidate's stated requirement for permanent roles only. Additionally, the role demands 3+ years of specialized AI/agentic development with hands-on LLM orchestration and structured AI workflows\u2014expertise not evidenced in candidate's profile. Candidate's background is traditional full-stack and frontend engineering; this role is forward-deployed AI engineering at the frontier.",
+    "required_qualifications": [
+      "Bachelor's or Master's in Computer Science, Machine Learning, or related technical discipline"
+    ],
+    "qualification_gaps": [
+      "No Machine Learning degree listed; candidate has BSc Applied Mathematics and MSc Computing (satisfies bachelor/master requirement but not ML specialization)"
+    ],
+    "qualification_status": "partial",
+    "exclude": true,
+    "exclude_reason": "Contract role (candidate requires permanent); lacks specialized AI/agentic development experience"
+  },
+  "0d534679be1d_087ef008101c_ea62c52e0813": {
+    "score": 3,
+    "matched_skills": [
+      "JavaScript/TypeScript",
+      "React",
+      "SQL databases",
+      "Software development",
+      "Front-end development",
+      "AI-assisted development (mentioned in profile)"
+    ],
+    "missing_essentials": [
+      "3+ years production AI/agentic development (no evidence in CV)",
+      "Hands-on agent orchestration (LangGraph, AutoGen, Claude Agent SDK, OpenAI Assistants) \u2014 not mentioned",
+      "Structured AI-assisted development workflows (Claude Code, Cursor) \u2014 only mentioned as general knowledge",
+      "Python production experience (profile lists C#, JavaScript, but no Python)",
+      "Vector databases and retrieval pipeline implementation",
+      "End-to-end eval harness design and discipline",
+      "Cloud-native deployment (AWS/Azure/Cloudflare/Vercel with Docker/Kubernetes/GitHub Actions)",
+      "LLM behavior optimization (accuracy, latency, cost)",
+      "Recent portfolio or GitHub trail demonstrating AI/agentic work",
+      "Public writing/talks about building with AI",
+      "MLOps experience (BentoML, MLflow, Vertex AI, SageMaker)",
+      "Streaming/batch pipelines (Spark, Airflow, Beam, Glue)",
+      "Healthcare or life sciences domain exposure"
+    ],
+    "employment_type_note": "Role explicitly stated as 'Contract' \u2014 not permanent employment",
+    "verdict": "Poor fit. Role requires 3+ years production AI/agentic development as a gating requirement; candidate's profile shows recent pivot to 'AI-ready applications' at Siemens but no demonstrable track record building agentic systems, agents, MCPs, or structured AI-assisted development workflows. Critical tech stack gaps (Python, vector databases, LLM orchestration). Employment type is contract, not permanent.",
+    "required_qualifications": [
+      "Bachelor's or Master's in Computer Science, Machine Learning, or related technical discipline"
+    ],
+    "qualification_gaps": [],
+    "qualification_status": "met",
+    "exclude": true,
+    "exclude_reason": "Fixed-term contract (not permanent); missing gatekeeping requirement: 3+ years production AI/agentic development"
+  },
+  "9d545b78b2cc_087ef008101c_ea62c52e0813": {
+    "score": 3,
+    "matched_skills": [
+      "JavaScript",
+      "Web development",
+      "Frontend development"
+    ],
+    "missing_essentials": [
+      "Seniority level not stated but title suggests mid/junior grade",
+      "No evidence of role progression or leadership",
+      "No indication of senior-level responsibilities"
+    ],
+    "employment_type_note": "Employment type not stated in job description",
+    "verdict": "Poor match. Candidate is a Senior Software Engineer actively seeking senior roles (Senior Software Engineer, Frontend Developer, Full-stack Developer, or lead/architect positions). This posting offers only a generic 'Javascript Developer' role with no seniority specification, no salary stated, and no employment type confirmation. The lack of detail and apparent mid-level positioning conflicts with candidate's search preferences for senior roles only. Candidate has explicitly stated they are 'not open to' junior roles.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Seniority mismatch - likely junior/mid-level role; candidate seeks senior positions only"
+  },
+  "fc661ee0aab3_087ef008101c_ea62c52e0813": {
+    "score": 4,
+    "matched_skills": [
+      "Full-stack development capability",
+      "Frontend (React, Angular)",
+      "Backend (C#, Java, JavaScript)",
+      "Database (SQL)",
+      "Software engineering experience"
+    ],
+    "missing_essentials": [
+      "Salary not stated \u2013 cannot confirm meets \u00a380,000 minimum",
+      "Employment type not stated \u2013 cannot confirm permanent role",
+      "No seniority level indicated in posting"
+    ],
+    "employment_type_note": "Employment type not specified in job posting. Cannot verify permanent status.",
+    "verdict": "Insufficient job information to evaluate match. Critical details missing: salary, employment type, seniority level, and role expectations. Candidate profile (Senior Software Engineer seeking senior roles, \u00a380k+, permanent only) cannot be properly assessed against an incomplete posting.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Incomplete job posting \u2013 salary and employment type not stated; cannot confirm candidate requirements are met"
+  },
+  "f3d50a7c0622_087ef008101c_ea62c52e0813": {
+    "score": 3,
+    "matched_skills": [
+      "Full-stack development capability (React, Angular, JavaScript, C#)",
+      "Software engineering expertise",
+      "Web services",
+      "AI-assisted development"
+    ],
+    "missing_essentials": [
+      "Product mindset / product management experience",
+      "Founding/startup experience",
+      "Business development or revenue responsibility",
+      "Early-stage scaling track record"
+    ],
+    "employment_type_note": "Employment type not stated in job description; cannot confirm permanent full-time status",
+    "verdict": "Strong misalignment. Candidate is a senior engineer with deep technical expertise but lacks the product and founding/entrepreneurial background essential for a 'Founding Full-Stack Product Engineer' role. This is a startup/product-focused position requiring business acumen and ownership mentality; candidate's profile shows pure delivery-focused software engineering in corporate/agency settings only. Seniority level (mid-senior) is also slightly below candidate's stated preference for senior roles. Salary not stated\u2014cannot confirm meets \u00a380k minimum.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different role type (product/founding engineer vs. software engineer); salary not stated; employment type unclear"
+  },
+  "8520b471800e_087ef008101c_ea62c52e0813": {
+    "score": 2,
+    "matched_skills": [
+      "AI-assisted development",
+      "SQL",
+      "Software Development",
+      "Problem-solving mindset"
+    ],
+    "missing_essentials": [
+      "Machine learning frameworks (TensorFlow, PyTorch, scikit-learn)",
+      "Python (data science context)",
+      "Large language models (LLMs) experience",
+      "Snowflake",
+      "MLOps practices",
+      "Azure cloud platform",
+      "Data science or statistics background",
+      "Experience deploying ML models to production",
+      "Statistical modelling and evaluation"
+    ],
+    "employment_type_note": "Employment type not stated in job description; assumed permanent based on RAC's standard contracting practices, but not explicitly confirmed.",
+    "verdict": "Strong fundamental mismatch. This is a data science specialist role requiring deep ML/Python/statistical expertise and cloud MLOps proficiency. The candidate is a senior frontend and full-stack software engineer with general AI awareness but no demonstrated data science, machine learning framework, or data engineering background. While the candidate has software engineering seniority and some overlap in Azure/agile environments, they lack the core technical gatekeeping qualifications (ML frameworks, Python for data science, LLM hands-on experience, Snowflake, MLOps) that a hiring manager would treat as non-negotiable for a Senior Data Scientist position. This is outside the candidate's target roles and competency domain.",
+    "required_qualifications": [
+      "Degree in Engineering, Sciences, Data Science, Statistics, or related field",
+      "Machine learning frameworks experience (TensorFlow, PyTorch, scikit-learn)",
+      "Strong Python skills for data analysis and modelling",
+      "LLM experience including prompt engineering and fine-tuning",
+      "SQL and Snowflake knowledge",
+      "Cloud platform experience (ideally Azure)",
+      "MLOps and version control exposure"
+    ],
+    "qualification_gaps": [
+      "Data Science, Statistics, or specialised engineering degree (candidate has MSc Computing and BSc Applied Mathematics; latter is tangentially relevant but MSc is in general computing, not data science)",
+      "Machine learning frameworks \u2013 no TensorFlow, PyTorch, or scikit-learn listed",
+      "Python specialisation for data science \u2013 candidate lists JavaScript, C#, React, Angular but not Python",
+      "LLM hands-on experience \u2013 candidate mentions 'AI-assisted development' but no specific LLM, prompt engineering, or fine-tuning work documented",
+      "Snowflake \u2013 not mentioned; candidate has general SQL only",
+      "MLOps practices \u2013 no documented MLOps or model deployment pipeline experience",
+      "Production ML model deployment \u2013 candidate's background is software engineering, not data science project delivery"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession (data science vs. software engineering); candidate lacks gatekeeping qualifications (ML frameworks, Python data science, LLM hands-on, Snowflake, MLOps) and is not open to data science roles."
+  },
+  "6518d6655b03_087ef008101c_ea62c52e0813": {
+    "score": 3,
+    "matched_skills": [
+      "Full-stack development capability",
+      "Frontend technologies (React, Angular)",
+      "Software engineering experience",
+      "JavaScript"
+    ],
+    "missing_essentials": [
+      "No stated salary \u2014 cannot verify meets \u00a380k minimum",
+      "Employment type not stated \u2014 cannot confirm permanent",
+      "Location mismatch: job is Bristol/London on-site; candidate location unknown but unlikely to relocate",
+      "Product engineering / founding experience \u2014 candidate's background is enterprise software (Siemens, corporate environments), not startup/product founding",
+      "No venture-backed or scaling startup experience evident"
+    ],
+    "employment_type_note": "Employment type not specified in job posting; candidate requires full-time permanent only",
+    "verdict": "Poor match. While the candidate has strong technical skills for full-stack development, critical upstream filter requirements cannot be verified (salary not stated, employment type not stated). Location appears misaligned (Bristol/London on-site vs candidate's Wales-based career). More critically, the 'Founding' element suggests an early-stage startup or scale-up context; candidate's entire background is in large corporates (Siemens, Accelero, Web.com). At mid-senior level, a hiring manager would expect demonstrated experience in fast-scaling product environments, equity negotiation, or founding involvement \u2014 not evidenced here.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Salary not stated (cannot verify \u00a380k minimum); employment type not stated (cannot confirm permanent); likely location mismatch; candidate profile (enterprise software, large corporates) misaligned with founding/startup product engineer role"
   }
 }
