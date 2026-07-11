@@ -12,4 +12,8 @@ Three console scripts (defined in pyproject.toml) help debug the pipeline locall
 - `job-search-debug` — runs the real pipeline (live scraping + AI scoring) but writes an HTML decisions report to `debug_report.html` and prints keep/drop decisions instead of emailing. `--profile profiles/<name>.yaml` selects the person (default: `profiles/jie-zhou.yaml`); run data goes to `runs/<profile>/`.
 - `job-search-email-local` — offline dry run against fixture jobs/scores; writes `search_plan.json`, `job_results_filtered.json`, `job_results_scored.json`, and `email_preview.html`. No network or API cost.
 
+There is also a Claude Code slash command for scorer calibration:
+
+- `/calibrate-scorer [profile-stem]` (default `jie-zhou`) — runs `job-search-debug` fresh, blind-re-assesses the top 5 scored jobs, and proposes scorer-prompt edits for approval. Confirmed disagreements are saved to `calibration/cases/*.yaml` (job fields + a `calibration` block with `expected_min`/`expected_max` score bounds); after any prompt edit the command replays every saved case via `explain-job --job-file <case> --force-score` and must not finish with a case outside its bounds.
+
 IMPORTANT: always check cached data before making unnecessary live calls. `explain-job` resolves jobs from local run data (`job_results.json`) first — pass `--run-data` or use `--dump-job-file` once then `--job-file` for repeat experiments, rather than refetching or re-calling the API. Note that `explain-job` still makes live LLM calls for location classification and exclusions (needs `ANTHROPIC_API_KEY`); use `job-search-email-local` when fixtures are enough.
