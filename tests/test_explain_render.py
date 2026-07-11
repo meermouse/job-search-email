@@ -72,3 +72,21 @@ def test_render_scorer_guards_empty_exclude_reason():
     assert "yes — \n" not in out
     # Should contain fallback text
     assert "yes — (reason not provided)" in out
+
+
+def test_render_scorer_shows_gatekeeping_gaps():
+    trace = AnalysisTrace(
+        analysis=JobAnalysis(
+            score=6, matched_skills=["workforce planning"], missing_essentials=[],
+            employment_type_note="Permanent", verdict="Wrong profession",
+            gatekeeping_gaps=["No HR executive track record"],
+        ),
+        system_prompt="SYS", user_message="USER", raw_text='{"score": 6}',
+    )
+    out = render_explanation(_job(), _gates_all_pass(), trace, None)
+    assert "Gatekeeping gaps: No HR executive track record" in out
+
+
+def test_render_scorer_gatekeeping_gaps_empty_shows_none():
+    out = render_explanation(_job(), _gates_all_pass(), _scorer_trace(), None)
+    assert "Gatekeeping gaps: (none)" in out
