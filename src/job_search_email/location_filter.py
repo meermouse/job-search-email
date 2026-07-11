@@ -26,7 +26,7 @@ def _cache_key(home: str, radius_miles: int, location: str) -> str:
     return f"{home}:{radius_miles}:{location}"
 
 
-def _extract_json_object(text: str):
+def _extract_json_object(text: str) -> object:
     # Models sometimes wrap the JSON in a code fence or surround it with prose
     # ("Extra data" from json.loads). Parse the first balanced JSON value
     # starting at the first brace and ignore everything around it.

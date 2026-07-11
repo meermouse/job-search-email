@@ -234,6 +234,7 @@ def score_jobs(
     beyond_cap = kept_sorted[limit:]
 
     system_prompt = _build_system_prompt(profile)
+    # The fingerprint covers only the system prompt: a change to _build_user_message alone (e.g. the JSON schema) will NOT invalidate cached scores.
     prompt_fp = fingerprint_prompt(system_prompt)
     scored_map: dict[int, ScoredResult] = {}
     to_call: list[tuple[int, FilteredResult]] = []
