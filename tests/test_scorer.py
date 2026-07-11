@@ -818,7 +818,7 @@ def test_system_prompt_contains_calibration_instruction():
     assert "gatekeeping" in prompt
     assert "score it 6 or below" in prompt
     # calibration must sit with the score guidance, before qualification analysis
-    assert prompt.index("Score guidance:") < prompt.index("Calibration: ") < prompt.index("Qualification analysis instructions:")
+    assert prompt.index("Score guidance") < prompt.index("Calibration: ") < prompt.index("Qualification analysis instructions:")
 
 
 _GATEKEEPING_RESPONSE = json.dumps({
@@ -907,3 +907,30 @@ def test_score_jobs_mismatch_cap_beats_gatekeeping_cap():
     with patch("job_search_email.scorer.client", _mock_client(both)):
         scored = score_jobs(results, make_profile())
     assert scored[0].analysis.score == 3
+
+
+def test_system_prompt_instructs_gatekeeping_gaps_field():
+    prompt = _build_system_prompt(make_profile())
+    assert "gatekeeping_gaps" in prompt
+
+
+def test_system_prompt_contains_different_profession_rule():
+    prompt = _build_system_prompt(make_profile())
+    assert "core discipline" in prompt
+    assert "1-4" in prompt
+    assert "Different profession" in prompt
+
+
+def test_system_prompt_score_bands_use_shortlist_terms():
+    prompt = _build_system_prompt(make_profile())
+    assert "initial sift" in prompt
+
+
+def test_user_message_schema_puts_analysis_fields_before_score():
+    from job_search_email.scorer import _build_user_message
+    msg = _build_user_message(make_job())
+    schema = msg[msg.index("Return JSON"):]
+    assert schema.index('"matched_skills"') < schema.index('"score"')
+    assert schema.index('"missing_essentials"') < schema.index('"score"')
+    assert schema.index('"gatekeeping_gaps"') < schema.index('"score"')
+    assert schema.index('"verdict"') < schema.index('"score"')

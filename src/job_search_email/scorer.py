@@ -41,17 +41,27 @@ def _build_system_prompt(profile: Profile) -> str:
         f"- Not open to: {', '.join(profile.not_open_to)}\n"
         "- Employment type wanted: full-time permanent only\n"
         f"- Min salary: £{profile.min_salary:,}\n\n"
-        "Score guidance: 8-10 = strong match (profile clearly fits). "
-        "5-7 = partial match (relevant but gaps present). "
-        "1-4 = weak (missing essentials or significant misalignment).\n\n"
+        "Score guidance — score the candidate's realistic odds of being shortlisted, "
+        "not the breadth of skills overlap: "
+        "8-10 = strong match (would very likely survive the initial sift). "
+        "5-7 = partial match (credible applicant but real gaps present). "
+        "1-4 = weak (would not survive the initial sift: missing essentials, wrong "
+        "profession, or significant misalignment).\n\n"
         "Calibration: the score must reflect the candidate's realistic odds of "
         "being shortlisted, not just breadth of skills overlap. Identify any "
         "requirement a hiring manager would treat as gatekeeping at the role's "
         "stated seniority — for example a fee-earning or business-development "
         "track record for senior consultancy grades, statutory registration, or "
-        "prior budget ownership at director level. If the candidate lacks a "
-        "gatekeeping requirement, the job is at best a partial match: score it "
-        "6 or below, however strong the remaining overlap.\n\n"
+        "prior budget ownership at director level. List every gatekeeping "
+        "requirement the candidate lacks in gatekeeping_gaps (use an empty list "
+        "if there are none). If the candidate lacks any gatekeeping requirement, "
+        "the job is at best a partial match: score it 6 or below, however strong "
+        "the remaining overlap.\n"
+        "If the role's core discipline (e.g. HR, finance, legal, clinical, "
+        "engineering) is a profession the candidate has never held a post in, "
+        "transferable skills do not survive the sift for a specialist role: "
+        "score it 1-4 regardless of keyword overlap, and normally set "
+        "exclude=true with exclude_reason \"Different profession\".\n\n"
         "Qualification analysis instructions:\n"
         "- Extract any explicitly stated qualification requirements from the job description\n"
         "- Compare each against the candidate's education and certifications using exact or near-exact matching only\n"
@@ -93,16 +103,17 @@ def _build_user_message(job: JobListing) -> str:
         f"Salary: {salary}\n"
         f"Employment type: {job.employment_type or 'not stated'}\n"
         f"Description:\n{description}\n\n"
-        "Return JSON:\n"
+        "Return JSON (populate the analysis fields first, then decide the score):\n"
         "{\n"
-        '  "score": <1-10>,\n'
         '  "matched_skills": ["..."],\n'
         '  "missing_essentials": ["..."],\n'
-        '  "employment_type_note": "...",\n'
-        '  "verdict": "...",\n'
+        '  "gatekeeping_gaps": ["..."],\n'
         '  "required_qualifications": ["..."],\n'
         '  "qualification_gaps": ["..."],\n'
         '  "qualification_status": "met|partial|mismatch|",\n'
+        '  "employment_type_note": "...",\n'
+        '  "verdict": "...",\n'
+        '  "score": <1-10>,\n'
         '  "exclude": false,\n'
         '  "exclude_reason": ""\n'
         "}"
