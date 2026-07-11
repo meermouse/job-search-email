@@ -26,13 +26,15 @@ def _cache_key(home: str, radius_miles: int, location: str) -> str:
     return f"{home}:{radius_miles}:{location}"
 
 
-def _strip_code_fence(text: str) -> str:
-    stripped = text.strip()
-    if stripped.startswith("```"):
-        lines = stripped.split("\n")
-        end = len(lines) - 1 if lines[-1].strip() == "```" else len(lines)
-        return "\n".join(lines[1:end]).strip()
-    return stripped
+def _extract_json_object(text: str):
+    # Models sometimes wrap the JSON in a code fence or surround it with prose
+    # ("Extra data" from json.loads). Parse the first balanced JSON value
+    # starting at the first brace and ignore everything around it.
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("no JSON object found in response")
+    obj, _ = json.JSONDecoder().raw_decode(text[start:])
+    return obj
 
 
 def classify_locations(
@@ -66,7 +68,7 @@ def classify_locations(
             messages=[{"role": "user", "content": user_message}],
         )
         text = response.content[0].text if response.content else ""
-        raw = json.loads(_strip_code_fence(text))
+        raw = _extract_json_object(text)
         if not isinstance(raw, dict):
             raise ValueError(f"expected dict, got {type(raw).__name__}")
         verdicts: dict[str, str] = raw
