@@ -2067,5 +2067,324 @@
     "qualification_status": "",
     "exclude": true,
     "exclude_reason": "Salary not stated (cannot verify \u00a380k minimum); employment type not stated (cannot confirm permanent); likely location mismatch; candidate profile (enterprise software, large corporates) misaligned with founding/startup product engineer role"
+  },
+  "20e44124785d_805b3836d78d_fb665247ec50": {
+    "score": 2,
+    "matched_skills": [],
+    "missing_essentials": [
+      "Investment management / asset management experience",
+      "Financial services sector background",
+      "Client relationship management in financial context",
+      "Investment products knowledge",
+      "Regulatory compliance in financial services (FCA/PRA)"
+    ],
+    "employment_type_note": "Employment type not stated in job description; cannot confirm permanent role",
+    "verdict": "Strong mismatch. Candidate's expertise is in NHS governance, workforce planning, and digital transformation within healthcare \u2014 a fundamentally different sector and skill set from investment partnership relationship management in asset management. No financial services, investment, or client-facing sales/relationship experience evident. Role appears to require business development and client management capabilities not present in candidate's profile.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession (investment/financial services vs. NHS governance); candidate not open to non-governance/digital transformation roles outside healthcare"
+  },
+  "3c8db015418d_805b3836d78d_fb665247ec50": {
+    "score": 2,
+    "matched_skills": [
+      "Power BI (desirable match)",
+      "Project management experience",
+      "Process improvement & digital transformation",
+      "Stakeholder management"
+    ],
+    "missing_essentials": [
+      "C# and .NET development (core requirement)",
+      "IIS configuration and support (core requirement)",
+      "SQL Server database design and stored procedures (core requirement)",
+      "Web technologies: HTML, CSS, Angular (core requirement)",
+      "WinForms, WPF, Webforms development experience (core requirement)",
+      "Web services development (core requirement)",
+      "Software engineering / development background"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; assumed permanent based on standard ABB practice, but not explicitly confirmed.",
+    "verdict": "Poor fit. This is a hands-on software engineering role requiring substantial C#/.NET and database development expertise. The candidate's background is entirely in healthcare governance, workforce planning, and business/digital transformation management. There is no evidence of software development experience, coding capability, or the technical depth required. The candidate's Power BI familiarity is a minor tangential match only. Fundamentally different career domain.",
+    "required_qualifications": [
+      "Degree-level education",
+      "Strong C# and .NET development experience",
+      "IIS experience",
+      "SQL Server knowledge",
+      "Web technologies proficiency (HTML, CSS, Angular)"
+    ],
+    "qualification_gaps": [
+      "No C# or .NET development demonstrated",
+      "No IIS configuration experience",
+      "No SQL Server or database development background",
+      "No web application development (HTML, CSS, Angular)",
+      "No evidence of software engineering or coding expertise"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession; no software development background"
+  },
+  "21511f645338_805b3836d78d_fb665247ec50": {
+    "score": 5,
+    "matched_skills": [
+      "Line management and team leadership",
+      "Stakeholder engagement and influence",
+      "Data analytics and reporting",
+      "Strategic planning and organizational development",
+      "Project delivery and programme management",
+      "Digital platforms and tools (Microsoft Office, Teams, SharePoint)"
+    ],
+    "missing_essentials": [
+      "Direct experience in talent development programme design or delivery",
+      "Succession planning or high-potential talent pipeline management",
+      "Leadership development programme ownership",
+      "HR or People function background",
+      "Track record in talent/capability strategy"
+    ],
+    "employment_type_note": "Employment type not stated in posting; cannot confirm permanent role.",
+    "verdict": "Partial match with significant domain gaps. Candidate has strong governance, data, strategic planning and line management skills, but lacks direct HR/talent development experience. The role requires proven expertise in succession planning, talent pipelines, and leadership development programmes\u2014all core accountability areas that are gatekeeping at this seniority. Candidate's NHS governance and workforce planning background does not translate directly to talent development strategy. Salary not stated, unable to confirm meets \u00a360k minimum.",
+    "required_qualifications": [],
+    "qualification_gaps": [
+      "CIPD qualification (desirable but not essential per posting)",
+      "Coaching or leadership development qualification (desirable but not essential)",
+      "Organisational development qualification (desirable but not essential)"
+    ],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Employment type not confirmed as permanent; salary not stated. Domain mismatch: HR/talent development specialist role unsuitable for NHS governance manager without direct talent/capability function experience."
+  },
+  "2a65e8747e6e_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Business Governance",
+      "Project Management",
+      "Data Analytics / Dashboards",
+      "Digital Transformation",
+      "Strategic Planning"
+    ],
+    "missing_essentials": [
+      "CCAB-qualified accountant status (CA, ACCA, ICAEW, or CIPFA)",
+      "Financial planning and forecasting expertise",
+      "Financial systems oversight and P&L management",
+      "Board-level financial reporting",
+      "Budget holder experience at principal/director level",
+      "Finance team leadership (oversees Finance Systems and Finance Support teams)",
+      "Statutory financial duties and compliance expertise",
+      "Welsh language skills or commitment to learn"
+    ],
+    "employment_type_note": "Full-time permanent role confirmed.",
+    "verdict": "Strong mismatch. This is a specialist principal finance role requiring CCAB professional accounting qualification and deep financial management expertise. Candidate's background is in governance, workforce planning, and digital infrastructure\u2014not financial accounting, reporting, or budget management. While candidate has governance experience and data analytics skills, they lack the core financial qualification and experience gatekeeping this senior finance position. Not a realistic shortlist candidate.",
+    "required_qualifications": [
+      "CCAB-qualified accountant (CA, ACCA, ICAEW, or CIPFA)",
+      "Strong leadership skills",
+      "Strategic vision",
+      "Financial planning and forecasting expertise"
+    ],
+    "qualification_gaps": [
+      "No accounting qualification listed (CCAB/CA/ACCA/ICAEW/CIPFA absent)",
+      "No evidence of financial accounting, planning, or forecasting background",
+      "No finance directorate or principal-level budget ownership",
+      "No board-level financial reporting experience"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different profession: finance specialist role requiring CCAB accounting qualification; candidate is governance/digital transformation specialist without financial accounting credentials or background."
+  },
+  "99f8e3205ff1_805b3836d78d_fb665247ec50": {
+    "score": 6,
+    "matched_skills": [
+      "Strategic workforce planning",
+      "Business governance",
+      "Digital transformation",
+      "Project management",
+      "Line management and team development",
+      "Stakeholder engagement with senior leaders",
+      "Policy management and compliance",
+      "Data analytics and reporting",
+      "Organisational change management"
+    ],
+    "missing_essentials": [
+      "No demonstrated HR business partnering experience",
+      "No evidence of leading an HR function or HR team at scale",
+      "No track record in people/talent strategy delivery",
+      "No experience with employee relations, recruitment, learning & development, or core HR domains",
+      "No prior deputising for a Chief People Officer or equivalent HR director-level exposure",
+      "No evidence of working with recognised trade unions or employee engagement at this level"
+    ],
+    "employment_type_note": "Permanent, full-time role as required. Salary (\u00a394,931) exceeds stated minimum (\u00a360,000).",
+    "verdict": "Partial match. Candidate brings strong governance, strategic workforce planning, digital transformation and senior stakeholder management skills that align with broader UKRI context and the transformation agenda. However, this is fundamentally an HR leadership role requiring deep people/talent expertise, and the candidate lacks a core HR background. While governance and workforce planning experience provides some transferability, absence of HR business partnering, employee relations, talent management, or HR function leadership experience represents a significant gap for a Deputy Chief People Officer position. Hiring managers would likely treat HR expertise as a gatekeeping requirement at this seniority level. Candidate would be at a material disadvantage against HR professionals with equivalent strategic seniority.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "f9ad862aeea9_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Programme and project management",
+      "Digital transformation leadership",
+      "Governance and assurance frameworks",
+      "Data-driven decision making",
+      "Team leadership and line management",
+      "Stakeholder engagement and partnership working",
+      "Workforce planning",
+      "Benefits realisation and reporting",
+      "Process improvement and service redesign",
+      "Risk management",
+      "Complex change programme delivery"
+    ],
+    "missing_essentials": [
+      "PRINCE2 certification (explicitly required; candidate has not stated this qualification)",
+      "Explicit track record leading PMO or Digital Portfolio Management Office at director/senior band level",
+      "Demonstrable experience with EPR, clinical systems, or healthcare IT portfolio management"
+    ],
+    "employment_type_note": "Full-time permanent role; meets candidate's requirement.",
+    "verdict": "Partial match. Candidate has strong core competencies in digital transformation, governance, programme delivery, and team leadership aligned to the role. However, PRINCE2 is explicitly stated as required for governance methodology and is not present in the candidate's profile\u2014this is a gatekeeping qualification at Band 8c level. Additionally, while Jie has programme management experience, there is no explicit evidence of leading a PMO at director level or managing large-scale digital portfolio functions such as EPR and clinical systems. The salary is not stated, preventing confirmation against the \u00a360k minimum threshold. Shortlist likelihood is reduced by the PRINCE2 gap and lack of explicit healthcare IT portfolio leadership track record, though the broader governance, transformation, and team leadership strengths are compelling.",
+    "required_qualifications": [
+      "PRINCE2 (stated: 'Responsible for effective project and programme governance and assurance using PRINCE2 methodology')"
+    ],
+    "qualification_gaps": [
+      "PRINCE2 certification not listed in candidate's qualifications or certifications section"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "bc3623eb238a_805b3836d78d_fb665247ec50": {
+    "score": 7,
+    "matched_skills": [
+      "Business governance and operating model design",
+      "Digital transformation and process improvement",
+      "Workforce planning and organisation design",
+      "Project management and delivery discipline",
+      "Senior stakeholder management and executive communication",
+      "Data analytics and reporting (Power BI dashboards)",
+      "Team leadership and line management",
+      "Policy and compliance frameworks",
+      "Strategic planning and roadmap development"
+    ],
+    "missing_essentials": [
+      "Demonstrated management consulting or external advisory background (fee-earning consulting delivery track record)",
+      "Explicit business development / account growth experience in a consulting context",
+      "Evidence of leading large multi-disciplinary teams at scale typical of Associate Director level in major consultancies"
+    ],
+    "employment_type_note": "Full-time permanent role; matches candidate's requirement.",
+    "verdict": "Partial match. Jie has strong foundational capabilities in governance, transformation, operating model design, stakeholder management and team leadership that align well with the role's core deliverables. The current Swansea Bay and previous Cheshire & Wirral roles demonstrate capability to design governance structures, lead cross-functional teams, and translate complex analysis into actionable recommendations. However, this is a senior management consultancy role (Associate Director equivalent) that typically requires proven fee-earning consulting experience and a track record of business development/account growth in a consulting environment. Jie's background is primarily in-house (NHS, private hospital operations), not external advisory. While the skills are transferable, the lack of explicit consulting delivery and BD track record creates a credibility gap at this seniority level\u2014a hiring manager at AECOM would likely view prior consultancy experience as a gatekeeping requirement. Salary not stated, so cannot fully verify against \u00a360k minimum, but Associate Director roles at major firms typically exceed this threshold.",
+    "required_qualifications": [
+      "Bachelor's degree or equivalent experience",
+      "Postgraduate qualification or relevant professional certification (advantageous, not required)"
+    ],
+    "qualification_gaps": [],
+    "qualification_status": "met",
+    "exclude": false,
+    "exclude_reason": ""
+  },
+  "857bc2e08ece_805b3836d78d_fb665247ec50": {
+    "score": 4,
+    "matched_skills": [
+      "Business Governance",
+      "Workforce Planning",
+      "Project Management",
+      "Data Analytics / Dashboards",
+      "Digital Transformation",
+      "Strategic operational leadership",
+      "Budget management and financial control",
+      "Risk management and incident governance",
+      "Stakeholder engagement",
+      "Line management and team leadership"
+    ],
+    "missing_essentials": [
+      "Clinical systems operational leadership (EPR, PAS, PACS, LIMS management)",
+      "Critical Incident Management (CIM) command experience in clinical environments",
+      "Digital Health portfolio operations and BAU service management",
+      "Technical assurance of clinical applications",
+      "Clinical IT infrastructure and systems resilience accountability",
+      "Disaster Recovery / Business Continuity planning and testing",
+      "Third-party supplier management at scale for clinical systems",
+      "Service Level Agreement (SLA) / Operational Level Agreement (OLA) definition and enforcement",
+      "Evidence of deputising or covering for Director-level digital operations roles"
+    ],
+    "employment_type_note": "Full-time permanent role confirmed.",
+    "verdict": "Weak match. Candidate has strong governance, workforce planning, and digital transformation credentials, but this is a specialised operational leadership role requiring direct hands-on accountability for clinical system reliability, CIM response, and Digital Health portfolio operations\u2014not governance enablement. Candidate's background is predominantly in governance frameworks, policy, reporting infrastructure, and digital process automation (Power BI, SharePoint, Power Automate). The role demands a clinical IT operations leader with proven experience commanding critical incident response, managing clinical application lifecycle, ensuring system resilience, and operating at the CTO/Director level in digital operations. Candidate's governance and strategic planning expertise, while valuable, does not substitute for the operational clinical systems leadership and technical assurance accountability this Band 8c role requires. Salary also not stated, making permanent placement assumption unverifiable.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "exclude": true,
+    "exclude_reason": "Role requires clinical IT operations leadership; candidate's profile is governance and digital transformation strategy, not clinical systems operations. Salary not stated (cannot confirm meets \u00a360k minimum). Fundamental role mismatch."
+  },
+  "eab0ce1b5760_805b3836d78d_fb665247ec50": {
+    "score": 3,
+    "matched_skills": [
+      "Project Management",
+      "Digital Transformation",
+      "Stakeholder Management",
+      "Team Leadership",
+      "Data Analytics / Dashboards",
+      "SharePoint",
+      "Microsoft Power Automate",
+      "Microsoft Power BI"
+    ],
+    "missing_essentials": [
+      "End User Computing (EUC) platform management experience",
+      "Endpoint management tools (Intune, SCCM, Apple Business Manager)",
+      "Azure Virtual Desktop (AVD) / Desktop-as-a-Service administration",
+      "Software packaging and deployment (SCCM, packaging tools)",
+      "PowerShell scripting",
+      "Office 365 endpoint/user-experience administration",
+      "Device lifecycle management and provisioning",
+      "DEX (Digital Employee Experience) metrics and analytics",
+      "Modern endpoint security controls and configuration",
+      "Hands-on technical EUC engineering experience"
+    ],
+    "employment_type_note": "Permanent role confirmed in job description.",
+    "verdict": "Weak match. Candidate has strong governance, digital transformation, and stakeholder management skills, but this is a hands-on technical EUC engineering role requiring deep expertise in endpoint management, device lifecycle, software deployment toolchains, and scripting\u2014none of which are evident in the candidate's profile. The candidate's background is governance, workforce planning, and business systems (Power BI, Power Automate, SharePoint), not infrastructure or endpoint engineering. The role explicitly demands 'significant experience managing end-user computing environments' and technical depth in Intune, SCCM, AVD, and PowerShell; the candidate has no demonstrated track record in these areas. While the candidate could potentially transition into IT leadership, they lack the gatekeeping technical foundations this role requires at manager level.",
+    "required_qualifications": [
+      "Significant experience managing end-user computing environments in a sizeable or complex organisation",
+      "Deep knowledge of modern endpoint management tools (e.g. Intune, SCCM, Apple Business Manager)",
+      "Good understanding of centralised remote working solutions (Azure Virtual Desktop, DaaS, Remote Desktop Services)",
+      "Proficiency in software packaging and deployment, including automation and scripting tools (PowerShell, Packer, Ansible)",
+      "Relevant industry certifications (e.g. Microsoft Certified: Modern Desktop Administrator Associate, ITIL) or equivalent experience"
+    ],
+    "qualification_gaps": [
+      "No EUC platform management experience",
+      "No endpoint management tool certifications or hands-on experience (Intune, SCCM, Apple Business Manager)",
+      "No Azure Virtual Desktop or DaaS administration experience",
+      "No PowerShell or infrastructure scripting",
+      "No Microsoft Certified: Modern Desktop Administrator or equivalent EUC certification",
+      "No software packaging/deployment experience (SCCM, Packer, etc.)"
+    ],
+    "qualification_status": "mismatch",
+    "exclude": true,
+    "exclude_reason": "Fundamentally different technical domain. Role requires hands-on EUC/endpoint engineering expertise; candidate's background is governance, workforce planning, and business analytics."
+  },
+  "2ee4d054191f_805b3836d78d_fb665247ec50": {
+    "score": 6,
+    "matched_skills": [
+      "Project Management",
+      "Business Governance",
+      "Data Analytics / Dashboards",
+      "Microsoft Power BI",
+      "SharePoint",
+      "Microsoft 365 proficiency",
+      "Stakeholder management",
+      "Process improvement and digital transformation",
+      "Risk management and reporting",
+      "Leadership and team collaboration"
+    ],
+    "missing_essentials": [
+      "Externally recognised PMO qualification (P3O, PRINCE2, MSP, PMQ) \u2014 listed as desirable but increasingly expected at this seniority",
+      "Explicit PMO service delivery experience \u2014 candidate's background is in governance, workforce planning, and transformation rather than dedicated PMO delivery"
+    ],
+    "employment_type_note": "Employment type not stated in posting; assuming permanent based on BT Group standard practice. No fixed-term language detected.",
+    "verdict": "Partial match. Candidate has strong governance, reporting, and digital infrastructure experience that overlaps significantly with PMO delivery. However, the role is fundamentally a PMO service delivery role (governance, risk, reporting, dependencies across contracts), and the candidate's track record is in organisational governance and digital transformation within NHS settings, not in delivering PMO services to external contracts or complex multi-contract environments. The absence of a PRINCE2 or P3O qualification, while listed as desirable, is a gap at senior PMO level. Salary not stated, preventing full evaluation against the \u00a360k minimum. Location (Bristol, 3 days on site) is UK-based and feasible. SC clearance requirement and 5-year UK residency are met based on current role at Swansea Bay.",
+    "required_qualifications": [
+      "Eligibility for SC Clearance and 5 years UK residency (security clearance requirement)"
+    ],
+    "qualification_gaps": [
+      "PRINCE2, P3O, MSP, or PMQ qualification \u2014 not held (desirable, but expected for senior PMO roles)"
+    ],
+    "qualification_status": "partial",
+    "exclude": false,
+    "exclude_reason": ""
   }
 }

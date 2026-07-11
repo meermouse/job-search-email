@@ -267,5 +267,14 @@
   "Cardiff:40:Markham, Wales, UK": "uncertain",
   "Cardiff:40:Wellington, England, UK": "outside",
   "Cardiff:40:Swansea, WLS, GB": "outside",
-  "Cardiff:40:Bridgwater, ENG, GB": "outside"
+  "Cardiff:40:Bridgwater, ENG, GB": "outside",
+  "Bristol:40:Nailsea, ENG, GB": "within",
+  "Bristol:40:Porth, WLS, GB": "outside",
+  "Bristol:40:Hereford, England, UK": "outside",
+  "Bristol:40:Ross-On-Wye, England, UK": "outside",
+  "Bristol:40:Old Down, England, UK": "within",
+  "Bristol:40:Pontyclun, WLS, GB": "outside",
+  "Bristol:40:Iron Acton, England, UK": "within",
+  "Bristol:40:Yeovil, England, UK": "outside",
+  "Bristol:40:South Molton": "outside"
 }
