@@ -104,3 +104,31 @@ def test_classify_locations_handles_fenced_json():
         mock_client.messages.create.return_value = response
         result = classify_locations(["Reading, RG1"], home="Bristol", radius_miles=50, cache=cache)
     assert result["Reading, RG1"] == "outside"
+
+
+def test_classify_locations_tolerates_trailing_prose_after_json():
+    # Regression: live run failed with "Extra data: line 4 column 1" when the
+    # model appended a note after the JSON object, and every location silently
+    # fell back to "uncertain".
+    cache: dict[str, str] = {}
+    with patch("job_search_email.location_filter.client") as mock_client:
+        block = MagicMock()
+        block.text = '{\n"Swindon, ENG, GB": "outside"\n}\n\nNote: Swindon is ~90 miles from home.'
+        response = MagicMock()
+        response.content = [block]
+        mock_client.messages.create.return_value = response
+        result = classify_locations(["Swindon, ENG, GB"], home="Swansea", radius_miles=40, cache=cache)
+    assert result["Swindon, ENG, GB"] == "outside"
+    assert cache["Swansea:40:Swindon, ENG, GB"] == "outside"
+
+
+def test_classify_locations_tolerates_leading_prose_before_json():
+    cache: dict[str, str] = {}
+    with patch("job_search_email.location_filter.client") as mock_client:
+        block = MagicMock()
+        block.text = 'Here is the classification:\n{"Reading, RG1": "outside"}'
+        response = MagicMock()
+        response.content = [block]
+        mock_client.messages.create.return_value = response
+        result = classify_locations(["Reading, RG1"], home="Bristol", radius_miles=50, cache=cache)
+    assert result["Reading, RG1"] == "outside"

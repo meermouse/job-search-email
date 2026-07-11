@@ -818,4 +818,119 @@ def test_system_prompt_contains_calibration_instruction():
     assert "gatekeeping" in prompt
     assert "score it 6 or below" in prompt
     # calibration must sit with the score guidance, before qualification analysis
-    assert prompt.index("Score guidance:") < prompt.index("Calibration: ") < prompt.index("Qualification analysis instructions:")
+    assert prompt.index("Score guidance") < prompt.index("Calibration: ") < prompt.index("Qualification analysis instructions:")
+
+
+_GATEKEEPING_RESPONSE = json.dumps({
+    "score": 7,
+    "matched_skills": ["workforce planning"],
+    "missing_essentials": ["HR function leadership"],
+    "gatekeeping_gaps": ["No HR executive track record"],
+    "employment_type_note": "Permanent full-time",
+    "verdict": "Keyword overlap but wrong profession",
+})
+
+
+def test_job_analysis_gatekeeping_gaps_defaults_empty():
+    a = make_analysis()
+    assert a.gatekeeping_gaps == []
+
+
+def test_job_analysis_gatekeeping_gaps_accepts_values():
+    a = make_analysis(gatekeeping_gaps=["No HR executive track record"])
+    assert a.gatekeeping_gaps == ["No HR executive track record"]
+
+
+def test_job_analysis_gatekeeping_backwards_compat_from_dict():
+    # Old cache entries without the field must still deserialise
+    old_cache_entry = {
+        "score": 7,
+        "matched_skills": [],
+        "missing_essentials": [],
+        "employment_type_note": "Permanent",
+        "verdict": "Good match",
+    }
+    a = JobAnalysis(**old_cache_entry)
+    assert a.gatekeeping_gaps == []
+
+
+def test_job_analysis_gatekeeping_serialises_with_asdict():
+    a = make_analysis(gatekeeping_gaps=["No JNCC experience"])
+    assert asdict(a)["gatekeeping_gaps"] == ["No JNCC experience"]
+
+
+def test_score_jobs_caps_score_to_6_when_gatekeeping_gaps():
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(_GATEKEEPING_RESPONSE)):
+        scored = score_jobs(results, make_profile())
+    a = scored[0].analysis
+    assert a.score == 6
+    assert a.gatekeeping_gaps == ["No HR executive track record"]
+
+
+def test_score_jobs_gatekeeping_cap_does_not_raise_score():
+    low = json.dumps({
+        "score": 3,
+        "matched_skills": [],
+        "missing_essentials": ["HR leadership"],
+        "gatekeeping_gaps": ["No HR executive track record"],
+        "employment_type_note": "",
+        "verdict": "Weak",
+    })
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(low)):
+        scored = score_jobs(results, make_profile())
+    assert scored[0].analysis.score == 3
+
+
+def test_score_jobs_no_gatekeeping_gaps_leaves_score_alone():
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(_GOOD_RESPONSE)):
+        scored = score_jobs(results, make_profile())
+    assert scored[0].analysis.score == 8
+    assert scored[0].analysis.gatekeeping_gaps == []
+
+
+def test_score_jobs_mismatch_cap_beats_gatekeeping_cap():
+    both = json.dumps({
+        "score": 9,
+        "matched_skills": [],
+        "missing_essentials": [],
+        "gatekeeping_gaps": ["No PRINCE2 delivery record"],
+        "employment_type_note": "",
+        "verdict": "Weak",
+        "required_qualifications": ["PRINCE2"],
+        "qualification_gaps": ["PRINCE2"],
+        "qualification_status": "mismatch",
+    })
+    results = [make_kept()]
+    with patch("job_search_email.scorer.client", _mock_client(both)):
+        scored = score_jobs(results, make_profile())
+    assert scored[0].analysis.score == 3
+
+
+def test_system_prompt_instructs_gatekeeping_gaps_field():
+    prompt = _build_system_prompt(make_profile())
+    assert "gatekeeping_gaps" in prompt
+
+
+def test_system_prompt_contains_different_profession_rule():
+    prompt = _build_system_prompt(make_profile())
+    assert "core discipline" in prompt
+    assert "1-4" in prompt
+    assert "Different profession" in prompt
+
+
+def test_system_prompt_score_bands_use_shortlist_terms():
+    prompt = _build_system_prompt(make_profile())
+    assert "initial sift" in prompt
+
+
+def test_user_message_schema_puts_analysis_fields_before_score():
+    from job_search_email.scorer import _build_user_message
+    msg = _build_user_message(make_job())
+    schema = msg[msg.index("Return JSON"):]
+    assert schema.index('"matched_skills"') < schema.index('"score"')
+    assert schema.index('"missing_essentials"') < schema.index('"score"')
+    assert schema.index('"gatekeeping_gaps"') < schema.index('"score"')
+    assert schema.index('"verdict"') < schema.index('"score"')
