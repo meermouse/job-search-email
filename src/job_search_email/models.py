@@ -85,6 +85,7 @@ class JobAnalysis:
     required_qualifications: list[str] = field(default_factory=list)
     qualification_gaps: list[str] = field(default_factory=list)
     qualification_status: str = ""
+    gatekeeping_gaps: list[str] = field(default_factory=list)
     exclude: bool = False
     exclude_reason: str = ""
 

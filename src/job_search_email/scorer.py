@@ -121,6 +121,9 @@ def _strip_code_fence(text: str) -> str:
 def _parse_analysis(text: str) -> JobAnalysis:
     data = json.loads(_strip_code_fence(text))
     score = int(data["score"])
+    gatekeeping_gaps = data.get("gatekeeping_gaps", [])
+    if gatekeeping_gaps:
+        score = min(score, 6)
     qual_status = data.get("qualification_status", "")
     if qual_status == "mismatch":
         score = min(score, 3)
@@ -133,6 +136,7 @@ def _parse_analysis(text: str) -> JobAnalysis:
         required_qualifications=data.get("required_qualifications", []),
         qualification_gaps=data.get("qualification_gaps", []),
         qualification_status=qual_status,
+        gatekeeping_gaps=gatekeeping_gaps,
         exclude=bool(data.get("exclude", False)),
         exclude_reason=data.get("exclude_reason", ""),
     )
