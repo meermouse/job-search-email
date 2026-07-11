@@ -19,16 +19,17 @@ stale run data silently.
 
 ## 2. Select the top 5
 
-Read `runs/<stem>/job_results_scored.json`. Kept jobs are entries with
-`rejected` false. Order kept jobs by `analysis.score` descending and take the
-top 5 — the same ordering the email uses. Skip any entry whose `analysis` is
-null (scoring failed) and note it in the final summary. If fewer than 5 kept
-jobs exist, use however many there are and say so.
+Read `runs/<stem>/job_results_scored.json`. It is an object with `kept` and
+`rejected` arrays; `kept` is already sorted by `analysis.score` descending —
+take its top 5 entries, the same ordering the email uses. Each entry's job
+fields live under its `job` key, with the scorer's verdict alongside in
+`analysis`. Skip any entry whose `analysis` is null (scoring failed) and note
+it in the final summary. If fewer than 5 kept entries exist, use however many
+there are and say so.
 
 ## 3. Blind re-assessment — anchoring discipline
 
-Process the jobs ONE AT A TIME. For each job, read ONLY these fields —
-`title`, `company`, `location`, `salary_min`, `employment_type`,
+Process the jobs ONE AT A TIME. For each job, read ONLY these fields from the entry's `job` object — `title`, `company`, `location`, `salary_min`, `employment_type`,
 `description` — plus `profiles/<stem>.yaml`. Do NOT read the job's
 `analysis` block yet.
 
@@ -105,7 +106,7 @@ analysis in the summary and stop.
 For each disagreement (regardless of whether a prompt edit was applied),
 write `calibration/cases/<YYYY-MM-DD>-<job-slug>.yaml` — slug from the job
 title, lowercase, hyphenated, ≤6 words. Build the YAML directly from the
-job's fields in `job_results_scored.json` (do not re-fetch):
+entry's `job` fields in `job_results_scored.json` (do not re-fetch):
 
 ```yaml
 title: ...
