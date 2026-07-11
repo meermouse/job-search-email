@@ -73,9 +73,7 @@ profile:
     - English
 
   target_roles:
-    - Senior Software Engineer
-    - Frontend Developer
-    - Full-stack Developer
+    - Senior Frontend Developer
   open_to:
     - Software Architect
     - Lead Developer
@@ -93,7 +91,7 @@ min_salary: 80000
 
 preamble: "Hey Marc, its The Job Mule 2.0. Lets go through todays jobs."
 recipient_email: marc.j.brookes@gmail.com
-send_main_email: false
+send_main_email: true
 send_debug_email: false
 filter_recruitment: true
 filter_sponsors: false
