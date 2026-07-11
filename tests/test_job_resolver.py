@@ -216,3 +216,30 @@ def test_dump_job_file_round_trips(tmp_path):
     dump_job_file(job, str(out))
     reloaded = load_job_file(str(out))
     assert reloaded == job
+
+
+def test_load_job_file_ignores_calibration_block(tmp_path):
+    # calibration/cases/*.yaml files carry an extra `calibration` block that
+    # explain-job must silently ignore when replaying the job.
+    case = tmp_path / "case.yaml"
+    case.write_text(
+        "title: Business Architect\n"
+        "company: AECOM\n"
+        "location: Cardiff\n"
+        "salary_min: 70000\n"
+        "description: Org design lead role.\n"
+        "url: https://example.com/job\n"
+        "source: manual\n"
+        "employment_type: fulltime\n"
+        "calibration:\n"
+        "  profile: jie-zhou\n"
+        "  scored: 7\n"
+        "  expected_max: 6\n"
+        "  reason: gatekeeping gap\n"
+        "  date: 2026-07-11\n",
+        encoding="utf-8",
+    )
+    job = load_job_file(str(case))
+    assert job.title == "Business Architect"
+    assert job.salary_min == 70000
+    assert job.employment_type == "fulltime"
