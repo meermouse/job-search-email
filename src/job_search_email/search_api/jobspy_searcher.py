@@ -1,5 +1,6 @@
 import math
 import re
+import sys
 from jobspy import scrape_jobs
 from ..models import JobListing, Profile
 
@@ -20,34 +21,48 @@ def _normalise_job_type(value: str) -> str | None:
 
 
 def search(query: str, profile: Profile) -> list[JobListing]:
-    df = scrape_jobs(
+    frames = [scrape_jobs(
         site_name=["linkedin", "indeed"],
         search_term=query,
         location=profile.location,
         distance=50,
         results_wanted=50,
         country_indeed="UK",
-    )
+    )]
 
-    if df.empty:
-        return []
+    if profile.include_remote:
+        # UK-wide remote leg. Failure here must not lose the radius results.
+        try:
+            frames.append(scrape_jobs(
+                site_name=["linkedin", "indeed"],
+                search_term=query,
+                location="United Kingdom",
+                is_remote=True,
+                results_wanted=50,
+                country_indeed="UK",
+            ))
+        except Exception as exc:
+            print(f"[jobspy_searcher] remote leg failed for {query!r}: {exc}", file=sys.stderr)
 
     results = []
-    for _, row in df.iterrows():
-        salary_min = _extract_salary_min(row)
-        if salary_min is not None and salary_min < profile.min_salary:
+    for df in frames:
+        if df.empty:
             continue
+        for _, row in df.iterrows():
+            salary_min = _extract_salary_min(row)
+            if salary_min is not None and salary_min < profile.min_salary:
+                continue
 
-        results.append(JobListing(
-            title=_str(row.get("title")),
-            company=_str(row.get("company")),
-            location=_str(row.get("location")),
-            salary_min=salary_min,
-            description=_str(row.get("description")),
-            url=_str(row.get("job_url")),
-            source=_str(row.get("site")).lower(),
-            employment_type=_normalise_job_type(_str(row.get("job_type"))),
-        ))
+            results.append(JobListing(
+                title=_str(row.get("title")),
+                company=_str(row.get("company")),
+                location=_str(row.get("location")),
+                salary_min=salary_min,
+                description=_str(row.get("description")),
+                url=_str(row.get("job_url")),
+                source=_str(row.get("site")).lower(),
+                employment_type=_normalise_job_type(_str(row.get("job_type"))),
+            ))
 
     return results
 

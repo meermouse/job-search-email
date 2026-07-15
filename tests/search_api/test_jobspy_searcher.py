@@ -91,3 +91,61 @@ def test_search_returns_empty_on_empty_dataframe():
     with patch("job_search_email.search_api.jobspy_searcher.scrape_jobs", return_value=pd.DataFrame()):
         result = search("nothing", PROFILE)
     assert result == []
+
+
+REMOTE_PROFILE = make_profile(name="Jie", include_remote=True)
+
+
+def test_search_remote_off_single_scrape_call():
+    with patch("job_search_email.search_api.jobspy_searcher.scrape_jobs",
+               return_value=pd.DataFrame()) as mock_scrape:
+        search("manager", PROFILE)
+    assert mock_scrape.call_count == 1
+
+
+def test_search_remote_on_adds_uk_wide_remote_leg():
+    with patch("job_search_email.search_api.jobspy_searcher.scrape_jobs",
+               return_value=pd.DataFrame()) as mock_scrape:
+        search("manager", REMOTE_PROFILE)
+
+    assert mock_scrape.call_count == 2
+    radius_kwargs = mock_scrape.call_args_list[0].kwargs
+    remote_kwargs = mock_scrape.call_args_list[1].kwargs
+    assert radius_kwargs["location"] == "Bristol"
+    assert radius_kwargs["distance"] == 50
+    assert remote_kwargs["location"] == "United Kingdom"
+    assert remote_kwargs["is_remote"] is True
+    assert remote_kwargs["search_term"] == "manager"
+    assert remote_kwargs["country_indeed"] == "UK"
+    assert "distance" not in remote_kwargs
+
+
+def test_search_remote_on_concatenates_both_legs():
+    remote_df = pd.DataFrame([{
+        "site": "linkedin",
+        "job_url": "https://linkedin.com/jobs/99",
+        "title": "Remote Digital Lead",
+        "company": "Acme Analytics",
+        "location": "United Kingdom (Remote)",
+        "description": "Fully remote role.",
+        "min_amount": 70000.0,
+        "max_amount": 80000.0,
+        "job_type": "fulltime",
+        "currency": "GBP",
+    }])
+    with patch("job_search_email.search_api.jobspy_searcher.scrape_jobs",
+               side_effect=[SAMPLE_DF, remote_df]):
+        result = search("manager", REMOTE_PROFILE)
+
+    titles = {j.title for j in result}
+    assert "Digital Transformation Manager" in titles  # radius leg
+    assert "Remote Digital Lead" in titles             # remote leg
+
+
+def test_search_remote_leg_failure_keeps_radius_results(capsys):
+    with patch("job_search_email.search_api.jobspy_searcher.scrape_jobs",
+               side_effect=[SAMPLE_DF, ConnectionError("linkedin down")]):
+        result = search("manager", REMOTE_PROFILE)
+
+    assert any(j.title == "Digital Transformation Manager" for j in result)
+    assert "remote leg failed" in capsys.readouterr().err
