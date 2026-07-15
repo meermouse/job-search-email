@@ -730,3 +730,145 @@ def test_filter_jobs_employment_type_checked_before_recruitment():
     jobs = [make_job(source="reed", company="Hays Specialist Recruitment Ltd", employment_type="contract")]
     results = filter_jobs(jobs, make_plan(), make_profile_stub(), recruitment_set=_RECRUITERS)
     assert results[0].reject_reason == "employment type: contract"
+
+
+# --- Remote gate (include_remote profiles) ---
+
+_WITHIN = frozenset({"Bristol", "Bath, BA1"})
+_OUTSIDE = frozenset({"Manchester"})
+
+
+def test_remote_gate_within_location_passes_without_verdict():
+    job = make_job(location="Bristol")
+    result = _check_location(job, _OUTSIDE, within_locations=_WITHIN, remote_verdicts={})
+    assert result is None
+
+
+def test_remote_gate_outside_confirmed_remote_passes_with_flag():
+    job = make_job(location="Manchester", url="https://x.com/1")
+    result = _check_location(
+        job, _OUTSIDE, within_locations=_WITHIN,
+        remote_verdicts={"https://x.com/1": "remote"},
+    )
+    assert result is not None
+    assert result.rejected is False
+    assert result.flags == ["remote_confirmed"]
+
+
+def test_remote_gate_outside_not_remote_rejected():
+    job = make_job(location="Manchester", url="https://x.com/1")
+    result = _check_location(
+        job, _OUTSIDE, within_locations=_WITHIN,
+        remote_verdicts={"https://x.com/1": "not_remote"},
+    )
+    assert result is not None and result.rejected is True
+    assert result.reject_reason == "location outside radius and not confirmed fully remote: Manchester"
+
+
+def test_remote_gate_uncertain_not_remote_rejected():
+    job = make_job(location="Remote, UK", url="https://x.com/1")
+    result = _check_location(
+        job, _OUTSIDE, within_locations=_WITHIN,
+        remote_verdicts={"https://x.com/1": "not_remote"},
+    )
+    assert result is not None and result.rejected is True
+    assert result.reject_reason == "location uncertain and not confirmed fully remote: Remote, UK"
+
+
+def test_remote_gate_uncertain_confirmed_remote_passes():
+    job = make_job(location="Remote, UK", url="https://x.com/1")
+    result = _check_location(
+        job, _OUTSIDE, within_locations=_WITHIN,
+        remote_verdicts={"https://x.com/1": "remote"},
+    )
+    assert result is not None
+    assert result.rejected is False
+    assert result.flags == ["remote_confirmed"]
+
+
+def test_remote_gate_blank_location_treated_as_uncertain():
+    job = make_job(location="", url="https://x.com/1")
+    result = _check_location(
+        job, _OUTSIDE, within_locations=_WITHIN,
+        remote_verdicts={"https://x.com/1": "not_remote"},
+    )
+    assert result is not None and result.rejected is True
+    assert result.reject_reason == "location uncertain and not confirmed fully remote: not stated"
+
+
+def test_remote_gate_missing_verdict_fails_closed():
+    job = make_job(location="Manchester", url="https://x.com/1")
+    result = _check_location(job, _OUTSIDE, within_locations=_WITHIN, remote_verdicts={})
+    assert result is not None and result.rejected is True
+    assert result.reject_reason == "remote check unavailable — cannot confirm fully remote (Manchester)"
+
+
+def test_remote_gate_unverified_verdict_fails_closed():
+    job = make_job(location="Manchester", url="https://x.com/1")
+    result = _check_location(
+        job, _OUTSIDE, within_locations=_WITHIN,
+        remote_verdicts={"https://x.com/1": "unverified"},
+    )
+    assert result is not None and result.rejected is True
+    assert "remote check unavailable" in result.reject_reason
+
+
+def test_remote_gate_none_verdicts_keeps_legacy_behaviour():
+    # remote_verdicts=None must behave exactly as before: uncertain passes.
+    job = make_job(location="Remote, UK")
+    assert _check_location(job, _OUTSIDE, within_locations=frozenset(), remote_verdicts=None) is None
+
+
+def test_filter_jobs_remote_gate_keeps_confirmed_and_flags():
+    jobs = [make_job(location="Manchester", url="https://x.com/1", employment_type="full-time")]
+    results = filter_jobs(
+        jobs, make_plan(), make_profile_stub(),
+        rejected_locations=frozenset({"Manchester"}),
+        within_locations=frozenset({"Bristol"}),
+        remote_verdicts={"https://x.com/1": "remote"},
+    )
+    assert results[0].rejected is False
+    assert "remote_confirmed" in results[0].flags
+
+
+def test_filter_jobs_remote_gate_rejects_unconfirmed():
+    jobs = [make_job(location="Remote", url="https://x.com/1", employment_type="full-time")]
+    results = filter_jobs(
+        jobs, make_plan(), make_profile_stub(),
+        within_locations=frozenset({"Bristol"}),
+        remote_verdicts={"https://x.com/1": "not_remote"},
+    )
+    assert results[0].rejected is True
+    assert results[0].reject_reason == "location uncertain and not confirmed fully remote: Remote"
+
+
+def test_filter_jobs_remote_gate_preserves_other_flags():
+    # remote_confirmed and employment_type_unknown can coexist.
+    jobs = [make_job(location="Manchester", url="https://x.com/1",
+                     employment_type=None, description="A management position.")]
+    results = filter_jobs(
+        jobs, make_plan(), make_profile_stub(),
+        rejected_locations=frozenset({"Manchester"}),
+        within_locations=frozenset(),
+        remote_verdicts={"https://x.com/1": "remote"},
+    )
+    assert results[0].rejected is False
+    assert "remote_confirmed" in results[0].flags
+    assert "employment_type_unknown" in results[0].flags
+
+
+def test_filter_jobs_no_remote_verdicts_unchanged():
+    # Default call: uncertain locations still pass, outside still rejected.
+    jobs = [
+        make_job(location="Remote", employment_type="full-time"),
+        make_job(location="Manchester", employment_type="full-time", url="https://x.com/2"),
+    ]
+    results = filter_jobs(
+        jobs, make_plan(), make_profile_stub(),
+        rejected_locations=frozenset({"Manchester"}),
+    )
+    remote_r = next(r for r in results if r.job.location == "Remote")
+    manc_r = next(r for r in results if r.job.location == "Manchester")
+    assert remote_r.rejected is False
+    assert manc_r.rejected is True
+    assert manc_r.reject_reason == "location outside radius: Manchester"
