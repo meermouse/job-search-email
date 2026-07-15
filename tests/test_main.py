@@ -433,6 +433,21 @@ def test_load_profile_filter_sponsors_reads_false(tmp_path: Path) -> None:
     assert profile.filter_sponsors is False
 
 
+def test_load_profile_include_remote_defaults_false(tmp_path: Path) -> None:
+    profile_path = tmp_path / "profile.yaml"
+    profile_path.write_text(PROFILE_YAML, encoding="utf-8")
+    profile = load_profile(path=profile_path)
+    assert profile.include_remote is False
+
+
+def test_load_profile_include_remote_reads_true(tmp_path: Path) -> None:
+    yaml_with_flag = PROFILE_YAML + "include_remote: true\n"
+    profile_path = tmp_path / "profile.yaml"
+    profile_path.write_text(yaml_with_flag, encoding="utf-8")
+    profile = load_profile(path=profile_path)
+    assert profile.include_remote is True
+
+
 def _run_main_with_toggles(tmp_path: Path, monkeypatch, send_main: bool, send_debug: bool):
     import sys
     import importlib
