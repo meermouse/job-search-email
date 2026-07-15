@@ -1,8 +1,15 @@
 import os
+import sys
 import requests
 from ..models import JobListing, Profile
 
 _REED_URL = "https://www.reed.co.uk/api/1.0/search"
+
+
+def _fetch(params: dict, api_key: str) -> list[JobListing]:
+    response = requests.get(_REED_URL, params=params, auth=(api_key, ""), timeout=30)
+    response.raise_for_status()
+    return [_to_listing(item) for item in response.json().get("results", [])]
 
 
 def search(query: str, profile: Profile) -> list[JobListing]:
@@ -10,17 +17,27 @@ def search(query: str, profile: Profile) -> list[JobListing]:
     if not api_key:
         raise ValueError("REED_API_KEY environment variable is not set")
 
-    params = {
+    listings = _fetch({
         "keywords": query,
         "locationName": profile.location,
         "distancefromLocation": 50,
         "minimumSalary": profile.min_salary,
         "resultsToTake": 100,
-    }
-    response = requests.get(_REED_URL, params=params, auth=(api_key, ""), timeout=30)
-    response.raise_for_status()
+    }, api_key)
 
-    return [_to_listing(item) for item in response.json().get("results", [])]
+    if profile.include_remote:
+        # UK-wide remote leg: no location constraint, keyword-biased towards
+        # remote listings. Failure here must not lose the radius results.
+        try:
+            listings += _fetch({
+                "keywords": f"{query} remote",
+                "minimumSalary": profile.min_salary,
+                "resultsToTake": 100,
+            }, api_key)
+        except Exception as exc:
+            print(f"[reed] remote leg failed for {query!r}: {exc}", file=sys.stderr)
+
+    return listings
 
 
 def _to_listing(item: dict) -> JobListing:
