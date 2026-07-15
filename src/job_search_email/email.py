@@ -21,6 +21,12 @@ def _score_badge(score: int) -> str:
     )
 
 
+_REMOTE_BADGE = (
+    ' <span style="background:#17a2b8; color:#ffffff; padding:2px 6px; '
+    'border-radius:4px; font-size:11px;">Remote</span>'
+)
+
+
 def _quals_badge(analysis: JobAnalysis) -> str:
     status = analysis.qualification_status
     gaps = analysis.qualification_gaps
@@ -61,12 +67,13 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
         salary = f"£{r.job.salary_min:,}" if r.job.salary_min is not None else "Not stated"
         badge = _score_badge(r.analysis.score)
         quals = _quals_badge(r.analysis)
+        remote = _REMOTE_BADGE if "remote_confirmed" in r.flags else ""
         cell = 'style="padding:8px 6px; border-bottom:1px solid #eeeeee;"'
         rows.append(
             f'<tr style="background:{row_bg};">'
             f"<td {cell}>{i}</td>"
             f"<td {cell}>{badge}</td>"
-            f'<td {cell}><a href="{_escape(r.job.url, quote=True)}" style="color:#0066cc; text-decoration:none;">{_escape(r.job.title)}</a></td>'
+            f'<td {cell}><a href="{_escape(r.job.url, quote=True)}" style="color:#0066cc; text-decoration:none;">{_escape(r.job.title)}</a>{remote}</td>'
             f"<td {cell}>{_escape(r.job.company)}</td>"
             f'<td {cell} style="white-space:nowrap;">{salary}</td>'
             f"<td {cell}>{quals}</td>"

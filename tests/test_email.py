@@ -345,3 +345,24 @@ def test_build_email_html_shows_dash_for_no_requirements():
     results = [_make_result_with_quals(score=8, status="")]
     html, _ = build_email_html(results, profile)
     assert "&#8212;" in html
+
+
+def _scored(flags: list[str]) -> ScoredResult:
+    job = JobListing(
+        title="Digital Lead", company="Acme Analytics", location="Remote (UK)",
+        salary_min=70000, description="", url="https://x.com/1",
+        source="reed", employment_type="permanent",
+    )
+    analysis = JobAnalysis(score=8, matched_skills=[], missing_essentials=[],
+                           employment_type_note="", verdict="Good fit")
+    return ScoredResult(job=job, flags=flags, rejected=False, reject_reason=None, analysis=analysis)
+
+
+def test_email_shows_remote_badge_for_confirmed_remote():
+    html, _ = build_email_html([_scored(["remote_confirmed"])], make_profile())
+    assert ">Remote</span>" in html
+
+
+def test_email_no_remote_badge_without_flag():
+    html, _ = build_email_html([_scored([])], make_profile())
+    assert ">Remote</span>" not in html
