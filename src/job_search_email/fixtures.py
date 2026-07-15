@@ -22,6 +22,13 @@ _FIXTURE_ANALYSES: dict[str, JobAnalysis] = {
         employment_type_note="Permanent full-time — matches preference.",
         verdict="Partial match. Strategy focus aligns but consulting pedigree is thin.",
     ),
+    "https://www.reed.co.uk/jobs/head-of-digital-remote/12345681": JobAnalysis(
+        score=8,
+        matched_skills=["digital transformation", "Business Strategy"],
+        missing_essentials=[],
+        employment_type_note="Permanent full-time, fully remote — matches preference.",
+        verdict="Strong match. Confirmed fully-remote senior digital transformation role.",
+    ),
 }
 
 _FALLBACK_ANALYSIS = JobAnalysis(
@@ -108,6 +115,32 @@ def fixture_jobs() -> list[JobListing]:
             source="reed",
             employment_type="permanent",
         ),
+        JobListing(
+            title="Head of Digital Transformation (Remote)",
+            company="Acme Analytics",
+            location="Remote (UK)",
+            salary_min=78000,
+            description=(
+                "Lead our digital transformation practice. This role is fully remote "
+                "within the UK, with quarterly team days in London. Permanent, full-time."
+            ),
+            url="https://www.reed.co.uk/jobs/head-of-digital-remote/12345681",
+            source="reed",
+            employment_type="permanent",
+        ),
+        JobListing(
+            title="Senior Business Manager",
+            company="KPMG UK",
+            location="Manchester",
+            salary_min=72000,
+            description=(
+                "Senior business manager role with hybrid working — three days per week "
+                "in our Manchester office. Permanent, full-time."
+            ),
+            url="https://www.reed.co.uk/jobs/senior-business-manager-manchester/12345682",
+            source="reed",
+            employment_type="permanent",
+        ),
     ]
 
 
@@ -126,3 +159,18 @@ def fixture_scores(results: list[FilteredResult]) -> list[ScoredResult]:
             analysis=analysis,
         ))
     return scored
+
+
+def fixture_location_classification() -> dict[str, str]:
+    return {
+        "Bristol": "within",
+        "Remote (UK)": "uncertain",
+        "Manchester": "outside",
+    }
+
+
+def fixture_remote_verdicts() -> dict[str, str]:
+    return {
+        "https://www.reed.co.uk/jobs/head-of-digital-remote/12345681": "remote",
+        "https://www.reed.co.uk/jobs/senior-business-manager-manchester/12345682": "not_remote",
+    }

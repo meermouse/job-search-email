@@ -14,7 +14,7 @@ def test_fixture_queries_returns_eight_strings():
 
 def test_fixture_jobs_returns_five_listings():
     jobs = fixture_jobs()
-    assert len(jobs) == 5
+    assert len(jobs) == 7
     assert all(isinstance(j, JobListing) for j in jobs)
 
 
@@ -109,3 +109,45 @@ def test_local_run_writes_json_artefacts(tmp_path, monkeypatch):
     scored = json.loads((tmp_path / "job_results_scored.json").read_text())
     assert "unanalysed" in scored["summary"]
     assert "analysis_failed" in scored["summary"]
+
+
+from job_search_email.filter import filter_jobs
+from job_search_email.fixtures import (
+    fixture_jobs,
+    fixture_location_classification,
+    fixture_remote_verdicts,
+)
+
+
+def _remote_gate_results():
+    from job_search_email.models import SearchPlan
+    from profile_helpers import make_profile
+    classification = fixture_location_classification()
+    plan = SearchPlan(profile_fingerprint="fp", queries=[],
+                      exclusions={"roles": [], "employment_types": []},
+                      nhs_rules={}, evaluator_notes=[])
+    return filter_jobs(
+        fixture_jobs(), plan, make_profile(),
+        rejected_locations=frozenset(l for l, v in classification.items() if v == "outside"),
+        within_locations=frozenset(l for l, v in classification.items() if v == "within"),
+        remote_verdicts=fixture_remote_verdicts(),
+    )
+
+
+def test_fixture_confirmed_remote_job_kept_with_flag():
+    results = _remote_gate_results()
+    remote = next(r for r in results if r.job.location == "Remote (UK)")
+    assert remote.rejected is False
+    assert "remote_confirmed" in remote.flags
+
+
+def test_fixture_far_afield_hybrid_job_rejected():
+    results = _remote_gate_results()
+    manc = next(r for r in results if r.job.location == "Manchester")
+    assert manc.rejected is True
+    assert manc.reject_reason == "location outside radius and not confirmed fully remote: Manchester"
+
+
+def test_fixture_classification_covers_all_fixture_locations():
+    covered = set(fixture_location_classification())
+    assert {j.location for j in fixture_jobs()} <= covered
