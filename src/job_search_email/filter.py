@@ -29,6 +29,7 @@ _LONDON_WEIGHTING = 1.20
 _MIN_COMPANY_CHARS = 8
 _MIN_COMPANY_WORDS = 2
 _RECRUITMENT_REASON = "recruitment agency — client company not disclosed, cannot verify sponsor"
+_REMOTE_CONFIRMED_FLAG = "remote_confirmed"
 
 
 def _check_employment_type(job: JobListing) -> FilteredResult:
@@ -158,13 +159,42 @@ def _check_sponsor(job: JobListing, sponsor_set: frozenset[str]) -> FilteredResu
     )
 
 
-def _check_location(job: JobListing, rejected_locations: frozenset[str]) -> FilteredResult | None:
-    if not job.location or job.location not in rejected_locations:
+def _check_location(
+    job: JobListing,
+    rejected_locations: frozenset[str],
+    within_locations: frozenset[str] = frozenset(),
+    remote_verdicts: dict[str, str] | None = None,
+) -> FilteredResult | None:
+    if remote_verdicts is None:
+        # Legacy behaviour (include_remote off): only definite "outside"
+        # verdicts reject; vague/uncertain locations pass through.
+        if not job.location or job.location not in rejected_locations:
+            return None
+        return FilteredResult(
+            job=job, flags=[], rejected=True,
+            reject_reason=f"location outside radius: {job.location}",
+        )
+
+    # Remote gate (include_remote on): anything not confirmed within the
+    # radius must be positively confirmed fully remote. A non-rejected
+    # result signals pass-with-flags.
+    if job.location and job.location in within_locations:
         return None
-    return FilteredResult(
-        job=job, flags=[], rejected=True,
-        reject_reason=f"location outside radius: {job.location}",
-    )
+
+    verdict = remote_verdicts.get(job.url, "unverified")
+    if verdict == "remote":
+        return FilteredResult(
+            job=job, flags=[_REMOTE_CONFIRMED_FLAG], rejected=False, reject_reason=None,
+        )
+
+    loc_label = job.location or "not stated"
+    if verdict == "unverified":
+        reason = f"remote check unavailable — cannot confirm fully remote ({loc_label})"
+    elif job.location and job.location in rejected_locations:
+        reason = f"location outside radius and not confirmed fully remote: {job.location}"
+    else:
+        reason = f"location uncertain and not confirmed fully remote: {loc_label}"
+    return FilteredResult(job=job, flags=[], rejected=True, reject_reason=reason)
 
 
 def filter_jobs(
@@ -174,15 +204,18 @@ def filter_jobs(
     rejected_locations: frozenset[str] = frozenset(),
     recruitment_set: frozenset[str] | None = None,
     sponsor_set: frozenset[str] | None = None,
+    within_locations: frozenset[str] = frozenset(),
+    remote_verdicts: dict[str, str] | None = None,
 ) -> list[FilteredResult]:
     exclusion_roles = plan.exclusions.get("roles", [])
     results: list[FilteredResult] = []
 
     for job in jobs:
-        loc_result = _check_location(job, rejected_locations)
-        if loc_result is not None:
+        loc_result = _check_location(job, rejected_locations, within_locations, remote_verdicts)
+        if loc_result is not None and loc_result.rejected:
             results.append(loc_result)
             continue
+        loc_flags = loc_result.flags if loc_result is not None else []
 
         et_result = _check_employment_type(job)
         if et_result.rejected:
@@ -218,7 +251,7 @@ def filter_jobs(
 
         results.append(FilteredResult(
             job=job,
-            flags=et_result.flags,
+            flags=loc_flags + et_result.flags,
             rejected=False,
             reject_reason=None,
         ))

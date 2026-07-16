@@ -43,6 +43,7 @@ class Profile:
     send_debug_email: bool = False
     filter_recruitment: bool = True
     filter_sponsors: bool = True
+    include_remote: bool = False
 
 
 @dataclass

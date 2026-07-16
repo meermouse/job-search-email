@@ -130,3 +130,71 @@ def test_search_posted_by_agency_absent_defaults_none(monkeypatch):
         result = search("manager", PROFILE)
 
     assert result[0].posted_by_agency is None
+
+
+REMOTE_PROFILE = make_profile(name="Jie", include_remote=True)
+
+
+def test_search_remote_off_single_request(monkeypatch):
+    monkeypatch.setenv("REED_API_KEY", "test-key")
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {"results": []}
+    mock_resp.raise_for_status.return_value = None
+    with patch("job_search_email.search_api.reed.requests.get", return_value=mock_resp) as mock_get:
+        search("manager", PROFILE)
+    assert mock_get.call_count == 1
+
+
+def test_search_remote_on_adds_uk_wide_leg(monkeypatch):
+    monkeypatch.setenv("REED_API_KEY", "test-key")
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {"results": []}
+    mock_resp.raise_for_status.return_value = None
+    with patch("job_search_email.search_api.reed.requests.get", return_value=mock_resp) as mock_get:
+        search("business manager", REMOTE_PROFILE)
+
+    assert mock_get.call_count == 2
+    radius_params = mock_get.call_args_list[0].kwargs["params"]
+    remote_params = mock_get.call_args_list[1].kwargs["params"]
+    assert radius_params["locationName"] == "Bristol"
+    assert remote_params["keywords"] == "business manager remote"
+    assert "locationName" not in remote_params
+    assert "distancefromLocation" not in remote_params
+    assert remote_params["minimumSalary"] == 60000
+    assert remote_params["resultsToTake"] == 100
+
+
+def test_search_remote_on_concatenates_results(monkeypatch):
+    monkeypatch.setenv("REED_API_KEY", "test-key")
+    remote_item = {**REED_RESPONSE["results"][0],
+                   "jobTitle": "Remote Digital Lead",
+                   "locationName": "Remote",
+                   "jobUrl": "https://www.reed.co.uk/jobs/remote-digital-lead/99"}
+    radius_resp = MagicMock()
+    radius_resp.json.return_value = REED_RESPONSE
+    radius_resp.raise_for_status.return_value = None
+    remote_resp = MagicMock()
+    remote_resp.json.return_value = {"results": [remote_item]}
+    remote_resp.raise_for_status.return_value = None
+
+    with patch("job_search_email.search_api.reed.requests.get",
+               side_effect=[radius_resp, remote_resp]):
+        result = search("manager", REMOTE_PROFILE)
+
+    titles = {j.title for j in result}
+    assert titles == {"Digital Transformation Manager", "Remote Digital Lead"}
+
+
+def test_search_remote_leg_failure_keeps_radius_results(monkeypatch, capsys):
+    monkeypatch.setenv("REED_API_KEY", "test-key")
+    radius_resp = MagicMock()
+    radius_resp.json.return_value = REED_RESPONSE
+    radius_resp.raise_for_status.return_value = None
+
+    with patch("job_search_email.search_api.reed.requests.get",
+               side_effect=[radius_resp, ConnectionError("reed down")]):
+        result = search("manager", REMOTE_PROFILE)
+
+    assert len(result) == 1
+    assert result[0].title == "Digital Transformation Manager"
+    assert "remote leg failed" in capsys.readouterr().err

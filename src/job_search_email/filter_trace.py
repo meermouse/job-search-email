@@ -27,18 +27,25 @@ def run_filter_gates(
     sponsor_set: frozenset[str] | None,
     nhs_rules: dict,
     exclusion_roles: list[str],
+    remote_verdict: str | None = None,
 ) -> list[GateResult]:
     gates: list[GateResult] = []
 
-    # Location — reuse the real gate by deriving rejected_locations from the verdict.
+    # Location — reuse the real gate by deriving the location sets from the verdict.
     rejected_locations = frozenset({job.location}) if location_verdict == "outside" else frozenset()
-    loc = _check_location(job, rejected_locations)
-    gates.append(GateResult(
-        "Location", loc is None,
-        f"{location_verdict} radius ({job.location or 'not stated'})"
-        if loc is None else (loc.reject_reason or ""),
-        False,
-    ))
+    if remote_verdict is None:
+        loc = _check_location(job, rejected_locations)
+    else:
+        within_locations = frozenset({job.location}) if location_verdict == "within" else frozenset()
+        loc = _check_location(job, rejected_locations, within_locations, {job.url: remote_verdict})
+
+    if loc is not None and loc.rejected:
+        loc_detail = loc.reject_reason or ""
+    elif loc is not None and "remote_confirmed" in loc.flags:
+        loc_detail = f"{location_verdict} radius, confirmed fully remote ({job.location or 'not stated'})"
+    else:
+        loc_detail = f"{location_verdict} radius ({job.location or 'not stated'})"
+    gates.append(GateResult("Location", loc is None or not loc.rejected, loc_detail, False))
 
     et = _check_employment_type(job)
     gates.append(GateResult(

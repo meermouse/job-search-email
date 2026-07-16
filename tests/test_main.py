@@ -433,6 +433,21 @@ def test_load_profile_filter_sponsors_reads_false(tmp_path: Path) -> None:
     assert profile.filter_sponsors is False
 
 
+def test_load_profile_include_remote_defaults_false(tmp_path: Path) -> None:
+    profile_path = tmp_path / "profile.yaml"
+    profile_path.write_text(PROFILE_YAML, encoding="utf-8")
+    profile = load_profile(path=profile_path)
+    assert profile.include_remote is False
+
+
+def test_load_profile_include_remote_reads_true(tmp_path: Path) -> None:
+    yaml_with_flag = PROFILE_YAML + "include_remote: true\n"
+    profile_path = tmp_path / "profile.yaml"
+    profile_path.write_text(yaml_with_flag, encoding="utf-8")
+    profile = load_profile(path=profile_path)
+    assert profile.include_remote is True
+
+
 def _run_main_with_toggles(tmp_path: Path, monkeypatch, send_main: bool, send_debug: bool):
     import sys
     import importlib
@@ -702,3 +717,64 @@ def test_main_exits_nonzero_when_no_profiles(tmp_path, monkeypatch):
     with pytest.raises(SystemExit) as excinfo:
         main_mod.main()
     assert excinfo.value.code == 1
+
+
+def _run_pipeline_remote(tmp_path, monkeypatch, profile, remote_return):
+    """Like _run_pipeline_capture_filter_call but also patches classify_remote."""
+    import sys, importlib
+    importlib.import_module("job_search_email.main")
+    main_mod = sys.modules["job_search_email.main"]
+
+    monkeypatch.setattr(main_mod, "CACHE_PATH", tmp_path / "plan_cache.json")
+    monkeypatch.setattr(main_mod, "SCORE_CACHE_PATH", tmp_path / "score_cache.json")
+    monkeypatch.setattr(main_mod, "LOCATION_CACHE_PATH", tmp_path / "location_cache.json")
+    monkeypatch.setattr(main_mod, "REMOTE_CACHE_PATH", tmp_path / "remote_cache.json")
+
+    from job_search_email.models import JobListing, SearchPlan
+    jobs = [
+        JobListing(title="Local", company="NHS", location="Bristol",
+                   salary_min=65000, description="", url="https://x.com/1",
+                   source="reed", employment_type="full-time"),
+        JobListing(title="Far", company="Acme Analytics", location="Manchester",
+                   salary_min=65000, description="Fully remote in the UK.", url="https://x.com/2",
+                   source="reed", employment_type="full-time"),
+    ]
+    plan = SearchPlan(profile_fingerprint="test", queries=["q"],
+                      exclusions={"roles": [], "employment_types": []},
+                      nhs_rules={}, evaluator_notes=[])
+
+    with (
+        patch("job_search_email.main.generate_search_plan", return_value=plan),
+        patch("job_search_email.main.fetch_all_jobs", return_value=jobs),
+        patch("job_search_email.main.classify_locations",
+              return_value={"Bristol": "within", "Manchester": "outside"}),
+        patch("job_search_email.main.score_jobs", return_value=[]),
+        patch("job_search_email.main.filter_jobs", return_value=[]) as mock_filter,
+        patch("job_search_email.main.classify_remote", return_value=remote_return) as mock_remote,
+    ):
+        main_mod.run_pipeline(profile, tmp_path / "out")
+
+    return mock_filter.call_args.kwargs, mock_remote
+
+
+def test_run_pipeline_remote_on_checks_far_jobs_and_passes_verdicts(tmp_path, monkeypatch):
+    kwargs, mock_remote = _run_pipeline_remote(
+        tmp_path, monkeypatch,
+        make_profile(include_remote=True),
+        remote_return={"https://x.com/2": "remote"},
+    )
+    checked_jobs = mock_remote.call_args.args[0]
+    assert [j.url for j in checked_jobs] == ["https://x.com/2"]  # only the far-afield job
+    assert kwargs["remote_verdicts"] == {"https://x.com/2": "remote"}
+    assert kwargs["within_locations"] == frozenset({"Bristol"})
+    assert (tmp_path / "remote_cache.json").exists()
+
+
+def test_run_pipeline_remote_off_skips_check(tmp_path, monkeypatch):
+    kwargs, mock_remote = _run_pipeline_remote(
+        tmp_path, monkeypatch,
+        make_profile(include_remote=False),
+        remote_return={},
+    )
+    mock_remote.assert_not_called()
+    assert kwargs["remote_verdicts"] is None

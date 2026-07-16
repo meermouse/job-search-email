@@ -17,6 +17,7 @@ from .location_filter import classify_locations
 from .main import SPONSOR_CACHE_PATH
 from .nhs_rules import get_nhs_rules
 from .profile import load_profile
+from .remote_filter import classify_remote
 from .scorer import analyse_job
 from .sponsor_filter import load_sponsor_set
 
@@ -63,6 +64,12 @@ def explain(
     else:
         verdict = "uncertain"
 
+    # NOTE: classify_remote also makes a live LLM call (needs ANTHROPIC_API_KEY);
+    # it only runs for include_remote profiles on far-afield jobs.
+    remote_verdict = None
+    if profile.include_remote and verdict != "within":
+        remote_verdict = classify_remote([job], cache={}).get(job.url, "unverified")
+
     # NOTE: classify_locations and get_exclusions both make live LLM calls and
     # therefore require ANTHROPIC_API_KEY to be set, even when the job is
     # ultimately rejected by a hard filter gate (sponsor, employment-type, etc.).
@@ -73,6 +80,7 @@ def explain(
         sponsor_set=sponsor_set,
         nhs_rules=get_nhs_rules(),
         exclusion_roles=get_exclusions(profile)["roles"],
+        remote_verdict=remote_verdict,
     )
 
     first_reject = next((g for g in gates if g.is_first_reject), None)

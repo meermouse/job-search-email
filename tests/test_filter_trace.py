@@ -85,3 +85,61 @@ def test_sponsor_gate_disabled_when_sponsor_set_none():
     sponsor_gate = next(g for g in gates if g.name == "Sponsor list")
     assert sponsor_gate.passed is True
     assert sponsor_gate.detail == "disabled (filter_sponsors=false)"
+
+
+def _remote_job(**kwargs) -> JobListing:
+    defaults = dict(
+        title="Digital Manager", company="Acme Analytics Ltd", location="Manchester",
+        salary_min=70000, description="", url="https://x.com/1",
+        source="reed", employment_type="permanent",
+    )
+    defaults.update(kwargs)
+    return JobListing(**defaults)
+
+
+def test_gates_remote_verdict_confirmed_passes_location():
+    gates = run_filter_gates(
+        _remote_job(), make_profile(),
+        location_verdict="outside", sponsor_set=None,
+        nhs_rules={}, exclusion_roles=[],
+        remote_verdict="remote",
+    )
+    loc = next(g for g in gates if g.name == "Location")
+    assert loc.passed is True
+    assert "confirmed fully remote" in loc.detail
+
+
+def test_gates_remote_verdict_not_remote_rejects_location():
+    gates = run_filter_gates(
+        _remote_job(), make_profile(),
+        location_verdict="outside", sponsor_set=None,
+        nhs_rules={}, exclusion_roles=[],
+        remote_verdict="not_remote",
+    )
+    loc = next(g for g in gates if g.name == "Location")
+    assert loc.passed is False
+    assert loc.is_first_reject is True
+    assert loc.detail == "location outside radius and not confirmed fully remote: Manchester"
+
+
+def test_gates_remote_verdict_unverified_fails_closed():
+    gates = run_filter_gates(
+        _remote_job(), make_profile(),
+        location_verdict="uncertain", sponsor_set=None,
+        nhs_rules={}, exclusion_roles=[],
+        remote_verdict="unverified",
+    )
+    loc = next(g for g in gates if g.name == "Location")
+    assert loc.passed is False
+    assert "remote check unavailable" in loc.detail
+
+
+def test_gates_no_remote_verdict_keeps_legacy_detail():
+    gates = run_filter_gates(
+        _remote_job(location="Bristol"), make_profile(),
+        location_verdict="within", sponsor_set=None,
+        nhs_rules={}, exclusion_roles=[],
+    )
+    loc = next(g for g in gates if g.name == "Location")
+    assert loc.passed is True
+    assert loc.detail == "within radius (Bristol)"

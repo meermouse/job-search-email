@@ -14,6 +14,7 @@ from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
 from .filter import filter_jobs
 from .location_filter import classify_locations, load_location_cache, save_location_cache
+from .remote_filter import classify_remote, load_remote_cache, save_remote_cache
 from .models import FilteredResult, JobListing, Profile, SearchPlan, ScoredResult
 from .nhs_rules import get_nhs_rules
 from .profile import load_profile
@@ -30,6 +31,7 @@ RUNS_DIR = ROOT / "runs"
 CACHE_PATH = ROOT / "search_plan_cache.json"
 SCORE_CACHE_PATH = ROOT / "job_score_cache.json"
 LOCATION_CACHE_PATH = ROOT / "location_cache.json"
+REMOTE_CACHE_PATH = ROOT / "remote_check_cache.json"
 SPONSOR_CACHE_PATH = ROOT / "assets" / "sponsor_cache.csv"
 RECRUITMENT_CACHE_PATH = ROOT / "assets" / "recruitment_agencies.csv"
 
@@ -178,6 +180,19 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
     if outside_count:
         print(f"- {outside_count} location(s) classified as outside radius: {sorted(rejected_locations)}")
 
+    within_locations = frozenset(loc for loc, verdict in classification.items() if verdict == "within")
+    remote_verdicts: dict[str, str] | None = None
+    if profile.include_remote:
+        print("Checking remote confirmation for far-afield jobs...")
+        far_jobs = [j for j in jobs if not (j.location and j.location in within_locations)]
+        remote_cache = load_remote_cache(REMOTE_CACHE_PATH)
+        remote_verdicts = classify_remote(far_jobs, cache=remote_cache)
+        save_remote_cache(remote_cache, REMOTE_CACHE_PATH)
+        confirmed = sum(1 for v in remote_verdicts.values() if v == "remote")
+        unverified = sum(1 for v in remote_verdicts.values() if v == "unverified")
+        print(f"- {len(far_jobs)} far-afield job(s) checked, {confirmed} confirmed fully remote"
+              + (f", {unverified} unverified (API error — rejected)" if unverified else ""))
+
     print("Filtering jobs...")
     if profile.filter_sponsors:
         sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH)
@@ -195,6 +210,8 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
         rejected_locations=rejected_locations,
         recruitment_set=recruitment_set,
         sponsor_set=sponsor_set,
+        within_locations=within_locations,
+        remote_verdicts=remote_verdicts,
     )
     write_filtered_results(filtered, filtered_results_path)
     kept = [r for r in filtered if not r.rejected]

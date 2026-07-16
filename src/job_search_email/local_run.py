@@ -6,7 +6,13 @@ from .cache import fingerprint_profile
 from .email import build_email_html
 from .evaluator_notes import get_evaluator_notes
 from .filter import filter_jobs
-from .fixtures import fixture_jobs, fixture_queries, fixture_scores
+from .fixtures import (
+    fixture_jobs,
+    fixture_location_classification,
+    fixture_queries,
+    fixture_remote_verdicts,
+    fixture_scores,
+)
 from .models import FilteredResult, SearchPlan, ScoredResult
 from .nhs_rules import get_nhs_rules
 from .profile import load_profile
@@ -84,7 +90,15 @@ def main() -> None:
     jobs = fixture_jobs()
     print(f"[local-test] fixture jobs loaded: {len(jobs)}")
 
-    filtered = filter_jobs(jobs, plan, profile)
+    # The offline run always exercises the remote gate with fixture verdicts,
+    # regardless of the profile's include_remote flag — no network involved.
+    classification = fixture_location_classification()
+    filtered = filter_jobs(
+        jobs, plan, profile,
+        rejected_locations=frozenset(l for l, v in classification.items() if v == "outside"),
+        within_locations=frozenset(l for l, v in classification.items() if v == "within"),
+        remote_verdicts=fixture_remote_verdicts(),
+    )
     _write_filtered_results(filtered, root / "job_results_filtered.json")
     kept = [r for r in filtered if not r.rejected]
     print(f"[local-test] filtered: {len(kept)} kept, {len(filtered) - len(kept)} rejected")
