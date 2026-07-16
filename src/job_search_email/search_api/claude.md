@@ -11,12 +11,13 @@ location	Bristol	Location string
 distance	50 (miles)	Radius from location
 results_wanted	50	Max results per query
 country_indeed	"UK"	Country for Indeed (LinkedIn infers from location)
+For include_remote profiles, a second call is made with is_remote=True and location="United Kingdom" — a UK-wide remote leg.
+
 What jobspy can also accept (not currently used):
 
 job_type — "fulltime", "parttime", "contract", "internship"
 hours_old — only return jobs posted within N hours
 easy_apply — LinkedIn Easy Apply only
-is_remote=True + location="United Kingdom" — used for the UK-wide remote leg when the profile sets include_remote: true.
 Salary filtering happens client-side after fetch: we parse min_amount from the structured fields, then fall back to a regex scan of the description text (£60,000 / £60k style).
 
 2. Reed API

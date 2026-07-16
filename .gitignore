@@ -18,6 +18,7 @@ job_results_scored.json
 debug_report.html
 runs/
 email_preview.html
+remote_check_cache.json
 .claude/*
 !.claude/commands/
 .superpowers/
