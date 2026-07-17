@@ -44,6 +44,7 @@ class Profile:
     filter_recruitment: bool = True
     filter_sponsors: bool = True
     include_remote: bool = False
+    email_frequency: str = "daily"
 
 
 @dataclass

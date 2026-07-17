@@ -3,6 +3,7 @@ This is a python application that is designed to run directly from github throug
 Its  goal is to provide a regular email to a user with a list of potential job opportunities. This will filter out jobs based upon location, salary range, employment type (permanent, contract, part time), and job suitability. This application also has the important role of only returning jobs from companies and organisations that are part of the uk governments list of approved sponsor companies for immigrants. There is a list of these companies held in a csv file located in:
 /assets/sponsor_cache.csv
 Profiles that don't need visa sponsorship can set `filter_sponsors: false`.
+The GitHub Action runs daily, but each profile can choose its email cadence with `email_frequency` (default `daily`): `daily` sends every run, `weekly` sends only on Mondays, and `twice-weekly` sends on Mondays and Fridays. On a non-send day the profile is skipped entirely (no scraping, scoring, or email).
 Profiles can opt in to UK-wide remote search with `include_remote: true` (default false): the searchers add a UK-wide remote leg, and any job not confirmed within the radius is kept only if an LLM check positively confirms the posting is fully remote (verdicts cached in `remote_check_cache.json`). Silence or hybrid wording rejects the job.
 
 ## Local debugging tools

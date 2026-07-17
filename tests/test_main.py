@@ -1,5 +1,6 @@
 import json
 from collections import Counter
+from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from unittest.mock import patch as _patch
@@ -12,7 +13,9 @@ from job_search_email.cache import fingerprint_profile
 from job_search_email.main import (
     generate_search_plan,
     load_cached_plan,
+    process_profile,
     save_cached_plan,
+    should_send_today,
 )
 from job_search_email.profile import load_profile
 from job_search_email.models import Profile, SearchPlan
@@ -778,3 +781,49 @@ def test_run_pipeline_remote_off_skips_check(tmp_path, monkeypatch):
     )
     mock_remote.assert_not_called()
     assert kwargs["remote_verdicts"] is None
+
+
+class TestShouldSendToday:
+    # weekday(): Monday=0 ... Sunday=6
+    def test_daily_sends_every_weekday(self):
+        assert all(should_send_today("daily", d) for d in range(7))
+
+    def test_weekly_sends_only_monday(self):
+        assert should_send_today("weekly", 0)
+        assert not any(should_send_today("weekly", d) for d in range(1, 7))
+
+    def test_twice_weekly_sends_monday_and_friday(self):
+        sending = [d for d in range(7) if should_send_today("twice-weekly", d)]
+        assert sending == [0, 4]
+
+    def test_unknown_frequency_falls_back_to_sending(self):
+        assert should_send_today("fortnightly", 2) is True
+
+
+def test_process_profile_skips_pipeline_on_non_send_day(tmp_path, monkeypatch):
+    profile_path = tmp_path / "weekly.yaml"
+    profile_path.write_text(
+        PROFILE_YAML + "\nemail_frequency: weekly\n", encoding="utf-8"
+    )
+
+    import sys
+
+    main_mod = sys.modules["job_search_email.main"]
+    ran = {"pipeline": False}
+
+    def fake_run_pipeline(profile, output_dir):
+        ran["pipeline"] = True
+        return {}, []
+
+    monkeypatch.setattr(main_mod, "run_pipeline", fake_run_pipeline)
+
+    # A Tuesday (weekday 1) is not a send day for a weekly profile.
+    class _Tuesday(date):
+        @classmethod
+        def today(cls):
+            return date(2026, 7, 14)
+
+    monkeypatch.setattr(main_mod, "date", _Tuesday)
+
+    process_profile(profile_path)
+    assert ran["pipeline"] is False

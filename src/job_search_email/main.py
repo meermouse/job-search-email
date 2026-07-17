@@ -4,6 +4,7 @@ import sys
 import traceback
 from collections import Counter, defaultdict
 from dataclasses import asdict
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +35,24 @@ LOCATION_CACHE_PATH = ROOT / "location_cache.json"
 REMOTE_CACHE_PATH = ROOT / "remote_check_cache.json"
 SPONSOR_CACHE_PATH = ROOT / "assets" / "sponsor_cache.csv"
 RECRUITMENT_CACHE_PATH = ROOT / "assets" / "recruitment_agencies.csv"
+
+
+# The GitHub Action runs daily; each run decides per-profile whether today is a
+# send day. Weekdays follow date.weekday(): Monday=0 ... Sunday=6.
+_WEEKLY_SEND_DAY = 0  # Monday
+_TWICE_WEEKLY_SEND_DAYS = frozenset({0, 4})  # Monday and Friday
+
+
+def should_send_today(email_frequency: str, weekday: int) -> bool:
+    """Return whether a profile's cadence includes the given weekday.
+
+    ``weekday`` is a ``date.weekday()`` value (Monday=0 ... Sunday=6).
+    """
+    if email_frequency == "weekly":
+        return weekday == _WEEKLY_SEND_DAY
+    if email_frequency == "twice-weekly":
+        return weekday in _TWICE_WEEKLY_SEND_DAYS
+    return True  # daily (and any unrecognised value) sends every day
 
 
 def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:
@@ -237,6 +256,14 @@ def discover_profiles(profiles_dir: Path) -> list[Path]:
 
 def process_profile(profile_path: Path) -> None:
     profile = load_profile(profile_path)
+
+    if not should_send_today(profile.email_frequency, date.today().weekday()):
+        print(
+            f"[main] skipping {profile.name}: email_frequency="
+            f"{profile.email_frequency!r} does not send today"
+        )
+        return
+
     classification, scored = run_pipeline(profile, RUNS_DIR / profile_path.stem)
 
     print("Sending emails...")

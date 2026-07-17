@@ -4,6 +4,23 @@ import yaml
 
 from .models import EducationEntry, ExperienceEntry, Profile
 
+VALID_EMAIL_FREQUENCIES = ("daily", "weekly", "twice-weekly")
+
+
+def _parse_email_frequency(raw: object) -> str:
+    """Normalise and validate the profile's email cadence.
+
+    Accepts loose spellings such as ``"twice weekly"`` or ``"twice_weekly"``
+    and returns the canonical value. Defaults to ``"daily"`` when unset.
+    """
+    value = str(raw or "daily").strip().lower().replace("_", "-").replace(" ", "-")
+    if value not in VALID_EMAIL_FREQUENCIES:
+        raise ValueError(
+            f"Invalid email_frequency {raw!r}; expected one of "
+            f"{', '.join(VALID_EMAIL_FREQUENCIES)}"
+        )
+    return value
+
 
 def _parse_experience(entries: list[dict]) -> list[ExperienceEntry]:
     return [
@@ -59,6 +76,7 @@ def load_profile(path: Path) -> Profile:
         filter_recruitment=data.get("filter_recruitment", True),
         filter_sponsors=data.get("filter_sponsors", True),
         include_remote=data.get("include_remote", False),
+        email_frequency=_parse_email_frequency(data.get("email_frequency")),
     )
 
 
