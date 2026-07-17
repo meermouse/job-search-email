@@ -117,4 +117,4 @@ send_main_email: true
 send_debug_email: false
 filter_recruitment: true
 # How often to send the email: daily | weekly | twice-weekly (twice-weekly = Mon & Fri)
-email_frequency: daily
+email_frequency: twice-weekly
