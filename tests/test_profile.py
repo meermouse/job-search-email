@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from job_search_email.models import EducationEntry, ExperienceEntry
 from job_search_email.profile import load_profile, render_profile
 from profile_helpers import make_profile
@@ -181,6 +183,36 @@ def test_all_repo_profiles_load_and_are_complete():
         assert profile.location, path.name
         assert profile.min_salary > 0, path.name
         assert profile.experience, path.name
+
+
+def test_email_frequency_defaults_to_daily(tmp_path):
+    minimal = "profile:\n  name: Test\nlocation: Bristol\nmin_salary: 0\n"
+    profile = load_profile(_write(tmp_path, minimal))
+    assert profile.email_frequency == "daily"
+
+
+@pytest.mark.parametrize(
+    "raw,expected",
+    [
+        ("daily", "daily"),
+        ("weekly", "weekly"),
+        ("twice-weekly", "twice-weekly"),
+        ("twice weekly", "twice-weekly"),
+        ("twice_weekly", "twice-weekly"),
+        ("  Weekly ", "weekly"),
+        ("TWICE-WEEKLY", "twice-weekly"),
+    ],
+)
+def test_email_frequency_normalises_valid_values(tmp_path, raw, expected):
+    text = f"profile:\n  name: Test\nlocation: Bristol\nmin_salary: 0\nemail_frequency: {raw!r}\n"
+    profile = load_profile(_write(tmp_path, text))
+    assert profile.email_frequency == expected
+
+
+def test_email_frequency_rejects_invalid_value(tmp_path):
+    text = "profile:\n  name: Test\nlocation: Bristol\nmin_salary: 0\nemail_frequency: monthly\n"
+    with pytest.raises(ValueError, match="Invalid email_frequency"):
+        load_profile(_write(tmp_path, text))
 
 
 def test_marc_profile_has_sponsor_filter_off():
