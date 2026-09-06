@@ -21,7 +21,7 @@ Rules:
 - Vary the angle: exact target titles, adjacent titles, skills-led searches, seniority variants
 - Reflect the candidate's seniority ({seniority}) — do not generate junior or entry-level terms
 - Avoid terms from their exclusion list: {not_open_to}
-- No duplicates or near-duplicates
+{remote_rule}- No duplicates or near-duplicates
 
 Candidate profile:
 {profile_block}
@@ -44,6 +44,12 @@ def _strip_code_fence(text: str) -> str:
 
 
 def generate_queries(profile: Profile) -> list[str]:
+    remote_rule = (
+        "- The candidate is open to fully-remote roles nationally — favour "
+        "target-title, adjacent-title, skills-led and seniority angles; do not "
+        "narrow to location-bound title variants\n"
+        if (profile.remote_uk_wide or profile.remote_hubs) else ""
+    )
     prompt = QUERY_GENERATION_PROMPT.format(
         name=profile.name,
         seniority=profile.seniority,
@@ -51,6 +57,7 @@ def generate_queries(profile: Profile) -> list[str]:
         profile_block=render_profile(profile),
         target_roles=", ".join(profile.target_roles),
         open_to=", ".join(profile.open_to),
+        remote_rule=remote_rule,
     )
 
     for attempt in range(1, 4):

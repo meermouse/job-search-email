@@ -29,7 +29,7 @@ class AnalysisTrace:
 
 
 def _build_system_prompt(profile: Profile) -> str:
-    return (
+    base = (
         "You are a job suitability analyst. Evaluate whether the following job is a good "
         "match for this candidate. Respond only with valid JSON matching the schema provided.\n\n"
         "Candidate profile:\n"
@@ -91,6 +91,15 @@ def _build_system_prompt(profile: Profile) -> str:
         "- Otherwise set exclude=false and exclude_reason to an empty string; rank the "
         "job with the score instead."
     )
+    if profile.remote_uk_wide or profile.remote_hubs:
+        base += (
+            "\n\nRemote preference: the candidate actively wants fully-remote work. "
+            "Do NOT set exclude=true, and do NOT mark the score down, solely because "
+            "the role's location is outside the candidate's home region when the "
+            "posting is remote. A role that is remote-first with some client travel "
+            "is acceptable.\n"
+        )
+    return base
 
 
 def _build_user_message(job: JobListing) -> str:
