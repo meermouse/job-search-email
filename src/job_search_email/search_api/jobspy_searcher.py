@@ -44,6 +44,19 @@ def search(query: str, profile: Profile) -> list[JobListing]:
         except Exception as exc:
             print(f"[jobspy_searcher] remote leg failed for {query!r}: {exc}", file=sys.stderr)
 
+    for hub in profile.remote_hubs:
+        try:
+            frames.append((f"jobspy:hub:{hub}", scrape_jobs(
+                site_name=["linkedin", "indeed"],
+                search_term=query,
+                location=hub,
+                is_remote=True,
+                results_wanted=50,
+                country_indeed="UK",
+            )))
+        except Exception as exc:
+            print(f"[jobspy_searcher] hub leg {hub!r} failed for {query!r}: {exc}", file=sys.stderr)
+
     results = []
     for leg, df in frames:
         if df.empty:

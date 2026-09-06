@@ -160,3 +160,41 @@ def test_search_tags_legs_radius_and_uk_wide():
     legs = {leg for r in results for leg in r.search_legs}
     assert "jobspy:radius" in legs
     assert "jobspy:uk-remote" in legs
+
+
+HUB_PROFILE = make_profile(name="Jie", remote_hubs=["London"])
+
+
+def test_search_adds_one_hub_leg_per_hub():
+    with patch("job_search_email.search_api.jobspy_searcher.scrape_jobs",
+               return_value=pd.DataFrame()) as mock_scrape:
+        search("manager", make_profile(name="Jie", remote_uk_wide=True, remote_hubs=["London", "Leeds"]))
+    # radius + uk-wide + 2 hubs
+    assert mock_scrape.call_count == 4
+    hub_calls = [c.kwargs for c in mock_scrape.call_args_list if c.kwargs.get("is_remote") and c.kwargs.get("location") in ("London", "Leeds")]
+    assert {c["location"] for c in hub_calls} == {"London", "Leeds"}
+    assert all(c["is_remote"] is True and "distance" not in c for c in hub_calls)
+
+
+def test_hub_leg_tags_search_legs():
+    row = {"title": "M", "company": "C", "location": "London", "job_url": "u",
+           "site": "linkedin", "job_type": "fulltime", "min_amount": 90000}
+    with patch("job_search_email.search_api.jobspy_searcher.scrape_jobs",
+               return_value=pd.DataFrame([row])):
+        results = search("manager", HUB_PROFILE)
+    assert any(r.search_legs == ["jobspy:hub:London"] for r in results)
+
+
+def test_hub_leg_failure_keeps_radius_results():
+    radius_df = pd.DataFrame([{"title": "R", "company": "C", "location": "Bristol",
+                               "job_url": "u", "site": "linkedin", "job_type": "fulltime",
+                               "min_amount": 90000}])
+
+    def flaky(*args, **kwargs):
+        if kwargs.get("location") == "London":
+            raise RuntimeError("hub boom")
+        return radius_df
+
+    with patch("job_search_email.search_api.jobspy_searcher.scrape_jobs", side_effect=flaky):
+        results = search("manager", HUB_PROFILE)
+    assert [r.title for r in results] == ["R"]
