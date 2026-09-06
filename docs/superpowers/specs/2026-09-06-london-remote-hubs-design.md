@@ -102,9 +102,21 @@ writing it to `cache`**. Cache writes happen only for verdicts the model actuall
 returned. (Same principle as `remote_filter` not caching `unverified`.) Successful
 verdicts are still cached as now.
 
-**2c. One-time cache purge.** Implementation step (not code): delete
-`location_cache.json` once so the poisoned `"…London… → uncertain"` entries are
-regenerated correctly. The file is gitignored and rebuilt on the next run.
+**2c. One-time cache purge.** Implementation step (not code). Correction to an
+earlier assumption: `location_cache.json` is **not** gitignored — it is git-tracked
+**and** restored by the daily GitHub Actions cache via a `restore-keys` prefix, so
+simply deleting the working copy does not purge it. A real purge requires both:
+
+1. Drop every `"uncertain"` entry from the file (fallbacks were only ever written as
+   `"uncertain"`, so the survivors are genuine model verdicts), then stop tracking it
+   — `git rm --cached location_cache.json` plus a `.gitignore` entry alongside
+   `search_plan_cache.json`, which it resembles (a regenerated cache).
+2. Bump the Actions cache key in `.github/workflows/daily_job.yml`
+   (`job-search-cache-` → `job-search-cache-v2-`, in both the `key:` and the
+   `restore-keys:` prefix) so the first post-merge run cannot restore a stale
+   poisoned cache over the clean checkout.
+
+§2b prevents re-poisoning thereafter: fallback verdicts are never cached.
 
 **2d. `normalise_location(raw: str) -> str`** — new helper in `location_filter.py`
 (already imported across the pipeline):
@@ -122,6 +134,17 @@ regenerated correctly. The file is gitignored and rebuilt on the next run.
 Applied in two places: building `unique_locations` in `run_pipeline` (so the
 classifier and its cache key see `London`, not `EC3A5AT`), and in `job_hub`
 (Section 3d). Job objects' own `location` strings are left as-is for display.
+
+**The same normalisation must be applied at BOTH the classification-key site and
+the gate-lookup site.** Classification keys are built in `main.py`
+(`unique_locations`) and `explain_job.py`; the verdict-derived sets are then looked
+up in `filter._check_location` (`within_locations` / `rejected_locations`) and in
+`filter_trace.run_filter_gates`, which derives those sets from a single verdict. The
+key used to classify and the key used to look up must come from the same function —
+otherwise a postcode or whitespace-variant location is classified but never matched,
+which silently loosens the radius filter (and, with the remote gate on, misroutes
+the job to the remote check). Reject reasons still quote the original, un-normalised
+`job.location` for readability.
 
 **2e. Unicode crash.** In `debug_run.py`: write `DEBUG_REPORT_PATH` with
 `encoding="utf-8"` (already the case) and guard `_print_decisions` so a title
@@ -198,6 +221,18 @@ checks, and thread it in:
   `"company not on approved sponsor list"` (a resolved company name that simply is
   not on the list) is **still a hard reject** — that company cannot sponsor whether
   the role is remote or not.
+
+**The recruitment carve-out is FINAL.** For an agency-posted job (`posted_by_agency`,
+or a company matching the recruitment list) that is confirmed remote,
+`_check_recruitment` returns a non-rejected `sponsor_unverified` result and
+`_check_sponsor` is **not consulted at all**. Such a job is therefore kept as
+`sponsor_unverified` even when its company string would otherwise resolve to
+`"company not on approved sponsor list"` — a case §4c's `_check_sponsor` bullet
+treats as a hard reject. This is a deliberate over-inclusion into the
+manual-check bucket: for an agency posting the named company is the agency, not the
+employer, so a "not on the list" verdict about it carries no information about the
+actual sponsor. `filter_trace.run_filter_gates` models the same dispatch so
+`explain-job` does not misreport these jobs as sponsor rejections.
 
 `sponsor_unverified` jobs flow through scoring normally. They are never mixed with
 sponsor-verified results in the email.
