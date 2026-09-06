@@ -10,8 +10,9 @@ from .profile import load_profile
 DEBUG_REPORT_PATH = Path.cwd() / "debug_report.html"
 
 
-def _safe(text: str) -> str:
+def _safe(text: str | None) -> str:
     """Encode text through stdout's encoding with fallback to UTF-8, never raising."""
+    text = "" if text is None else str(text)
     enc = getattr(sys.stdout, "encoding", None) or "utf-8"
     return text.encode(enc, "replace").decode(enc, "replace")
 

@@ -91,7 +91,7 @@ def main() -> None:
     print(f"[local-test] fixture jobs loaded: {len(jobs)}")
 
     # The offline run always exercises the remote gate with fixture verdicts,
-    # regardless of the profile's include_remote flag — no network involved.
+    # whatever the profile's `remote:` block says — no network involved.
     classification = fixture_location_classification()
     filtered = filter_jobs(
         jobs, plan, profile,

@@ -234,7 +234,7 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
     )
     write_filtered_results(filtered, filtered_results_path)
     kept = [r for r in filtered if not r.rejected]
-    flagged = [r for r in kept if r.flags]
+    flagged = [r for r in kept if "employment_type_unknown" in r.flags]
     print(f"- filtered: {len(kept)} kept, {len(filtered) - len(kept)} rejected ({len(flagged)} flagged unknown employment type)")
     print(f"- filtered results written to: {filtered_results_path}")
 

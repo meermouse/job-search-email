@@ -172,7 +172,9 @@ def fixture_jobs() -> list[JobListing]:
         ),
         JobListing(
             title="Head of PMO",
-            company="Reed",  # sparse company string -> sponsor_unverified when remote-confirmed
+            # Offline wiring passes sponsor_set=None, so _check_sponsor never runs:
+            # this job reaches sponsor_unverified via the agency carve-out below.
+            company="Reed",
             location="London",
             salary_min=80000,
             description="Fully remote (UK based). Permanent, full-time.",

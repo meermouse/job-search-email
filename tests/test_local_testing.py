@@ -12,7 +12,7 @@ def test_fixture_queries_returns_eight_strings():
     assert all(isinstance(q, str) and q.strip() for q in queries)
 
 
-def test_fixture_jobs_returns_five_listings():
+def test_fixture_jobs_returns_ten_listings():
     jobs = fixture_jobs()
     assert len(jobs) == 10
     assert all(isinstance(j, JobListing) for j in jobs)
