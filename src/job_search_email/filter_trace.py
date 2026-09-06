@@ -4,6 +4,7 @@ from .filter import (
     _check_employment_type,
     _check_location,
     _check_nhs_band_salary,
+    _check_recruitment,
     _check_role_suitability,
     _check_salary,
     _check_sponsor,
@@ -29,6 +30,7 @@ def run_filter_gates(
     nhs_rules: dict,
     exclusion_roles: list[str],
     remote_verdict: str | None = None,
+    recruitment_set: frozenset[str] | None = None,
 ) -> list[GateResult]:
     gates: list[GateResult] = []
 
@@ -82,8 +84,30 @@ def run_filter_gates(
     ))
 
     remote_ok = bool({"remote_confirmed", "remote_with_travel"} & set(loc.flags)) if loc is not None else False
-    sponsor = _check_sponsor(job, sponsor_set, remote_ok) if sponsor_set is not None else None
-    if sponsor_set is None:
+
+    # Mirrors filter_jobs' dispatch: Recruitment runs first, and a non-rejected
+    # carve-out is FINAL — _check_sponsor is not consulted for that job.
+    rec = _check_recruitment(job, recruitment_set, remote_ok) if recruitment_set is not None else None
+    recruitment_carved = False
+    if recruitment_set is None:
+        rec_detail = "disabled (filter_recruitment=false)"
+    elif rec is None:
+        rec_detail = "not agency / not on recruitment list"
+    elif not rec.rejected:
+        rec_detail = "kept — sponsor unverified (agency, confirmed remote)"
+        recruitment_carved = True
+    else:
+        rec_detail = rec.reject_reason or ""
+    gates.append(GateResult("Recruitment", rec is None or not rec.rejected, rec_detail, False))
+
+    sponsor = (
+        _check_sponsor(job, sponsor_set, remote_ok)
+        if sponsor_set is not None and not recruitment_carved
+        else None
+    )
+    if recruitment_carved:
+        sponsor_detail = "skipped — recruitment carve-out"
+    elif sponsor_set is None:
         sponsor_detail = "disabled (filter_sponsors=false)"
     elif sponsor is None:
         sponsor_detail = "n/a (NHS source)" if job.source == "nhs" else "on approved sponsor list"
