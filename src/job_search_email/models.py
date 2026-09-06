@@ -43,8 +43,14 @@ class Profile:
     send_debug_email: bool = False
     filter_recruitment: bool = True
     filter_sponsors: bool = True
-    include_remote: bool = False
+    remote_uk_wide: bool = False
+    remote_hubs: list[str] = field(default_factory=list)
     email_frequency: str = "daily"
+
+    @property
+    def include_remote(self) -> bool:
+        """Compatibility shim: any remote search configured at all."""
+        return self.remote_uk_wide or bool(self.remote_hubs)
 
 
 @dataclass

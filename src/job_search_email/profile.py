@@ -22,6 +22,28 @@ def _parse_email_frequency(raw: object) -> str:
     return value
 
 
+def _parse_remote(data: dict) -> tuple[bool, list[str]]:
+    """Parse the ``remote:`` block into (uk_wide, hubs).
+
+    The legacy top-level ``include_remote:`` key is no longer accepted.
+    """
+    if "include_remote" in data:
+        raise ValueError(
+            "Profile key 'include_remote' is no longer supported. Use a "
+            "'remote:' block instead:\n  remote:\n    uk_wide: true\n    hubs: [London]"
+        )
+    block = data.get("remote") or {}
+    if not isinstance(block, dict):
+        raise ValueError(f"Profile 'remote' must be a mapping, got {type(block).__name__}")
+    uk_wide = bool(block.get("uk_wide", False))
+    hubs_raw = block.get("hubs") or []
+    if not isinstance(hubs_raw, list) or any(
+        not isinstance(h, str) or not h.strip() for h in hubs_raw
+    ):
+        raise ValueError("Profile 'remote.hubs' must be a list of non-empty strings")
+    return uk_wide, [h.strip() for h in hubs_raw]
+
+
 def _parse_experience(entries: list[dict]) -> list[ExperienceEntry]:
     return [
         ExperienceEntry(
@@ -51,6 +73,7 @@ def load_profile(path: Path) -> Profile:
         data = yaml.safe_load(stream)
 
     p = data["profile"]
+    remote_uk_wide, remote_hubs = _parse_remote(data)
     return Profile(
         name=p["name"],
         about=(p.get("about") or "").strip(),
@@ -75,7 +98,8 @@ def load_profile(path: Path) -> Profile:
         send_debug_email=data.get("send_debug_email", False),
         filter_recruitment=data.get("filter_recruitment", True),
         filter_sponsors=data.get("filter_sponsors", True),
-        include_remote=data.get("include_remote", False),
+        remote_uk_wide=remote_uk_wide,
+        remote_hubs=remote_hubs,
         email_frequency=_parse_email_frequency(data.get("email_frequency")),
     )
 
