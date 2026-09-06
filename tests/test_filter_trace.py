@@ -152,3 +152,16 @@ def test_gates_no_remote_verdict_keeps_legacy_detail():
     loc = next(g for g in gates if g.name == "Location")
     assert loc.passed is True
     assert loc.detail == "within radius (Bristol)"
+
+
+def test_gates_confirmed_remote_sparse_company_sponsor_gate_kept_unverified():
+    gates = run_filter_gates(
+        _remote_job(company="Tiny"), make_profile(),
+        location_verdict="uncertain", sponsor_set=_SPONSORS,
+        nhs_rules={}, exclusion_roles=[],
+        remote_verdict="remote",
+    )
+    by_name = {g.name: g for g in gates}
+    assert by_name["Location"].passed is True
+    assert by_name["Sponsor list"].passed is True
+    assert "unverified" in by_name["Sponsor list"].detail

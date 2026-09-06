@@ -78,14 +78,17 @@ def run_filter_gates(
         False,
     ))
 
-    sponsor = _check_sponsor(job, sponsor_set) if sponsor_set is not None else None
+    remote_ok = bool({"remote_confirmed", "remote_with_travel"} & set(loc.flags)) if loc is not None else False
+    sponsor = _check_sponsor(job, sponsor_set, remote_ok) if sponsor_set is not None else None
     if sponsor_set is None:
         sponsor_detail = "disabled (filter_sponsors=false)"
     elif sponsor is None:
         sponsor_detail = "n/a (NHS source)" if job.source == "nhs" else "on approved sponsor list"
+    elif not sponsor.rejected:
+        sponsor_detail = "kept — sponsor unverified (confirmed remote)"
     else:
         sponsor_detail = sponsor.reject_reason or ""
-    gates.append(GateResult("Sponsor list", sponsor is None, sponsor_detail, False))
+    gates.append(GateResult("Sponsor list", sponsor is None or not sponsor.rejected, sponsor_detail, False))
 
     for gate in gates:
         if not gate.passed:
