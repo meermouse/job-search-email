@@ -48,3 +48,14 @@ def test_whitespace_stripped_before_dedup():
 
 def test_empty_list_returns_empty():
     assert deduplicate([]) == []
+
+
+def test_duplicate_merges_search_legs():
+    jobs = [
+        _job(title="Manager", company="NHS", search_legs=["jobspy:radius"]),
+        _job(title="Manager", company="NHS", search_legs=["jobspy:uk-remote"]),
+        _job(title="Manager", company="NHS", search_legs=["jobspy:uk-remote"]),
+    ]
+    result = deduplicate(jobs)
+    assert len(result) == 1
+    assert result[0].search_legs == ["jobspy:radius", "jobspy:uk-remote"]

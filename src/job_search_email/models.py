@@ -73,6 +73,7 @@ class JobListing:
     source: str
     employment_type: str | None
     posted_by_agency: bool | None = None
+    search_legs: list[str] = field(default_factory=list)
 
 
 @dataclass

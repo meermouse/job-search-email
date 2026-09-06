@@ -41,6 +41,7 @@ def test_search_returns_job_listings(monkeypatch):
     assert job.source == "nhs"
     assert job.description == ""
     assert job.employment_type is None
+    assert all(j.search_legs == ["nhs:radius"] for j in result)
 
 
 def test_search_filters_below_min_salary(monkeypatch):

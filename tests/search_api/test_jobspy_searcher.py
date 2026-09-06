@@ -149,3 +149,14 @@ def test_search_remote_leg_failure_keeps_radius_results(capsys):
 
     assert any(j.title == "Digital Transformation Manager" for j in result)
     assert "remote leg failed" in capsys.readouterr().err
+
+
+def test_search_tags_legs_radius_and_uk_wide():
+    row = {"title": "M", "company": "C", "location": "London", "job_url": "u",
+           "site": "linkedin", "job_type": "fulltime", "min_amount": 90000}
+    with patch("job_search_email.search_api.jobspy_searcher.scrape_jobs",
+               return_value=pd.DataFrame([row])) as mock_scrape:
+        results = search("manager", REMOTE_PROFILE)
+    legs = {leg for r in results for leg in r.search_legs}
+    assert "jobspy:radius" in legs
+    assert "jobspy:uk-remote" in legs
