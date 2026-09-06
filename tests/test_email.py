@@ -366,3 +366,63 @@ def test_email_shows_remote_badge_for_confirmed_remote():
 def test_email_no_remote_badge_without_flag():
     html, _ = build_email_html([_scored([])], make_profile())
     assert ">Remote</span>" not in html
+
+
+# --- Three-group partition (Task 10) ---
+
+def _remote_result(title, url, *, flags, legs=(), location="London", score=7):
+    job = JobListing(title=title, company="Acme", location=location, salary_min=80000,
+                     description="", url=url, source="linkedin", employment_type="full-time",
+                     search_legs=list(legs))
+    analysis = JobAnalysis(score=score, matched_skills=[], missing_essentials=[],
+                           employment_type_note="", verdict="ok")
+    return ScoredResult(job=job, flags=list(flags), rejected=False, reject_reason=None, analysis=analysis)
+
+
+def test_job_hub_matches_by_leg_and_by_location():
+    from job_search_email.email import job_hub
+    from job_search_email.models import JobListing
+    by_leg = JobListing(title="t", company="c", location="Anywhere", salary_min=None,
+                        description="", url="u", source="linkedin", employment_type=None,
+                        search_legs=["jobspy:hub:London"])
+    by_loc = JobListing(title="t", company="c", location="EC3A 5AT", salary_min=None,
+                        description="", url="u2", source="reed", employment_type=None)
+    assert job_hub(by_leg, ["London"]) == "London"
+    assert job_hub(by_loc, ["London"]) == "London"
+    assert job_hub(by_loc, ["Manchester"]) is None
+
+
+def test_email_has_remote_london_section():
+    profile = _make_profile(remote_hubs=["London"])
+    results = [
+        _make_result(6, title="Local Job", url="https://x/local"),
+        _remote_result("Remote London Job", "https://x/rl", flags=["remote_confirmed"],
+                       legs=["jobspy:hub:London"]),
+    ]
+    html, n = build_email_html(results, profile)
+    assert "Remote &#8212; London" in html or "Remote — London" in html
+    assert "Remote London Job" in html
+    assert n == 1  # only the local job is in the main table
+
+
+def test_email_sponsor_unverified_section_separate():
+    profile = _make_profile(remote_hubs=["London"])
+    results = [
+        _remote_result("Verified Remote", "https://x/v", flags=["remote_confirmed"],
+                       legs=["jobspy:hub:London"]),
+        _remote_result("Unverified Remote", "https://x/u",
+                       flags=["remote_confirmed", "sponsor_unverified"], legs=["jobspy:hub:London"]),
+    ]
+    html, _ = build_email_html(results, profile)
+    assert "sponsor not verified" in html.lower()
+    # the unverified job is not in the London section's rows twice
+    assert html.count("Unverified Remote") == 1
+
+
+def test_email_no_remote_sections_when_no_hubs():
+    profile = _make_profile()  # no remote block
+    results = [_make_result(7, title="Plain Job", url="https://x/p")]
+    html, n = build_email_html(results, profile)
+    assert "Remote — London" not in html
+    assert "sponsor not verified" not in html.lower()
+    assert n == 1

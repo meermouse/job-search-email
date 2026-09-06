@@ -5,7 +5,17 @@ from datetime import date
 from email.message import EmailMessage
 from html import escape as _escape
 
-from .models import JobAnalysis, Profile, ScoredResult
+from .location_filter import normalise_location
+from .models import JobAnalysis, JobListing, Profile, ScoredResult
+
+
+def job_hub(job: JobListing, hubs: list[str]) -> str | None:
+    for hub in hubs:
+        if f"jobspy:hub:{hub}" in job.search_legs:
+            return hub
+        if normalise_location(job.location or "").lower() == hub.lower():
+            return hub
+    return None
 
 
 def _score_badge(score: int) -> str:
@@ -25,6 +35,19 @@ _REMOTE_BADGE = (
     ' <span style="background:#17a2b8; color:#ffffff; padding:2px 6px; '
     'border-radius:4px; font-size:11px;">Remote</span>'
 )
+
+_REMOTE_TRAVEL_BADGE = (
+    ' <span style="background:#6f42c1; color:#ffffff; padding:2px 6px; '
+    'border-radius:4px; font-size:11px;">Remote &#183; some travel</span>'
+)
+
+
+def _remote_badge(flags: list[str]) -> str:
+    if "remote_with_travel" in flags:
+        return _REMOTE_TRAVEL_BADGE
+    if "remote_confirmed" in flags:
+        return _REMOTE_BADGE
+    return ""
 
 
 def _quals_badge(analysis: JobAnalysis) -> str:
@@ -58,40 +81,49 @@ def _quals_badge(analysis: JobAnalysis) -> str:
 
 def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str, int]:
     eligible = [r for r in results if not r.rejected and r.analysis is not None]
-    eligible.sort(key=lambda r: r.analysis.score, reverse=True)
-    top = eligible[:20]
 
-    rows = []
-    for i, r in enumerate(top, 1):
-        row_bg = "#f9f9f9" if i % 2 == 0 else "#ffffff"
-        salary = f"£{r.job.salary_min:,}" if r.job.salary_min is not None else "Not stated"
-        badge = _score_badge(r.analysis.score)
-        quals = _quals_badge(r.analysis)
-        remote = _REMOTE_BADGE if "remote_confirmed" in r.flags else ""
-        cell = 'style="padding:8px 6px; border-bottom:1px solid #eeeeee;"'
-        rows.append(
-            f'<tr style="background:{row_bg};">'
-            f"<td {cell}>{i}</td>"
-            f"<td {cell}>{badge}</td>"
-            f'<td {cell}><a href="{_escape(r.job.url, quote=True)}" style="color:#0066cc; text-decoration:none;">{_escape(r.job.title)}</a>{remote}</td>'
-            f"<td {cell}>{_escape(r.job.company)}</td>"
-            f'<td {cell} style="white-space:nowrap;">{salary}</td>'
-            f"<td {cell}>{quals}</td>"
-            f"<td {cell}>{_escape(r.analysis.verdict)}</td>"
-            f"</tr>"
-        )
+    hubs = profile.remote_hubs
 
-    n = len(top)
-    today = date.today().strftime("%Y-%m-%d")
+    def _is_confirmed_remote(r: ScoredResult) -> bool:
+        return bool({"remote_confirmed", "remote_with_travel"} & set(r.flags))
+
+    unverified = [r for r in eligible if "sponsor_unverified" in r.flags]
+    rest = [r for r in eligible if "sponsor_unverified" not in r.flags]
+    london = [r for r in rest if _is_confirmed_remote(r) and hubs and job_hub(r.job, hubs)]
+    london_urls = {r.job.url for r in london}
+    main = [r for r in rest if r.job.url not in london_urls]
+
+    main.sort(key=lambda r: r.analysis.score, reverse=True)
+    london.sort(key=lambda r: r.analysis.score, reverse=True)
+    unverified.sort(key=lambda r: r.analysis.score, reverse=True)
+    top = main[:20]
+
     th = 'style="padding:8px 6px; text-align:left; border-bottom:2px solid #dddddd; background:#f0f0f0;"'
+    cell = 'style="padding:8px 6px; border-bottom:1px solid #eeeeee;"'
 
-    return f"""<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="font-family:Arial,sans-serif; background:#ffffff; color:#333333; max-width:920px; margin:0 auto; padding:20px;">
-  <p style="font-size:16px; margin-bottom:20px;">{_escape(profile.preamble)}</p>
-  <p style="font-size:14px; color:#666666; margin-bottom:16px;">Here are your top {n} jobs from today's search, ranked by suitability.</p>
-  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+    def _rows(items: list[ScoredResult]) -> str:
+        rows = []
+        for i, r in enumerate(items, 1):
+            row_bg = "#f9f9f9" if i % 2 == 0 else "#ffffff"
+            salary = f"£{r.job.salary_min:,}" if r.job.salary_min is not None else "Not stated"
+            badge = _score_badge(r.analysis.score)
+            quals = _quals_badge(r.analysis)
+            remote = _remote_badge(r.flags)
+            rows.append(
+                f'<tr style="background:{row_bg};">'
+                f"<td {cell}>{i}</td>"
+                f"<td {cell}>{badge}</td>"
+                f'<td {cell}><a href="{_escape(r.job.url, quote=True)}" style="color:#0066cc; text-decoration:none;">{_escape(r.job.title)}</a>{remote}</td>'
+                f"<td {cell}>{_escape(r.job.company)}</td>"
+                f'<td {cell} style="white-space:nowrap;">{salary}</td>'
+                f"<td {cell}>{quals}</td>"
+                f"<td {cell}>{_escape(r.analysis.verdict)}</td>"
+                f"</tr>"
+            )
+        return "".join(rows)
+
+    def _table(items: list[ScoredResult]) -> str:
+        return f"""<table style="width:100%; border-collapse:collapse; font-size:13px;">
     <thead>
       <tr>
         <th {th}>#</th>
@@ -104,12 +136,40 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
       </tr>
     </thead>
     <tbody>
-      {"".join(rows)}
+      {_rows(items)}
     </tbody>
-  </table>
+  </table>"""
+
+    n = len(top)
+    today = date.today().strftime("%Y-%m-%d")
+
+    parts = [
+        f"""<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif; background:#ffffff; color:#333333; max-width:920px; margin:0 auto; padding:20px;">
+  <p style="font-size:16px; margin-bottom:20px;">{_escape(profile.preamble)}</p>
+  <p style="font-size:14px; color:#666666; margin-bottom:16px;">Here are your top {n} jobs from today's search, ranked by suitability.</p>
+  """,
+        _table(top),
+    ]
+
+    if hubs and london:
+        parts.append('<h2 style="font-size:16px; margin-top:28px;">Remote &#8212; London</h2>')
+        parts.append(_table(london))
+    if unverified:
+        parts.append('<h2 style="font-size:16px; margin-top:28px;">Remote &#8212; sponsor not verified</h2>')
+        parts.append('<p style="font-size:12px; color:#666;">Sponsor status could not be verified from the listing — check the employer manually.</p>')
+        parts.append(_table(unverified))
+
+    parts.append(
+        f"""
   <p style="font-size:12px; color:#999999; margin-top:24px;">Generated on {today}</p>
 </body>
-</html>""", n
+</html>"""
+    )
+
+    return "".join(parts), n
 
 
 def send_email(html: str, profile: Profile, n: int = 0, override_to: str | None = None) -> None:
