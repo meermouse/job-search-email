@@ -89,7 +89,9 @@ def classify_locations(
             )
             response = client.messages.create(
                 model=_MODEL,
-                max_tokens=1024,
+                # Scale with the batch: a 50-entry verdict object overflows a
+                # flat 1024, and a truncated response fails the whole batch.
+                max_tokens=max(1024, 40 * len(batch) + 256),
                 system=_SYSTEM_PROMPT,
                 messages=[{"role": "user", "content": user_message}],
             )
