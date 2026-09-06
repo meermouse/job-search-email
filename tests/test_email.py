@@ -423,6 +423,25 @@ def test_email_no_remote_sections_when_no_hubs():
     profile = _make_profile()  # no remote block
     results = [_make_result(7, title="Plain Job", url="https://x/p")]
     html, n = build_email_html(results, profile)
-    assert "Remote — London" not in html
+    assert "Remote &#8212; London" not in html
     assert "sponsor not verified" not in html.lower()
     assert n == 1
+
+
+def test_email_heading_per_hub():
+    profile = _make_profile(remote_hubs=["London", "Manchester"])
+    results = [
+        _remote_result("London Remote Job", "https://x/lon", flags=["remote_confirmed"],
+                       legs=["jobspy:hub:London"], location="Anywhere"),
+        _remote_result("Manchester Remote Job", "https://x/man", flags=["remote_confirmed"],
+                       legs=["jobspy:hub:Manchester"], location="Anywhere"),
+    ]
+    html, _ = build_email_html(results, profile)
+
+    lon_heading = html.index("Remote &#8212; London")
+    man_heading = html.index("Remote &#8212; Manchester")
+    lon_job = html.index("London Remote Job")
+    man_job = html.index("Manchester Remote Job")
+
+    # Each job sits under its own hub's heading, hubs in configured order.
+    assert lon_heading < lon_job < man_heading < man_job

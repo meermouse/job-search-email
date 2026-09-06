@@ -90,8 +90,10 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
     unverified = [r for r in eligible if "sponsor_unverified" in r.flags]
     rest = [r for r in eligible if "sponsor_unverified" not in r.flags]
     london = [r for r in rest if _is_confirmed_remote(r) and hubs and job_hub(r.job, hubs)]
-    london_urls = {r.job.url for r in london}
-    main = [r for r in rest if r.job.url not in london_urls]
+    # Identity, not URL: two distinct results can share a URL (e.g. "" for NHS
+    # listings missing an href), which would drop unrelated jobs from the email.
+    london_ids = {id(r) for r in london}
+    main = [r for r in rest if id(r) not in london_ids]
 
     main.sort(key=lambda r: r.analysis.score, reverse=True)
     london.sort(key=lambda r: r.analysis.score, reverse=True)
@@ -155,8 +157,15 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
     ]
 
     if hubs and london:
-        parts.append('<h2 style="font-size:16px; margin-top:28px;">Remote &#8212; London</h2>')
-        parts.append(_table(london))
+        # One heading per hub, in configured order; hubs with no jobs are skipped.
+        for hub in hubs:
+            hub_jobs = [r for r in london if job_hub(r.job, hubs) == hub]
+            if not hub_jobs:
+                continue
+            parts.append(
+                f'<h2 style="font-size:16px; margin-top:28px;">Remote &#8212; {_escape(hub)}</h2>'
+            )
+            parts.append(_table(hub_jobs))
     if unverified:
         parts.append('<h2 style="font-size:16px; margin-top:28px;">Remote &#8212; sponsor not verified</h2>')
         parts.append('<p style="font-size:12px; color:#666;">Sponsor status could not be verified from the listing — check the employer manually.</p>')
