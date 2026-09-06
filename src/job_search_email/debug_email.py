@@ -142,8 +142,9 @@ def _sponsor_section(filtered: list[FilteredResult]) -> str:
         r for r in filtered
         if r.rejected and r.reject_reason and any(r.reject_reason.startswith(p) for p in sponsor_prefixes)
     ]
+    unverified_count = sum(1 for r in filtered if not r.rejected and "sponsor_unverified" in r.flags)
 
-    if not rejected:
+    if not rejected and unverified_count == 0:
         body = '<p style="color:#999; font-size:13px;">No sponsor filter rejections.</p>'
     else:
         rows = "".join(
@@ -152,14 +153,19 @@ def _sponsor_section(filtered: list[FilteredResult]) -> str:
             f'<td style="padding:4px 8px;">{_escape(r.reject_reason or "")}</td></tr>'
             for r in rejected
         )
-        body = (
+        table = (
             '<table style="width:100%; border-collapse:collapse; font-size:13px;">'
             '<thead><tr style="background:#f0f0f0;">'
             '<th style="padding:4px 8px; text-align:left;">Title</th>'
             '<th style="padding:4px 8px; text-align:left;">Company</th>'
             '<th style="padding:4px 8px; text-align:left;">Reason</th>'
             f'</tr></thead><tbody>{rows}</tbody></table>'
-        )
+        ) if rejected else ""
+        unverified_note = (
+            f'<p style="font-size:13px; color:#666; margin-top:8px;">'
+            f'{unverified_count} confirmed-remote job(s) kept as sponsor-unverified.</p>'
+        ) if unverified_count else ""
+        body = table + unverified_note
 
     return (
         "<details><summary style='font-size:15px; font-weight:bold; cursor:pointer; padding:8px 0;'>"

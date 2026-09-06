@@ -11,7 +11,7 @@ location	Bristol	Location string
 distance	50 (miles)	Radius from location
 results_wanted	50	Max results per query
 country_indeed	"UK"	Country for Indeed (LinkedIn infers from location)
-For include_remote profiles, a second call is made with is_remote=True and location="United Kingdom" — a UK-wide remote leg.
+When `remote.uk_wide` is set, a second call is made with is_remote=True and location="United Kingdom" — a UK-wide remote leg. When `remote.hubs` is set, jobspy also issues one `location="<hub>", is_remote=True` call per named hub — a remote-only leg for each hub.
 
 What jobspy can also accept (not currently used):
 
@@ -31,7 +31,7 @@ locationName	Bristol	Location string
 distancefromLocation	50	Radius in miles
 minimumSalary	60000	Server-side salary floor
 resultsToTake	100	Max results per query
-For include_remote profiles, a second call is made with keywords="<query> remote" and no locationName/distancefromLocation — a UK-wide remote leg with no location constraint.
+When `remote.uk_wide` is set, a second call is made with keywords="<query> remote" and no locationName/distancefromLocation — a UK-wide remote leg with no location constraint. Reed gets no per-hub leg — `remote.hubs` adds jobspy legs only.
 
 Reed also supports (not currently used):
 
@@ -53,7 +53,7 @@ Salary filtering happens client-side by parsing the first £ figure from the sal
 
 Limitation: No job description is fetched from NHS Jobs — the description field is always returned as an empty string. This means the AI scorer only sees the title, company, location, and salary for NHS jobs.
 
-NHS Jobs deliberately has no remote leg, even for include_remote profiles: descriptions are always empty, so a posting can never pass remote confirmation, and querying one is pointless.
+NHS Jobs deliberately has no remote leg, even for profiles with a `remote:` block: descriptions are always empty, so a posting can never pass remote confirmation, and querying one is pointless.
 
 Key Gap to Note
-All three sources accept the same three core inputs from our side: query, location, distance. The agentic loop varies the query string per round — that's the only lever currently being pulled. Remote-only is now used for jobspy and Reed via the UK-wide remote leg (include_remote); employment type, posting date, and contract type remain unused.
+All three sources accept the same three core inputs from our side: query, location, distance. The agentic loop varies the query string per round — that's the only lever currently being pulled. Remote-only is now used for jobspy and Reed via the UK-wide remote leg (`remote.uk_wide`) and, for jobspy, one remote-only leg per `remote.hubs` entry; employment type, posting date, and contract type remain unused.

@@ -4,7 +4,16 @@ Its  goal is to provide a regular email to a user with a list of potential job o
 /assets/sponsor_cache.csv
 Profiles that don't need visa sponsorship can set `filter_sponsors: false`.
 The GitHub Action runs daily, but each profile can choose its email cadence with `email_frequency` (default `daily`): `daily` sends every run, `weekly` sends only on Mondays, and `twice-weekly` sends on Mondays and Fridays. On a non-send day the profile is skipped entirely (no scraping, scoring, or email).
-Profiles can opt in to UK-wide remote search with `include_remote: true` (default false): the searchers add a UK-wide remote leg, and any job not confirmed within the radius is kept only if an LLM check positively confirms the posting is fully remote (verdicts cached in `remote_check_cache.json`). Silence or hybrid wording rejects the job.
+Profiles configure remote search with a `remote:` block (default: absent = no remote
+search). `remote.uk_wide: true` adds a UK-wide remote leg to jobspy and Reed;
+`remote.hubs: [London, ...]` adds one jobspy remote-only leg per named hub. Any job
+not confirmed within the radius is kept only if an LLM check positively confirms the
+posting is fully remote or remote-with-regular-travel (verdicts cached in
+`remote_check_cache.json`); silence or hybrid wording rejects it. Confirmed-remote
+jobs whose employer cannot be matched to the sponsor list (agency-posted, or company
+string too sparse) are kept and shown in a separate "Remote — sponsor not verified"
+email group rather than dropped. Hub jobs that clear the checks appear in a
+"Remote — <hub>" section.
 
 ## Local debugging tools
 

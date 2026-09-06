@@ -131,6 +131,16 @@ def test_sponsor_not_on_list_rejected_job_appears():
     assert "company not on approved sponsor list" in html
 
 
+def test_sponsor_unverified_carve_out_count_appears():
+    html = build_debug_email_html(
+        {"Bristol": "within"},
+        [_kept(_make_job(), flags=["remote_confirmed", "sponsor_unverified"])],
+        _make_profile(),
+    )
+    assert "Sponsor Filter" in html
+    assert "1 confirmed-remote job(s) kept as sponsor-unverified." in html
+
+
 def _ai_excluded(job: JobListing, reason: str, score: int = 6) -> ScoredResult:
     return ScoredResult(
         job=job, flags=[], rejected=True,

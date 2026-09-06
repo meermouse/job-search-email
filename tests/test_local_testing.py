@@ -14,7 +14,7 @@ def test_fixture_queries_returns_eight_strings():
 
 def test_fixture_jobs_returns_five_listings():
     jobs = fixture_jobs()
-    assert len(jobs) == 7
+    assert len(jobs) == 10
     assert all(isinstance(j, JobListing) for j in jobs)
 
 
@@ -85,6 +85,24 @@ def test_local_run_writes_email_preview(tmp_path, monkeypatch):
     content = preview.read_text(encoding="utf-8")
     assert "<!DOCTYPE html>" in content
     assert "Senior Business Manager" in content
+
+
+def test_local_run_email_has_all_three_groups(tmp_path, monkeypatch):
+    import shutil
+
+    project_root = Path(__file__).parent.parent
+    profiles_dir = tmp_path / "profiles"
+    profiles_dir.mkdir()
+    shutil.copy(project_root / "profiles" / "jie-zhou.yaml", profiles_dir / "jie-zhou.yaml")
+    monkeypatch.chdir(tmp_path)
+
+    from job_search_email import local_run
+    local_run.main()
+
+    html = (tmp_path / "email_preview.html").read_text(encoding="utf-8")
+    assert "Remote &#8212; London" in html
+    assert "sponsor not verified" in html.lower()
+    assert "some travel" in html.lower()
 
 
 def test_local_run_writes_json_artefacts(tmp_path, monkeypatch):

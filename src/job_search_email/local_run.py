@@ -96,6 +96,7 @@ def main() -> None:
     filtered = filter_jobs(
         jobs, plan, profile,
         rejected_locations=frozenset(l for l, v in classification.items() if v == "outside"),
+        recruitment_set=frozenset(),
         within_locations=frozenset(l for l, v in classification.items() if v == "within"),
         remote_verdicts=fixture_remote_verdicts(),
     )
