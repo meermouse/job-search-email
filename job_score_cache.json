@@ -2386,5 +2386,582 @@
     "qualification_status": "partial",
     "exclude": false,
     "exclude_reason": ""
+  },
+  "b76cd3aa1ac4_751adf852fe3_5cd4c0aff961": {
+    "score": 1,
+    "matched_skills": [],
+    "missing_essentials": [
+      "Network engineering expertise (SDWAN, WAN, LAN/WLAN, VPN/SASE, load-balancing)",
+      "Netskope platform experience",
+      "Network infrastructure knowledge",
+      "Complex incident diagnosis and resolution in networking",
+      "Network configuration management"
+    ],
+    "employment_type_note": "Employment type not stated in posting; unable to confirm permanent full-time status",
+    "verdict": "Candidate's background is entirely in healthcare governance, digital transformation, and business management. This is a specialist network engineering role requiring deep hands-on technical expertise in network platforms (Netskope, SDWAN, VPN/SASE, load balancing). Jie Zhou has no network engineering experience, no Netskope experience, and no evidence of technical infrastructure engineering work. While the candidate has some data infrastructure and digital transformation experience, this is a fundamentally different profession (IT infrastructure engineering vs. governance/business management). The role is not open to career-changers or those without direct networking expertise.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "Network engineering background / discipline",
+      "Netskope platform experience (explicitly required)",
+      "SDWAN/WAN/VPN/SASE technical expertise"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (network engineering vs. governance/business management); no technical networking background"
+  },
+  "f0a4987665bf_751adf852fe3_5cd4c0aff961": {
+    "score": 1,
+    "matched_skills": [],
+    "missing_essentials": [
+      "Legal qualification (solicitor/barrister)",
+      "Law degree or equivalent legal training",
+      "Legal practice experience",
+      "Admitted to practice or in training contract"
+    ],
+    "employment_type_note": "Employment type not stated in job description; candidate requires full-time permanent only",
+    "verdict": "Candidate is from a completely different profession (NHS digital governance/business management, not legal practice). An Associate or Senior Associate role at a top-50 law firm is a specialist legal position requiring legal qualification and practice experience. Jie Zhou's background in healthcare management, digital transformation, and governance has no transferable pathway into legal practice. This is a fundamental profession mismatch.",
+    "required_qualifications": [
+      "Law degree or equivalent legal qualification (implicit for Associate/Senior Associate at UK law firm)",
+      "Admission to practice or current training contract (implicit for legal associate roles)"
+    ],
+    "qualification_gaps": [
+      "No law degree listed",
+      "No legal qualification or admission status mentioned",
+      "No evidence of legal practice training or experience"
+    ],
+    "qualification_status": "mismatch",
+    "gatekeeping_gaps": [
+      "Legal qualification (solicitor/barrister registration)",
+      "Law degree or equivalent legal qualification",
+      "Legal practice experience in a law firm"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (legal practice; candidate is healthcare governance/digital transformation specialist)"
+  },
+  "207ecc9785d5_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [],
+    "missing_essentials": [
+      "Veterinary care sector experience",
+      "Animal health / clinical background",
+      "Vet practice management",
+      "Regional leadership in veterinary services"
+    ],
+    "employment_type_note": "Employment type not stated in job description; salary not stated.",
+    "verdict": "This is a veterinary care sector leadership role. Jie Zhou's entire career has been in NHS governance, digital transformation, workforce planning, and healthcare administration \u2014 not veterinary medicine or animal care. While the job title mentions 'Director' and involves regional leadership and team management, the core discipline is veterinary services, which is fundamentally different from healthcare administration. Jie has explicitly stated he is not open to clinical roles. This role requires sector-specific experience in vet care, practice management, and animal health \u2014 none of which are present in his profile. The transferable skills in governance and management do not overcome the profession mismatch for a specialist sector leadership post.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "Veterinary or animal health sector experience (core profession mismatch)",
+      "Veterinary qualifications or clinical background",
+      "Vet practice or animal care management track record"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (veterinary care vs. healthcare administration); not open to clinical roles"
+  },
+  "75f57fa6c11e_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Digital Transformation",
+      "Project Management",
+      "Data Analytics",
+      "Business process improvement",
+      "Stakeholder engagement",
+      "Line management"
+    ],
+    "missing_essentials": [
+      "Veterinary sector experience",
+      "Design/UX background",
+      "Product design or design management track record",
+      "Clinical/care domain knowledge"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; cannot confirm permanent status.",
+    "verdict": "This is a Design Manager role in veterinary care\u2014a fundamentally different profession and sector from Jie Zhou's healthcare governance and business management background. While Jie has strong digital transformation and project management capabilities, the role requires design/UX leadership expertise and veterinary sector knowledge that are absent from the profile. Jie's target roles are Business Manager, Digital Transformation, and Senior Management\u2014not design management. The candidate is explicitly not open to clinical roles, and a care-focused design leadership position sits at the intersection of design specialization and care domain expertise, both of which are missing. This would not survive the initial sift for a Design Manager post.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "Design management or product design professional experience",
+      "Veterinary or animal care sector background"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (design management, not business/governance); veterinary sector unsuitable"
+  },
+  "625e352b5c85_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Business governance",
+      "Financial control and budget management",
+      "Strategic planning",
+      "Data analytics and reporting",
+      "Project management",
+      "Stakeholder engagement"
+    ],
+    "missing_essentials": [
+      "Core finance/accounting background (candidate is governance & digital transformation specialist, not finance professional)",
+      "Financial accounting expertise",
+      "Management accounts preparation",
+      "VAT/tax compliance knowledge",
+      "Audit management at finance level"
+    ],
+    "employment_type_note": "Role explicitly stated as 'Interim Financial Controller' \u2014 fixed-term/temporary contract. Candidate's stated preference is 'full-time permanent only'. Employment type mismatch is a hard exclusion.",
+    "verdict": "Exclude: Fixed-term interim contract conflicts with candidate's permanent-only requirement. Additionally, Financial Controller is a specialist finance role requiring core accounting/finance profession background. Candidate is a governance and digital transformation specialist with budget oversight experience, not a finance professional. This is a different profession requiring statutory/technical finance credentials and experience in core finance operations (management accounts, financial reporting, audit coordination). Transferable skills in budget management and reporting do not overcome the fundamental profession mismatch at this seniority level.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "Finance profession background (never held a finance-focused post)",
+      "Interim/fixed-term contract (candidate stated 'full-time permanent only')"
+    ],
+    "exclude": true,
+    "exclude_reason": "Fixed-term interim contract + different profession (Finance specialist role, candidate lacks finance background)"
+  },
+  "158b9093f624_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Team leadership / line management",
+      "Project management",
+      "Stakeholder engagement",
+      "Process improvement",
+      "Digital tools and systems"
+    ],
+    "missing_essentials": [
+      "Service desk / IT support experience",
+      "ITSM or ticketing system experience",
+      "IT infrastructure knowledge",
+      "First-line or second-line support background",
+      "Veterinary sector experience"
+    ],
+    "employment_type_note": "Employment type not stated in job description; cannot confirm permanent role status.",
+    "verdict": "Wrong profession. Jie Zhou's career is entirely in NHS governance, business management, and digital transformation policy\u2014not IT service desk operations. While line management and process improvement skills transfer broadly, service desk leadership is a specialist IT operations role requiring hands-on ticketing, incident management, and technical support background. A hiring manager would gatekeep on prior service desk or ITSM experience and would not interview a governance/business manager without that core discipline experience, despite keyword overlap in leadership.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "No service desk or IT support experience (core discipline mismatch)",
+      "No ticketing system or ITSM background",
+      "No stated IT operations or technical support track record"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (IT service desk operations vs. healthcare governance/business management)"
+  },
+  "89a5acc24428_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Project management",
+      "Digital transformation",
+      "Data analytics",
+      "Stakeholder management",
+      "Business process improvement",
+      "Microsoft technologies (Power BI, Power Automate, SharePoint)"
+    ],
+    "missing_essentials": [
+      "IT systems administration / infrastructure management",
+      "Help desk / technical support experience",
+      "IT service management (ITSM) or ticketing systems",
+      "Network / server / hardware operations knowledge",
+      "IT vendor management",
+      "IT security/compliance implementation"
+    ],
+    "employment_type_note": "Employment type not stated in job description; cannot confirm permanent role status.",
+    "verdict": "This is a fundamentally different profession. Jie Zhou's background is in business governance, workforce planning, and digital transformation within healthcare administration\u2014not IT operations. While she has project management and some data infrastructure skills, IT Operations Manager is a specialist IT/technical role requiring hands-on systems administration, infrastructure management, and technical team leadership. Her governance and business process expertise does not bridge this gap. The role demands operational IT knowledge (ticketing, ITSM, networks, infrastructure) that is absent from her profile. She is explicitly not open to roles outside her target disciplines (business management, digital transformation, strategy), and this is a technical operations role.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "No IT operations or IT service delivery background",
+      "No demonstrated technical infrastructure management experience",
+      "No IT team leadership at operational level"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (IT operations vs. business governance/digital transformation); missing technical infrastructure background"
+  },
+  "019eadc749b1_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Digital Transformation",
+      "Project Management",
+      "Business governance and process improvement",
+      "Stakeholder engagement",
+      "Data analytics",
+      "Strategic thinking",
+      "Line management and team leadership"
+    ],
+    "missing_essentials": [
+      "AI/machine learning domain expertise",
+      "AI solution design and implementation experience",
+      "AI business case development",
+      "AI ethics and responsible AI governance",
+      "Fee-earning or revenue-generating track record",
+      "Consulting sales/business development experience"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; salary also not stated. Cannot verify against candidate's permanent full-time requirement and \u00a360k minimum.",
+    "verdict": "Weak match. Candidate has strong governance, digital transformation and project management credentials, but this is a specialist AI consulting role requiring deep AI/ML expertise, client-facing consultancy experience, and fee-earning track record. Candidate's background is entirely in NHS operational governance and process improvement\u2014a fundamentally different profession. Transferable project and stakeholder skills do not overcome the absence of AI domain expertise or consultancy sales experience, both gatekeeping requirements for a senior consulting grade. Additionally, role suitability is undermined by lack of employment type and salary transparency against stated preferences.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "No AI or machine learning specialist background",
+      "No consultancy or fee-earning experience",
+      "No business development or client acquisition track record",
+      "Career path entirely in NHS/healthcare operations, not AI solutions"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (AI consulting vs. NHS governance operations); missing gatekeeping requirements (no AI/ML expertise, no consultancy or fee-earning background)"
+  },
+  "ad4474a3c6ca_751adf852fe3_5cd4c0aff961": {
+    "score": 3,
+    "matched_skills": [
+      "Project Management",
+      "Data Analytics / Dashboards",
+      "Business Governance",
+      "Workforce Planning",
+      "Digital Transformation",
+      "Cost control and budget management (from research centre budget holder role)",
+      "Process improvement and operational efficiency",
+      "Stakeholder engagement and reporting"
+    ],
+    "missing_essentials": [
+      "Cost accounting or financial management specialism",
+      "Productivity/efficiency improvement track record in commercial/TMT context",
+      "Commercial or profit & loss accountability",
+      "Experience in Technology, Media & Telecommunications sector"
+    ],
+    "employment_type_note": "Permanent role; salary range \u00a350,000\u2013\u00a370,000 stated. Candidate's minimum is \u00a360,000, which falls within range but at lower end.",
+    "verdict": "Weak match. Candidate has strong project management, governance, and data analytics skills, but the role is a cost and productivity specialist position in the TMT sector. Jie's entire career is in NHS healthcare and education, with no commercial cost accounting or TMT sector experience. The hiring manager would likely view this as sector and specialism misalignment. While budget management and process improvement appear in the candidate's background, they are secondary to governance and workforce planning, not the core strategic cost/productivity expertise TMT hiring managers would expect. Gatekeeping gaps: commercial P&L accountability and TMT sector experience.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "No cost accounting or managerial accounting background beyond certifications",
+      "No commercial P&L ownership or fee-earning track record",
+      "Career entirely in NHS/healthcare and education \u2014 not in TMT or commercial sector",
+      "No explicit productivity or lean/efficiency improvement delivery at scale"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession and sector (TMT cost accounting vs. NHS governance); career lacks commercial cost/productivity specialism and TMT experience."
+  },
+  "452baf7721b8_751adf852fe3_5cd4c0aff961": {
+    "score": 1,
+    "matched_skills": [
+      "Project management (multi-year outsourcing programme",
+      "Contract management and negotiation",
+      "Digital transformation experience",
+      "Stakeholder relationship building",
+      "Team leadership and supervision",
+      "Public sector experience (NHS, local government)",
+      "Business governance and compliance",
+      "Data infrastructure and process improvement"
+    ],
+    "missing_essentials": [
+      "Qualified solicitor status (legal professional qualification)",
+      "6+ years PQE (Post-Qualification Experience) as a lawyer",
+      "Commercial IT contract drafting and negotiation expertise",
+      "Private practice or in-house legal experience",
+      "Fee-earning legal track record",
+      "Legal advisory experience (this is a legal profession role)"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; cannot confirm permanent role status, though law firm role typically permanent.",
+    "verdict": "Fundamental profession mismatch. This is a specialist legal role requiring qualified solicitor status and 6+ years PQE in commercial IT law practice. The candidate is a healthcare governance and digital transformation professional with no legal qualification, no solicitor registration, and no legal practice experience. Transferable skills in project management, contract management, public sector stakeholder engagement, and digital transformation are present, but do not bridge the core professional gatekeeping requirement. The role explicitly requires a qualified lawyer; the candidate is not one. This would not survive an initial sift.",
+    "required_qualifications": [
+      "Qualified solicitor",
+      "Minimum 6 years PQE"
+    ],
+    "qualification_gaps": [
+      "No legal qualification stated in profile",
+      "No PQE as a solicitor"
+    ],
+    "qualification_status": "mismatch",
+    "gatekeeping_gaps": [
+      "Qualified solicitor (mandatory)",
+      "6+ years PQE in legal practice (mandatory)",
+      "Commercial IT/legal contract expertise (core discipline requirement)"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (legal) \u2014 candidate is not a qualified solicitor and lacks required PQE"
+  },
+  "3dbef4016a54_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Project management",
+      "Stakeholder engagement",
+      "Cross-functional collaboration",
+      "Strategic thinking",
+      "Data-driven reporting and analysis",
+      "Organizational skills",
+      "Communication and presentation"
+    ],
+    "missing_essentials": [
+      "Built environment background (architecture, engineering, planning, design, or accessibility)",
+      "Direct experience in inclusive design, accessibility design, or related built environment discipline",
+      "Knowledge of accessibility standards and legislation",
+      "Experience conducting accessibility audits or inclusive design reviews",
+      "User research or engagement experience in built environment context"
+    ],
+    "employment_type_note": "Employment type not stated in job description; unable to confirm permanent status.",
+    "verdict": "This is a fundamental profession mismatch. Jie Zhou's entire career has been built on NHS/healthcare governance, workforce planning, digital infrastructure, and business management. The role requires someone with meaningful background in built environment, inclusive design, architecture, engineering, planning, or accessibility\u2014none of which Jie has held. While Jie demonstrates strong project management, stakeholder engagement, and cross-functional collaboration skills, these are insufficient to bridge the gap for a specialist consultancy role in a different profession. The job description explicitly welcomes 'people from a range of professional backgrounds' but still expects 'experience or knowledge within the built environment, design, accessibility, engagement, user research or a related field.' Jie lacks all of these core domain requirements. A hiring manager conducting the initial sift would screen this out immediately as outside their profession, regardless of transferable skills.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "No demonstrated background in built environment, architecture, engineering, planning, design, or accessibility",
+      "No evidence of accessibility standards knowledge or inclusive design expertise",
+      "Healthcare/NHS governance background is fundamentally different from built environment consultancy"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession: candidate has no built environment, inclusive design, architecture, engineering, planning, or accessibility background."
+  },
+  "e88288cd0a92_751adf852fe3_5cd4c0aff961": {
+    "score": 1,
+    "matched_skills": [
+      "Strategic leadership and vision",
+      "Change management and transformation",
+      "Team building and line management",
+      "Governance and compliance frameworks",
+      "Data-driven decision making",
+      "Stakeholder engagement",
+      "Project management",
+      "Organizational effectiveness"
+    ],
+    "missing_essentials": [
+      "Teaching qualification (PGCE, BEd, or equivalent)",
+      "QTS (Qualified Teacher Status) or equivalent teaching registration",
+      "EWC (Education Workforce Council) registration",
+      "Demonstrated experience as a school leader or deputy headteacher",
+      "Track record of leading school improvement and raising pupil attainment",
+      "Knowledge of curriculum design and delivery in secondary education",
+      "Experience managing school budgets and financial control in educational setting",
+      "Proven experience in safeguarding and child protection in schools",
+      "Understanding of Welsh Education Policy and inspection frameworks (Estyn)",
+      "Clinical or healthcare sector experience (not transferable to school leadership)"
+    ],
+    "employment_type_note": "Full-time permanent role commencing Spring Term 2027. Meets candidate's employment type preference.",
+    "verdict": "This is a headteacher role in secondary education\u2014a regulated teaching profession requiring statutory registration with the Education Workforce Council (EWC) and QTS/equivalent teaching qualification. Jie Zhou has no teaching qualification, no QTS, no EWC registration, and no demonstrated experience in school leadership or education. Despite strong transferable skills in governance, digital transformation, strategic leadership, and organizational change, these do not substitute for the mandatory professional teaching qualifications and school leadership background that are gatekeeping requirements for a headteacher appointment in Wales. The candidate's background is in healthcare management and governance, not education. This represents a fundamentally different profession.",
+    "required_qualifications": [
+      "EWC registration",
+      "Teaching qualification (PGCE, BEd, or equivalent)",
+      "QTS or equivalent professional teaching status"
+    ],
+    "qualification_gaps": [
+      "No teaching qualification listed",
+      "No EWC registration evidence",
+      "No QTS or equivalent",
+      "Educational credentials are in English Literature (BA), not teacher training"
+    ],
+    "qualification_status": "mismatch",
+    "gatekeeping_gaps": [
+      "EWC registration requirement (explicitly stated: 'THIS POST REQUIRES YOU TO BE REGISTERED WITH THE EWC')",
+      "Teaching qualification and QTS/equivalent (legal requirement for headteacher in Wales)",
+      "School leadership experience at deputy head level or equivalent",
+      "Track record in school improvement and pupil outcomes"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (education/teaching). Missing mandatory EWC registration, QTS, and teaching qualification. No school leadership experience."
+  },
+  "cd2c135ac1ab_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Project management",
+      "Microsoft Office",
+      "AutoCAD (not explicitly listed but design/infrastructure experience)",
+      "Technical documentation and reporting",
+      "Stakeholder engagement and client interface",
+      "Organizational and process management"
+    ],
+    "missing_essentials": [
+      "Electrical engineering degree (BSc minimum)",
+      "Electrical design experience (RIBA Stages 0-4)",
+      "Electrical systems surveying and assessment",
+      "M&E technical knowledge and certification",
+      "Electrical site monitoring and quality assurance",
+      "AutoCAD proficiency",
+      "Track record in electrical engineering or site engineering",
+      "Electrical building infrastructure knowledge"
+    ],
+    "employment_type_note": "Full-time permanent role; aligns with candidate's stated preference.",
+    "verdict": "This is a fundamentally different profession. The role requires a specialist Electrical Engineer with BSc-level engineering qualification, M&E credentials, and direct electrical design and surveying experience. The candidate's entire career has been in NHS governance, business management, and digital transformation\u2014not engineering. While the candidate demonstrates strong project management, governance, and stakeholder skills, these are not transferable to the core discipline of electrical engineering. No amount of business acumen compensates for the absence of engineering qualification, technical M&E knowledge, and electrical design experience. The hiring manager would reject this application at the initial sift for failing hard professional requirements.",
+    "required_qualifications": [
+      "BSc Electrical Engineering degree (as a minimum)",
+      "Recognised M&E qualification",
+      "Chartered or willing to obtain MCIBSE (or equivalent)"
+    ],
+    "qualification_gaps": [
+      "BSc Electrical Engineering \u2014 candidate holds Masters in Strategic Management of Projects, Management, and BA in English Language and Literature; no engineering degree",
+      "Recognised M&E qualification \u2014 not present in candidate's profile",
+      "MCIBSE or equivalent \u2014 no engineering professional registration or evidence of willingness to obtain"
+    ],
+    "qualification_status": "mismatch",
+    "gatekeeping_gaps": [
+      "BSc Electrical Engineering degree (candidate has Masters in Strategic Management and Management, not engineering)",
+      "Recognised M&E qualification (no M&E background stated)",
+      "Chartered or willing to obtain MCIBSE or equivalent (no engineering registration or willingness stated)",
+      "High level of independent Electrical design experience RIBA 0-4 (candidate has governance/workforce planning, not electrical design)",
+      "Track record in electrical engineering or site engineering (candidate's background is NHS governance, business management, not engineering)"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession \u2014 electrical engineering specialist role; candidate lacks BSc engineering degree, M&E qualifications, and technical electrical engineering experience"
+  },
+  "0f22a55d3bd1_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Strategic leadership and transformation delivery",
+      "Business governance and policy framework management",
+      "Workforce planning and line management",
+      "Project management (end-to-end)",
+      "Data analytics and reporting dashboards",
+      "Stakeholder engagement across complex networks",
+      "Digital infrastructure and process automation",
+      "Financial oversight and budget management",
+      "Risk management and compliance"
+    ],
+    "missing_essentials": [
+      "Local government commissioning experience (adult or children's services)",
+      "Social care market development and provider management",
+      "Personal budgets / Direct Payments / Individual Service Funds oversight",
+      "Local authority service delivery or commissioning track record",
+      "Director-level experience (first director appointment explicitly invited, but candidate has no prior director role)",
+      "Proven transformation delivery at scale within local government or social care",
+      "Knowledge of statutory social care frameworks (Care Act, safeguarding, quality assurance)"
+    ],
+    "employment_type_note": "Role explicitly states 'Contract: Permanent' \u2014 meets candidate's requirement for full-time permanent employment only.",
+    "verdict": "This is a fundamental profession mismatch. Jie Zhou's entire career has been in NHS governance, digital transformation, and workforce planning within health settings (NHS Wales, NHS Foundation Trust, private hospital, NHS Swansea Bay). The role requires a commissioning leader with a track record in local government social care (adult and/or children's services) \u2014 a distinct and specialist discipline. While Jie has strong governance, data, project management and transformation skills that are transferable, a Service Director appointment at local authority level commissioning is a different profession. Local government commissioners need deep knowledge of social care markets, Direct Payments, safeguarding frameworks, and statutory duties under the Care Act \u2014 none of which appear in Jie's profile. The role description explicitly targets 'a commissioning leader seeking their first director appointment' \u2014 Jie has never worked in commissioning, local government, or held a director post. This is not a case of 'senior enough but wrong specialism'; it is candidacy for entry into a different profession at director level, which hiring managers would treat as disqualifying at sift. Jie's governance and digital expertise would not overcome the absence of commissioning background in a role this specialized.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "No local government or social care commissioning background",
+      "No prior director-level appointment",
+      "NHS-focused career with no local authority or commissioning experience"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (NHS governance/digital transformation, not local government social care commissioning). No commissioning or local authority experience required for director-level appointment."
+  },
+  "46e545e2ed73_751adf852fe3_5cd4c0aff961": {
+    "score": 3,
+    "matched_skills": [
+      "Business governance",
+      "Project management",
+      "Workforce planning",
+      "Data analytics and reporting",
+      "Stakeholder engagement",
+      "Policy management",
+      "Risk management",
+      "Operational leadership"
+    ],
+    "missing_essentials": [
+      "Local government commissioning experience",
+      "Public health or social care commissioning background",
+      "Procurement and contract management",
+      "Budget management at commissioning scale",
+      "Service redesign in local authority context"
+    ],
+    "employment_type_note": "Employment type not stated in job description; salary not stated. Cannot verify permanent status or salary meets \u00a360k minimum.",
+    "verdict": "Weak match. The candidate has strong generic business management, governance, and digital skills transferable to local authority context. However, the role is a specialist commissioning position in local government/public health, a sector and discipline where the candidate has no prior experience. NHS governance is not equivalent to local authority commissioning. The absence of commissioning, procurement, or local government background would be treated as gatekeeping by hiring managers for a named 'Commissioning Business Manager' role. Additionally, missing salary and employment type information creates uncertainty about role suitability against stated preferences (permanent full-time, min \u00a360k).",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "No demonstrated commissioning experience",
+      "No local government background",
+      "No public health or social care service management history"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different professional discipline (commissioning/local government); no commissioning or local authority background"
+  },
+  "ff1a3c7ac466_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Project Management",
+      "Strategic Management",
+      "Digital Transformation",
+      "Data Analytics",
+      "Stakeholder Management",
+      "Business Governance",
+      "Team Leadership"
+    ],
+    "missing_essentials": [
+      "Defence & National Security domain experience",
+      "Government/public sector consultancy track record",
+      "Fee-earning or business development experience",
+      "Security clearance or eligibility for clearance",
+      "Consultancy delivery methodology (e.g. structured problem-solving, client advisory)"
+    ],
+    "employment_type_note": "Employment type not stated in job description; cannot confirm permanent position.",
+    "verdict": "This is a weak match. While the candidate has strong governance, project management, and digital transformation credentials from NHS contexts, the role requires defence & national security domain expertise and a consultancy delivery background that are entirely absent from the profile. The candidate has operated as an operational manager and infrastructure builder within healthcare, not as a strategy consultant selling advice to government or defence clients. No security clearance eligibility, consultancy track record, or revenue-generation experience is evident. The role's seniority and domain specificity are a poor fit for an NHS governance and digital manager, regardless of strong generic leadership skills. Additionally, salary is not stated and employment type is not confirmed as permanent.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "No defence, national security, or government consultancy background",
+      "No evidence of fee-earning or revenue-generating consultancy track record",
+      "No stated experience in client-facing advisory or strategy consultancy roles",
+      "Salary not stated; cannot verify meets \u00a360k minimum"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (defence consultancy, not healthcare operations); no consultancy track record; salary and employment type not confirmed"
+  },
+  "f6f5641800d5_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Digital Transformation",
+      "Project Management",
+      "Data Analytics",
+      "Stakeholder Management",
+      "Process Improvement",
+      "Cross-functional Team Leadership"
+    ],
+    "missing_essentials": [
+      "Product management experience or track record",
+      "User research / customer discovery background",
+      "Product roadmap development",
+      "Feature prioritization and backlog management",
+      "Metrics-driven product decision-making",
+      "Go-to-market strategy"
+    ],
+    "employment_type_note": "Employment type not stated in job description; cannot confirm permanent, full-time role as required by candidate",
+    "verdict": "Weak match. The candidate has strong governance, digital transformation, and business management credentials, but lacks product management experience\u2014the core discipline for this role. While project management, data analytics, and process improvement skills are transferable, a Product Manager role requires a distinct skill set (user research, product strategy, feature prioritization, roadmap development, go-to-market thinking) that is absent from their CV. At senior PM level, prior product management track record would be a gatekeeping requirement. The candidate's background is fundamentally in operations and governance, not product. Additionally, salary and employment type are not stated, creating uncertainty around alignment with the candidate's minimum requirements (\u00a360k, full-time permanent).",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "No demonstrated product management experience or PM-specific track record",
+      "Career history is governance, business management, and digital transformation\u2014not product development or product strategy"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession: candidate is operations/governance specialist, not product manager; core PM experience and track record absent"
+  },
+  "e7244f2959ed_751adf852fe3_5cd4c0aff961": {
+    "score": 2,
+    "matched_skills": [
+      "Project Management",
+      "Strategic Planning",
+      "Digital Transformation",
+      "Data Analytics",
+      "Stakeholder Management",
+      "Business Governance",
+      "Leadership & Team Management"
+    ],
+    "missing_essentials": [
+      "National security clearance (SC/DV) \u2014 not mentioned in candidate profile",
+      "Defence/security sector experience \u2014 candidate has only NHS and private healthcare background",
+      "Government/public sector contracting experience \u2014 limited to NHS roles",
+      "Consulting delivery track record \u2014 candidate is primarily internal operations/management focused, not external advisory",
+      "Fee-earning or client-facing consulting background \u2014 absent from profile"
+    ],
+    "employment_type_note": "Employment type not stated in job posting; assume permanent unless FTC indicated. No salary stated; cannot verify against \u00a360k minimum.",
+    "verdict": "Significant sector and discipline mismatch. Candidate is an internal NHS operations and governance manager with strong project and digital transformation skills, but lacks any defence, national security, or external consulting background. National security clearance is a de facto hard requirement for Cheltenham defence consulting roles; candidate profile shows no eligibility or history. The role demands defence/government sector credibility and consulting delivery experience \u2014 neither present. While candidate's governance, data analytics, and project leadership are transferable, they do not overcome the fundamental sector barrier for a specialist national security consultancy role at senior level.",
+    "required_qualifications": [],
+    "qualification_gaps": [],
+    "qualification_status": "",
+    "gatekeeping_gaps": [
+      "National security clearance eligibility or prior SC/DV clearance",
+      "Prior defence or national security sector experience",
+      "Consulting or external advisory delivery experience at senior level",
+      "Government contracting or public sector strategy consulting background"
+    ],
+    "exclude": true,
+    "exclude_reason": "Different profession (defence/national security consulting vs. internal NHS governance management); lacks sector experience and security clearance eligibility"
   }
 }
