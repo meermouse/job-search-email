@@ -8,6 +8,7 @@ from .filter import (
     _check_salary,
     _check_sponsor,
 )
+from .location_filter import normalise_location
 from .models import JobListing, Profile
 
 
@@ -32,11 +33,13 @@ def run_filter_gates(
     gates: list[GateResult] = []
 
     # Location — reuse the real gate by deriving the location sets from the verdict.
-    rejected_locations = frozenset({job.location}) if location_verdict == "outside" else frozenset()
+    # Keyed by the normalised location, matching _check_location's lookup.
+    norm_location = normalise_location(job.location or "")
+    rejected_locations = frozenset({norm_location}) if location_verdict == "outside" else frozenset()
     if remote_verdict is None:
         loc = _check_location(job, rejected_locations)
     else:
-        within_locations = frozenset({job.location}) if location_verdict == "within" else frozenset()
+        within_locations = frozenset({norm_location}) if location_verdict == "within" else frozenset()
         loc = _check_location(job, rejected_locations, within_locations, {job.url: remote_verdict})
 
     if loc is not None and loc.rejected:

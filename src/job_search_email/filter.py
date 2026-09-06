@@ -1,5 +1,6 @@
 import re
 from typing import Any
+from .location_filter import normalise_location
 from .models import FilteredResult, JobListing, Profile, SearchPlan
 from .sponsor_filter import _normalize as _normalize_company, _build_entries
 
@@ -177,10 +178,16 @@ def _check_location(
     within_locations: frozenset[str] = frozenset(),
     remote_verdicts: dict[str, str] | None = None,
 ) -> FilteredResult | None:
+    # The verdict sets are keyed by the normalised location (see main.py's
+    # unique_locations), so the lookup must normalise too — otherwise postcode
+    # and whitespace variants are classified but never matched. Reject reasons
+    # still quote the original string for readability.
+    loc = normalise_location(job.location) if job.location else ""
+
     if remote_verdicts is None:
         # Legacy behaviour (include_remote off): only definite "outside"
         # verdicts reject; vague/uncertain locations pass through.
-        if not job.location or job.location not in rejected_locations:
+        if not loc or loc not in rejected_locations:
             return None
         return FilteredResult(
             job=job, flags=[], rejected=True,
@@ -190,7 +197,7 @@ def _check_location(
     # Remote gate (include_remote on): anything not confirmed within the
     # radius must be positively confirmed fully remote. A non-rejected
     # result signals pass-with-flags.
-    if job.location and job.location in within_locations:
+    if loc and loc in within_locations:
         return None
 
     verdict = remote_verdicts.get(job.url, "unverified")
@@ -206,7 +213,7 @@ def _check_location(
     loc_label = job.location or "not stated"
     if verdict == "unverified":
         reason = f"remote check unavailable — cannot confirm fully remote ({loc_label})"
-    elif job.location and job.location in rejected_locations:
+    elif loc and loc in rejected_locations:
         reason = f"location outside radius and not confirmed fully remote: {job.location}"
     else:
         reason = f"location uncertain and not confirmed fully remote: {loc_label}"

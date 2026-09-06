@@ -13,7 +13,7 @@ from .job_resolver import (
     lookup_job,
     resolve_job,
 )
-from .location_filter import classify_locations
+from .location_filter import classify_locations, normalise_location
 from .main import SPONSOR_CACHE_PATH
 from .nhs_rules import get_nhs_rules
 from .profile import load_profile
@@ -57,10 +57,13 @@ def explain(
         dump_job_file(job, dump_job_file_path)
 
     if job.location:
+        # Classify the same normalised key the pipeline uses (main.py's
+        # unique_locations), so the verdict lookup matches at the gate.
+        norm_location = normalise_location(job.location)
         verdict = classify_locations(
-            [job.location], home=profile.location,
+            [norm_location], home=profile.location,
             radius_miles=profile.radius_miles, cache={},
-        ).get(job.location, "uncertain")
+        ).get(norm_location, "uncertain")
     else:
         verdict = "uncertain"
 

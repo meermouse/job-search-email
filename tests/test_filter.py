@@ -72,6 +72,24 @@ def test_check_location_passes_blank_location():
     assert result is None
 
 
+def test_check_location_rejects_london_postcode_against_normalised_verdict():
+    # "EC3A5AT" is classified (and cached) as "London"; the gate must
+    # normalise before the lookup or the verdict is never matched.
+    job = make_job(location="EC3A5AT")
+    result = _check_location(job, rejected_locations=frozenset({"London"}))
+    assert result is not None
+    assert result.rejected is True
+    assert result.reject_reason == "location outside radius: EC3A5AT"
+
+
+def test_check_location_rejects_whitespace_variant_against_normalised_verdict():
+    job = make_job(location="Reading,  RG1")
+    result = _check_location(job, rejected_locations=frozenset({"Reading, RG1"}))
+    assert result is not None
+    assert result.rejected is True
+    assert result.reject_reason == "location outside radius: Reading,  RG1"
+
+
 # --- Stage 1: structured employment_type field ---
 
 def test_employment_type_contract_rejected():
