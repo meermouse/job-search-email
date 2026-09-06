@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -9,6 +10,28 @@ client = anthropic.Anthropic()
 
 _MODEL = os.getenv("SCORER_MODEL", "claude-haiku-4-5-20251001")
 _BATCH_SIZE = 50
+
+_LONDON_OUTWARD_AREAS = frozenset({"EC", "WC", "E", "N", "NW", "SE", "SW", "W"})
+_UK_POSTCODE_RE = re.compile(
+    r"^([A-Z]{1,2})(\d[A-Z\d]?)\s*(\d[A-Z]{2})?$", re.IGNORECASE
+)
+
+
+def normalise_location(raw: str) -> str:
+    """Collapse whitespace; map bare London postcodes to ``"London"``.
+
+    Non-London postcodes and any non-postcode string are returned unchanged
+    (aside from whitespace normalisation).
+    """
+    cleaned = " ".join((raw or "").split())
+    m = _UK_POSTCODE_RE.match(cleaned)
+    if not m:
+        return cleaned
+    area = m.group(1).upper()
+    if area in _LONDON_OUTWARD_AREAS:
+        return "London"
+    return cleaned
+
 
 _SYSTEM_PROMPT = (
     "You are a UK geography expert. Given a home city, a radius in miles, and a list of "

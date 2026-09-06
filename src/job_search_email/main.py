@@ -14,7 +14,7 @@ from .debug_email import build_debug_email_html
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
 from .filter import filter_jobs
-from .location_filter import classify_locations, load_location_cache, save_location_cache
+from .location_filter import classify_locations, load_location_cache, normalise_location, save_location_cache
 from .remote_filter import classify_remote, load_remote_cache, save_remote_cache
 from .models import FilteredResult, JobListing, Profile, SearchPlan, ScoredResult
 from .nhs_rules import get_nhs_rules
@@ -186,7 +186,7 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
 
     print("Classifying job locations...")
     location_cache = load_location_cache(LOCATION_CACHE_PATH)
-    unique_locations = list({j.location for j in jobs if j.location})
+    unique_locations = list({normalise_location(j.location) for j in jobs if j.location})
     classification = classify_locations(
         unique_locations,
         home=profile.location,
