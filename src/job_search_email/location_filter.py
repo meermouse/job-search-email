@@ -8,6 +8,7 @@ import anthropic
 client = anthropic.Anthropic()
 
 _MODEL = os.getenv("SCORER_MODEL", "claude-haiku-4-5-20251001")
+_BATCH_SIZE = 50
 
 _SYSTEM_PROMPT = (
     "You are a UK geography expert. Given a home city, a radius in miles, and a list of "
@@ -56,32 +57,37 @@ def classify_locations(
     if not to_classify:
         return result
 
-    try:
-        user_message = (
-            f"Home location: {home}. Radius: {radius_miles} miles.\n"
-            f"Classify these locations:\n{json.dumps(to_classify, ensure_ascii=False)}"
-        )
-        response = client.messages.create(
-            model=_MODEL,
-            max_tokens=1024,
-            system=_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_message}],
-        )
-        text = response.content[0].text if response.content else ""
-        raw = _extract_json_object(text)
-        if not isinstance(raw, dict):
-            raise ValueError(f"expected dict, got {type(raw).__name__}")
-        verdicts: dict[str, str] = raw
-    except Exception as exc:
-        print(f"[location_filter] classify call failed: {exc}", file=sys.stderr)
-        verdicts = {}
+    for start in range(0, len(to_classify), _BATCH_SIZE):
+        batch = to_classify[start:start + _BATCH_SIZE]
+        try:
+            user_message = (
+                f"Home location: {home}. Radius: {radius_miles} miles.\n"
+                f"Classify these locations:\n{json.dumps(batch, ensure_ascii=False)}"
+            )
+            response = client.messages.create(
+                model=_MODEL,
+                max_tokens=1024,
+                system=_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": user_message}],
+            )
+            text = response.content[0].text if response.content else ""
+            raw = _extract_json_object(text)
+            if not isinstance(raw, dict):
+                raise ValueError(f"expected dict, got {type(raw).__name__}")
+            verdicts: dict[str, str] = raw
+        except Exception as exc:
+            print(f"[location_filter] classify call failed: {exc}", file=sys.stderr)
+            verdicts = {}
 
-    for loc in to_classify:
-        verdict = verdicts.get(loc, "uncertain")
-        if verdict not in ("within", "outside", "uncertain"):
-            verdict = "uncertain"
-        result[loc] = verdict
-        cache[_cache_key(home, radius_miles, loc)] = verdict
+        for loc in batch:
+            verdict = verdicts.get(loc)
+            if verdict not in ("within", "outside", "uncertain"):
+                # No usable verdict — resolve transiently, do NOT cache, so the
+                # next run retries (mirrors remote_filter's "unverified").
+                result[loc] = "uncertain"
+                continue
+            result[loc] = verdict
+            cache[_cache_key(home, radius_miles, loc)] = verdict
 
     return result
 
