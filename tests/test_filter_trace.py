@@ -134,6 +134,15 @@ def test_gates_remote_verdict_unverified_fails_closed():
     assert "remote check unavailable" in loc.detail
 
 
+def test_trace_location_detail_for_remote_with_travel():
+    gates = _gates(_job(url="https://x/3", location="London"),
+                   location_verdict="uncertain", sponsor_set=None,
+                   remote_verdict="remote_with_travel")
+    loc = next(g for g in gates if g.name == "Location")
+    assert loc.passed is True
+    assert "travel" in loc.detail.lower()
+
+
 def test_gates_no_remote_verdict_keeps_legacy_detail():
     gates = run_filter_gates(
         _remote_job(location="Bristol"), make_profile(),

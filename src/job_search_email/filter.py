@@ -30,6 +30,7 @@ _MIN_COMPANY_CHARS = 8
 _MIN_COMPANY_WORDS = 2
 _RECRUITMENT_REASON = "recruitment agency — client company not disclosed, cannot verify sponsor"
 _REMOTE_CONFIRMED_FLAG = "remote_confirmed"
+_REMOTE_WITH_TRAVEL_FLAG = "remote_with_travel"
 
 
 def _check_employment_type(job: JobListing) -> FilteredResult:
@@ -185,6 +186,10 @@ def _check_location(
     if verdict == "remote":
         return FilteredResult(
             job=job, flags=[_REMOTE_CONFIRMED_FLAG], rejected=False, reject_reason=None,
+        )
+    if verdict == "remote_with_travel":
+        return FilteredResult(
+            job=job, flags=[_REMOTE_WITH_TRAVEL_FLAG], rejected=False, reject_reason=None,
         )
 
     loc_label = job.location or "not stated"

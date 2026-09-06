@@ -803,6 +803,21 @@ def test_remote_gate_missing_verdict_fails_closed():
     assert result.reject_reason == "remote check unavailable — cannot confirm fully remote (Manchester)"
 
 
+def test_remote_with_travel_is_kept_with_flag():
+    from job_search_email.filter import _check_location
+    job = make_job(url="https://x/1", location="London")
+    res = _check_location(job, frozenset(), frozenset(), {"https://x/1": "remote_with_travel"})
+    assert res is not None and res.rejected is False
+    assert "remote_with_travel" in res.flags
+
+
+def test_not_remote_still_rejected_under_gate():
+    from job_search_email.filter import _check_location
+    job = make_job(url="https://x/2", location="London")
+    res = _check_location(job, frozenset(), frozenset(), {"https://x/2": "not_remote"})
+    assert res is not None and res.rejected is True
+
+
 def test_remote_gate_unverified_verdict_fails_closed():
     job = make_job(location="Manchester", url="https://x.com/1")
     result = _check_location(
