@@ -16,5 +16,8 @@ def make_profile(**overrides) -> Profile:
         location="Bristol",
         min_salary=60000,
     )
+    # Back-compat: tests written against the old bool.
+    if "include_remote" in overrides:
+        overrides.setdefault("remote_uk_wide", overrides.pop("include_remote"))
     kwargs.update(overrides)
     return Profile(**kwargs)

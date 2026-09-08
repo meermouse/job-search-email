@@ -13,10 +13,11 @@ from .job_resolver import (
     lookup_job,
     resolve_job,
 )
-from .location_filter import classify_locations
-from .main import SPONSOR_CACHE_PATH
+from .location_filter import classify_locations, normalise_location
+from .main import RECRUITMENT_CACHE_PATH, SPONSOR_CACHE_PATH
 from .nhs_rules import get_nhs_rules
 from .profile import load_profile
+from .recruitment_filter import load_recruitment_set
 from .remote_filter import classify_remote
 from .scorer import analyse_job
 from .sponsor_filter import load_sponsor_set
@@ -57,10 +58,13 @@ def explain(
         dump_job_file(job, dump_job_file_path)
 
     if job.location:
+        # Classify the same normalised key the pipeline uses (main.py's
+        # unique_locations), so the verdict lookup matches at the gate.
+        norm_location = normalise_location(job.location)
         verdict = classify_locations(
-            [job.location], home=profile.location,
+            [norm_location], home=profile.location,
             radius_miles=profile.radius_miles, cache={},
-        ).get(job.location, "uncertain")
+        ).get(norm_location, "uncertain")
     else:
         verdict = "uncertain"
 
@@ -74,6 +78,9 @@ def explain(
     # therefore require ANTHROPIC_API_KEY to be set, even when the job is
     # ultimately rejected by a hard filter gate (sponsor, employment-type, etc.).
     sponsor_set = load_sponsor_set(SPONSOR_CACHE_PATH) if profile.filter_sponsors else None
+    recruitment_set = (
+        load_recruitment_set(RECRUITMENT_CACHE_PATH) if profile.filter_recruitment else None
+    )
     gates = run_filter_gates(
         job, profile,
         location_verdict=verdict,
@@ -81,6 +88,7 @@ def explain(
         nhs_rules=get_nhs_rules(),
         exclusion_roles=get_exclusions(profile)["roles"],
         remote_verdict=remote_verdict,
+        recruitment_set=recruitment_set,
     )
 
     first_reject = next((g for g in gates if g.is_first_reject), None)

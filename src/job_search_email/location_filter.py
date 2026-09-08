@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -8,6 +9,41 @@ import anthropic
 client = anthropic.Anthropic()
 
 _MODEL = os.getenv("SCORER_MODEL", "claude-haiku-4-5-20251001")
+_BATCH_SIZE = 50
+
+_LONDON_OUTWARD_AREAS = frozenset({"EC", "WC", "E", "N", "NW", "SE", "SW", "W"})
+_UK_POSTCODE_RE = re.compile(
+    r"^([A-Z]{1,2})(\d[A-Z\d]?)\s*(\d[A-Z]{2})?$", re.IGNORECASE
+)
+# LinkedIn/Indeed metro strings: "Greater Bristol Area, United Kingdom",
+# "Bristol Area, United Kingdom". Collapse to the bare city so the distance
+# classifier judges it from the city centre instead of defaulting to uncertain.
+_METRO_AREA_RE = re.compile(
+    r"^(?:Greater\s+)?(.+?)\s+Area(?:,\s*United Kingdom)?$", re.IGNORECASE
+)
+
+
+def normalise_location(raw: str) -> str:
+    """Collapse whitespace; resolve strings the distance classifier cannot place.
+
+    - ``"Greater <City> Area[, United Kingdom]"`` / ``"<City> Area, ..."`` → ``"<City>"``
+    - bare London-district postcodes → ``"London"``
+
+    Every other postcode and non-postcode string is returned unchanged (aside
+    from whitespace normalisation).
+    """
+    cleaned = " ".join((raw or "").split())
+    m = _METRO_AREA_RE.match(cleaned)
+    if m:
+        return m.group(1).strip()
+    m = _UK_POSTCODE_RE.match(cleaned)
+    if not m:
+        return cleaned
+    area = m.group(1).upper()
+    if area in _LONDON_OUTWARD_AREAS:
+        return "London"
+    return cleaned
+
 
 _SYSTEM_PROMPT = (
     "You are a UK geography expert. Given a home city, a radius in miles, and a list of "
@@ -56,32 +92,39 @@ def classify_locations(
     if not to_classify:
         return result
 
-    try:
-        user_message = (
-            f"Home location: {home}. Radius: {radius_miles} miles.\n"
-            f"Classify these locations:\n{json.dumps(to_classify, ensure_ascii=False)}"
-        )
-        response = client.messages.create(
-            model=_MODEL,
-            max_tokens=1024,
-            system=_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_message}],
-        )
-        text = response.content[0].text if response.content else ""
-        raw = _extract_json_object(text)
-        if not isinstance(raw, dict):
-            raise ValueError(f"expected dict, got {type(raw).__name__}")
-        verdicts: dict[str, str] = raw
-    except Exception as exc:
-        print(f"[location_filter] classify call failed: {exc}", file=sys.stderr)
-        verdicts = {}
+    for start in range(0, len(to_classify), _BATCH_SIZE):
+        batch = to_classify[start:start + _BATCH_SIZE]
+        try:
+            user_message = (
+                f"Home location: {home}. Radius: {radius_miles} miles.\n"
+                f"Classify these locations:\n{json.dumps(batch, ensure_ascii=False)}"
+            )
+            response = client.messages.create(
+                model=_MODEL,
+                # Scale with the batch: a 50-entry verdict object overflows a
+                # flat 1024, and a truncated response fails the whole batch.
+                max_tokens=max(1024, 40 * len(batch) + 256),
+                system=_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": user_message}],
+            )
+            text = response.content[0].text if response.content else ""
+            raw = _extract_json_object(text)
+            if not isinstance(raw, dict):
+                raise ValueError(f"expected dict, got {type(raw).__name__}")
+            verdicts: dict[str, str] = raw
+        except Exception as exc:
+            print(f"[location_filter] classify call failed: {exc}", file=sys.stderr)
+            verdicts = {}
 
-    for loc in to_classify:
-        verdict = verdicts.get(loc, "uncertain")
-        if verdict not in ("within", "outside", "uncertain"):
-            verdict = "uncertain"
-        result[loc] = verdict
-        cache[_cache_key(home, radius_miles, loc)] = verdict
+        for loc in batch:
+            verdict = verdicts.get(loc)
+            if verdict not in ("within", "outside", "uncertain"):
+                # No usable verdict — resolve transiently, do NOT cache, so the
+                # next run retries (mirrors remote_filter's "unverified").
+                result[loc] = "uncertain"
+                continue
+            result[loc] = verdict
+            cache[_cache_key(home, radius_miles, loc)] = verdict
 
     return result
 

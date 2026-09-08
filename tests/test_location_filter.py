@@ -132,3 +132,32 @@ def test_classify_locations_tolerates_leading_prose_before_json():
         mock_client.messages.create.return_value = response
         result = classify_locations(["Reading, RG1"], home="Bristol", radius_miles=50, cache=cache)
     assert result["Reading, RG1"] == "outside"
+
+
+def test_classify_locations_batches_at_50():
+    locs = [f"Place {i}, PL{i}" for i in range(120)]
+    with patch("job_search_email.location_filter.client") as mock_client:
+        mock_client.messages.create.return_value = _mock_claude_response(
+            {loc: "uncertain" for loc in locs}
+        )
+        classify_locations(locs, home="Bristol", radius_miles=40, cache={})
+    assert mock_client.messages.create.call_count == 3  # 50 + 50 + 20
+
+
+def test_classify_locations_does_not_cache_on_api_failure():
+    cache: dict[str, str] = {}
+    with patch("job_search_email.location_filter.client") as mock_client:
+        mock_client.messages.create.side_effect = RuntimeError("boom")
+        result = classify_locations(["Nowhere, NW1"], home="Bristol", radius_miles=40, cache=cache)
+    assert result["Nowhere, NW1"] == "uncertain"
+    assert cache == {}  # transient fallback is not persisted
+
+
+def test_classify_locations_does_not_cache_missing_verdict():
+    cache: dict[str, str] = {}
+    with patch("job_search_email.location_filter.client") as mock_client:
+        mock_client.messages.create.return_value = _mock_claude_response({"A, A1": "within"})
+        result = classify_locations(["A, A1", "B, B1"], home="Bristol", radius_miles=40, cache=cache)
+    assert result["B, B1"] == "uncertain"
+    assert "Bristol:40:B, B1" not in cache
+    assert cache["Bristol:40:A, A1"] == "within"

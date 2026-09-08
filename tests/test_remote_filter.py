@@ -135,3 +135,21 @@ def test_save_and_load_remote_cache_roundtrip(tmp_path):
     save_remote_cache({"https://x.com/1": "remote"}, path)
     assert not (tmp_path / "cache.tmp").exists()
     assert load_remote_cache(path) == {"https://x.com/1": "remote"}
+
+
+def test_classify_remote_accepts_remote_with_travel():
+    jobs = [make_job("https://x.com/1", description="Remote-first with regular travel to client sites.")]
+    cache: dict[str, str] = {}
+    with patch("job_search_email.remote_filter.client") as mock_client:
+        mock_client.messages.create.return_value = _mock_claude_response({"0": "remote_with_travel"})
+        result = classify_remote(jobs, cache=cache)
+    assert result["https://x.com/1"] == "remote_with_travel"
+    assert cache["https://x.com/1"] == "remote_with_travel"
+
+
+def test_classify_remote_unknown_verdict_falls_back_to_not_remote():
+    jobs = [make_job("https://x.com/9")]
+    with patch("job_search_email.remote_filter.client") as mock_client:
+        mock_client.messages.create.return_value = _mock_claude_response({"0": "maybe"})
+        result = classify_remote(jobs, cache={})
+    assert result["https://x.com/9"] == "not_remote"

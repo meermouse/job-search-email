@@ -72,6 +72,24 @@ def test_check_location_passes_blank_location():
     assert result is None
 
 
+def test_check_location_rejects_london_postcode_against_normalised_verdict():
+    # "EC3A5AT" is classified (and cached) as "London"; the gate must
+    # normalise before the lookup or the verdict is never matched.
+    job = make_job(location="EC3A5AT")
+    result = _check_location(job, rejected_locations=frozenset({"London"}))
+    assert result is not None
+    assert result.rejected is True
+    assert result.reject_reason == "location outside radius: EC3A5AT"
+
+
+def test_check_location_rejects_whitespace_variant_against_normalised_verdict():
+    job = make_job(location="Reading,  RG1")
+    result = _check_location(job, rejected_locations=frozenset({"Reading, RG1"}))
+    assert result is not None
+    assert result.rejected is True
+    assert result.reject_reason == "location outside radius: Reading,  RG1"
+
+
 # --- Stage 1: structured employment_type field ---
 
 def test_employment_type_contract_rejected():
@@ -803,6 +821,21 @@ def test_remote_gate_missing_verdict_fails_closed():
     assert result.reject_reason == "remote check unavailable — cannot confirm fully remote (Manchester)"
 
 
+def test_remote_with_travel_is_kept_with_flag():
+    from job_search_email.filter import _check_location
+    job = make_job(url="https://x/1", location="London")
+    res = _check_location(job, frozenset(), frozenset(), {"https://x/1": "remote_with_travel"})
+    assert res is not None and res.rejected is False
+    assert "remote_with_travel" in res.flags
+
+
+def test_not_remote_still_rejected_under_gate():
+    from job_search_email.filter import _check_location
+    job = make_job(url="https://x/2", location="London")
+    res = _check_location(job, frozenset(), frozenset(), {"https://x/2": "not_remote"})
+    assert res is not None and res.rejected is True
+
+
 def test_remote_gate_unverified_verdict_fails_closed():
     job = make_job(location="Manchester", url="https://x.com/1")
     result = _check_location(
@@ -872,3 +905,52 @@ def test_filter_jobs_no_remote_verdicts_unchanged():
     assert remote_r.rejected is False
     assert manc_r.rejected is True
     assert manc_r.reject_reason == "location outside radius: Manchester"
+
+
+def test_confirmed_remote_agency_job_kept_as_sponsor_unverified():
+    from job_search_email.filter import _check_recruitment
+    job = make_job(company="Hays", posted_by_agency=True)
+    res = _check_recruitment(job, frozenset({"hays"}), remote_ok=True)
+    assert res is not None and res.rejected is False
+    assert res.flags == ["sponsor_unverified"]
+
+
+def test_agency_job_without_remote_ok_still_rejected():
+    from job_search_email.filter import _check_recruitment
+    job = make_job(company="Hays", posted_by_agency=True)
+    res = _check_recruitment(job, frozenset({"hays"}), remote_ok=False)
+    assert res is not None and res.rejected is True
+
+
+def test_confirmed_remote_sparse_company_kept_as_sponsor_unverified():
+    from job_search_email.filter import _check_sponsor
+    job = make_job(company="Reed")  # too short/one word -> "not specified" branch
+    res = _check_sponsor(job, frozenset(), remote_ok=True)
+    assert res is not None and res.rejected is False
+    assert res.flags == ["sponsor_unverified"]
+
+
+def test_confirmed_remote_named_non_sponsor_still_rejected():
+    from job_search_email.filter import _check_sponsor
+    job = make_job(company="Definitely Not A Sponsor Ltd")
+    res = _check_sponsor(job, frozenset(), remote_ok=True)
+    assert res is not None and res.rejected is True
+    assert "not on approved sponsor list" in res.reject_reason
+
+
+def test_filter_jobs_end_to_end_sponsor_unverified_flag():
+    # A confirmed-remote, agency-posted job survives filter_jobs with the flag.
+    job = make_job(company="Michael Page", location="London", posted_by_agency=True,
+                   url="https://x/rm1", salary_min=90000, employment_type="permanent")
+    plan = SearchPlan(profile_fingerprint="", queries=[], exclusions={"roles": []},
+                      nhs_rules={}, evaluator_notes=[])
+    out = filter_jobs(
+        [job], plan, make_profile(remote_hubs=["London"]),
+        recruitment_set=frozenset(),
+        sponsor_set=frozenset(),
+        within_locations=frozenset(),
+        remote_verdicts={"https://x/rm1": "remote"},
+    )
+    assert len(out) == 1 and out[0].rejected is False
+    assert "sponsor_unverified" in out[0].flags
+    assert "remote_confirmed" in out[0].flags

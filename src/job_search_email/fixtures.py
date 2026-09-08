@@ -29,6 +29,13 @@ _FIXTURE_ANALYSES: dict[str, JobAnalysis] = {
         employment_type_note="Permanent full-time, fully remote — matches preference.",
         verdict="Strong match. Confirmed fully-remote senior digital transformation role.",
     ),
+    "https://www.linkedin.com/jobs/view/hub-london-1": JobAnalysis(
+        score=8,
+        matched_skills=["digital transformation", "Project Management"],
+        missing_essentials=[],
+        employment_type_note="Permanent full-time, fully remote — matches preference.",
+        verdict="Strong match. Confirmed fully-remote programme leadership role in the London hub.",
+    ),
 }
 
 _FALLBACK_ANALYSIS = JobAnalysis(
@@ -141,6 +148,42 @@ def fixture_jobs() -> list[JobListing]:
             source="reed",
             employment_type="permanent",
         ),
+        JobListing(
+            title="Remote Programme Director (London)",
+            company="Baringa",
+            location="London",
+            salary_min=90000,
+            description="Fully remote within the UK. Permanent, full-time.",
+            url="https://www.linkedin.com/jobs/view/hub-london-1",
+            source="linkedin",
+            employment_type="permanent",
+            search_legs=["jobspy:hub:London"],
+        ),
+        JobListing(
+            title="Transformation Lead (Remote, some travel)",
+            company="Mott MacDonald",
+            location="London",
+            salary_min=85000,
+            description="Home-based with regular travel to client sites. Permanent.",
+            url="https://www.linkedin.com/jobs/view/hub-london-2",
+            source="linkedin",
+            employment_type="permanent",
+            search_legs=["jobspy:hub:London"],
+        ),
+        JobListing(
+            title="Head of PMO",
+            # Offline wiring passes sponsor_set=None, so _check_sponsor never runs:
+            # this job reaches sponsor_unverified via the agency carve-out below.
+            company="Reed",
+            location="London",
+            salary_min=80000,
+            description="Fully remote (UK based). Permanent, full-time.",
+            url="https://www.reed.co.uk/jobs/head-of-pmo/hub-london-3",
+            source="reed",
+            employment_type="permanent",
+            posted_by_agency=True,
+            search_legs=["jobspy:hub:London", "reed:uk-remote"],
+        ),
     ]
 
 
@@ -166,6 +209,7 @@ def fixture_location_classification() -> dict[str, str]:
         "Bristol": "within",
         "Remote (UK)": "uncertain",
         "Manchester": "outside",
+        "London": "uncertain",
     }
 
 
@@ -173,4 +217,7 @@ def fixture_remote_verdicts() -> dict[str, str]:
     return {
         "https://www.reed.co.uk/jobs/head-of-digital-remote/12345681": "remote",
         "https://www.reed.co.uk/jobs/senior-business-manager-manchester/12345682": "not_remote",
+        "https://www.linkedin.com/jobs/view/hub-london-1": "remote",
+        "https://www.linkedin.com/jobs/view/hub-london-2": "remote_with_travel",
+        "https://www.reed.co.uk/jobs/head-of-pmo/hub-london-3": "remote",
     }

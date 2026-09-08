@@ -20,12 +20,15 @@ _SYSTEM_PROMPT = (
     '- "remote": the posting positively and explicitly confirms fully-remote working '
     '(e.g. "fully remote", "100% remote", "work from anywhere in the UK"). Occasional '
     "pre-arranged visits such as quarterly team days do not disqualify.\n"
+    '- "remote_with_travel": the posting confirms remote-first / home-based working '
+    "but names recurring travel to client sites, regional offices, or customer "
+    "locations as a routine expectation (not just occasional team days).\n"
     '- "not_remote": everything else — hybrid, a set number of office days per week, '
     '"remote optional", on-site, or the posting never clearly confirms fully-remote '
     "working.\n\n"
     "Silence is not confirmation: when the text does not explicitly confirm fully-remote "
     'working, answer "not_remote".\n'
-    "Respond only with valid JSON: an object mapping each job id to its verdict."
+    "Respond only with valid JSON: an object mapping each job id to its verdict (one of: remote, remote_with_travel, not_remote)."
 )
 
 
@@ -82,7 +85,7 @@ def classify_remote(jobs: list[JobListing], cache: dict[str, str]) -> dict[str, 
                 result[job.url] = "unverified"
                 continue
             verdict = verdicts.get(str(i))
-            if verdict not in ("remote", "not_remote"):
+            if verdict not in ("remote", "remote_with_travel", "not_remote"):
                 # Model omitted or garbled the verdict: no positive
                 # confirmation exists, which is the strict default.
                 verdict = "not_remote"

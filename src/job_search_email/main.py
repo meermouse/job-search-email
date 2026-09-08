@@ -14,7 +14,7 @@ from .debug_email import build_debug_email_html
 from .evaluator_notes import get_evaluator_notes
 from .exclusions import get_exclusions
 from .filter import filter_jobs
-from .location_filter import classify_locations, load_location_cache, save_location_cache
+from .location_filter import classify_locations, load_location_cache, normalise_location, save_location_cache
 from .remote_filter import classify_remote, load_remote_cache, save_remote_cache
 from .models import FilteredResult, JobListing, Profile, SearchPlan, ScoredResult
 from .nhs_rules import get_nhs_rules
@@ -186,7 +186,7 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
 
     print("Classifying job locations...")
     location_cache = load_location_cache(LOCATION_CACHE_PATH)
-    unique_locations = list({j.location for j in jobs if j.location})
+    unique_locations = list({normalise_location(j.location) for j in jobs if j.location})
     classification = classify_locations(
         unique_locations,
         home=profile.location,
@@ -203,7 +203,10 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
     remote_verdicts: dict[str, str] | None = None
     if profile.include_remote:
         print("Checking remote confirmation for far-afield jobs...")
-        far_jobs = [j for j in jobs if not (j.location and j.location in within_locations)]
+        far_jobs = [
+            j for j in jobs
+            if not (j.location and normalise_location(j.location) in within_locations)
+        ]
         remote_cache = load_remote_cache(REMOTE_CACHE_PATH)
         remote_verdicts = classify_remote(far_jobs, cache=remote_cache)
         save_remote_cache(remote_cache, REMOTE_CACHE_PATH)
@@ -234,7 +237,7 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
     )
     write_filtered_results(filtered, filtered_results_path)
     kept = [r for r in filtered if not r.rejected]
-    flagged = [r for r in kept if r.flags]
+    flagged = [r for r in kept if "employment_type_unknown" in r.flags]
     print(f"- filtered: {len(kept)} kept, {len(filtered) - len(kept)} rejected ({len(flagged)} flagged unknown employment type)")
     print(f"- filtered results written to: {filtered_results_path}")
 

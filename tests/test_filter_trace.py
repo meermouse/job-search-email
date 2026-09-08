@@ -33,7 +33,7 @@ def test_all_gates_reported_in_order():
     names = [g.name for g in gates]
     assert names == [
         "Location", "Employment type", "Role suitability",
-        "NHS band salary", "Salary", "Sponsor list",
+        "NHS band salary", "Salary", "Recruitment", "Sponsor list",
     ]
 
 
@@ -67,7 +67,7 @@ def test_reports_all_gates_even_after_first_reject():
     assert by_name["Location"].is_first_reject is True
     assert by_name["Sponsor list"].passed is False
     assert by_name["Sponsor list"].is_first_reject is False
-    assert len(gates) == 6  # every gate still reported
+    assert len(gates) == 7  # every gate still reported
 
 
 def test_sponsor_gate_disabled_when_sponsor_set_none():
@@ -134,6 +134,15 @@ def test_gates_remote_verdict_unverified_fails_closed():
     assert "remote check unavailable" in loc.detail
 
 
+def test_trace_location_detail_for_remote_with_travel():
+    gates = _gates(_job(url="https://x/3", location="London"),
+                   location_verdict="uncertain", sponsor_set=None,
+                   remote_verdict="remote_with_travel")
+    loc = next(g for g in gates if g.name == "Location")
+    assert loc.passed is True
+    assert "travel" in loc.detail.lower()
+
+
 def test_gates_no_remote_verdict_keeps_legacy_detail():
     gates = run_filter_gates(
         _remote_job(location="Bristol"), make_profile(),
@@ -143,3 +152,58 @@ def test_gates_no_remote_verdict_keeps_legacy_detail():
     loc = next(g for g in gates if g.name == "Location")
     assert loc.passed is True
     assert loc.detail == "within radius (Bristol)"
+
+
+def test_gates_confirmed_remote_sparse_company_sponsor_gate_kept_unverified():
+    gates = run_filter_gates(
+        _remote_job(company="Tiny"), make_profile(),
+        location_verdict="uncertain", sponsor_set=_SPONSORS,
+        nhs_rules={}, exclusion_roles=[],
+        remote_verdict="remote",
+    )
+    by_name = {g.name: g for g in gates}
+    assert by_name["Location"].passed is True
+    assert by_name["Sponsor list"].passed is True
+    assert "unverified" in by_name["Sponsor list"].detail
+
+
+def test_gates_agency_carve_out_skips_sponsor_gate():
+    # filter_jobs treats a non-rejected recruitment carve-out as FINAL: the
+    # sponsor gate is never consulted, so the trace must not report a sponsor
+    # rejection for a job the real pipeline keeps and emails.
+    gates = run_filter_gates(
+        _remote_job(posted_by_agency=True), make_profile(),
+        location_verdict="uncertain", sponsor_set=frozenset(),
+        nhs_rules={}, exclusion_roles=[],
+        remote_verdict="remote",
+        recruitment_set=frozenset(),
+    )
+    by_name = {g.name: g for g in gates}
+    assert by_name["Recruitment"].passed is True
+    assert "sponsor unverified" in by_name["Recruitment"].detail
+    assert by_name["Sponsor list"].passed is True
+    assert "skipped" in by_name["Sponsor list"].detail
+    assert not any(g.is_first_reject for g in gates)
+
+
+def test_gates_agency_not_remote_rejected_by_recruitment_gate():
+    gates = run_filter_gates(
+        _remote_job(posted_by_agency=True, location="Bristol"), make_profile(),
+        location_verdict="within", sponsor_set=frozenset(),
+        nhs_rules={}, exclusion_roles=[],
+        recruitment_set=frozenset(),
+    )
+    by_name = {g.name: g for g in gates}
+    assert by_name["Recruitment"].passed is False
+    assert by_name["Recruitment"].is_first_reject is True
+
+
+def test_gates_recruitment_disabled_when_set_is_none():
+    gates = run_filter_gates(
+        _remote_job(), make_profile(),
+        location_verdict="within", sponsor_set=None,
+        nhs_rules={}, exclusion_roles=[],
+    )
+    by_name = {g.name: g for g in gates}
+    assert by_name["Recruitment"].passed is True
+    assert "disabled" in by_name["Recruitment"].detail

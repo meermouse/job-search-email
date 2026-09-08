@@ -1,5 +1,6 @@
 import re
 from typing import Any
+from .location_filter import normalise_location
 from .models import FilteredResult, JobListing, Profile, SearchPlan
 from .sponsor_filter import _normalize as _normalize_company, _build_entries
 
@@ -30,6 +31,7 @@ _MIN_COMPANY_CHARS = 8
 _MIN_COMPANY_WORDS = 2
 _RECRUITMENT_REASON = "recruitment agency — client company not disclosed, cannot verify sponsor"
 _REMOTE_CONFIRMED_FLAG = "remote_confirmed"
+_REMOTE_WITH_TRAVEL_FLAG = "remote_with_travel"
 
 
 def _check_employment_type(job: JobListing) -> FilteredResult:
@@ -115,12 +117,19 @@ def _check_salary(job: JobListing, min_salary: int) -> FilteredResult | None:
     return None
 
 
-def _check_recruitment(job: JobListing, recruitment_set: frozenset[str]) -> FilteredResult | None:
+def _check_recruitment(
+    job: JobListing, recruitment_set: frozenset[str], remote_ok: bool = False
+) -> FilteredResult | None:
     if job.source == "nhs":
         return None
 
-    if job.posted_by_agency:
+    def _result() -> FilteredResult:
+        if remote_ok:
+            return FilteredResult(job=job, flags=["sponsor_unverified"], rejected=False, reject_reason=None)
         return FilteredResult(job=job, flags=[], rejected=True, reject_reason=_RECRUITMENT_REASON)
+
+    if job.posted_by_agency:
+        return _result()
 
     normalized = _normalize_company(job.company or "")
     if not normalized:
@@ -128,12 +137,14 @@ def _check_recruitment(job: JobListing, recruitment_set: frozenset[str]) -> Filt
 
     for candidate in _build_entries(normalized):
         if candidate in recruitment_set:
-            return FilteredResult(job=job, flags=[], rejected=True, reject_reason=_RECRUITMENT_REASON)
+            return _result()
 
     return None
 
 
-def _check_sponsor(job: JobListing, sponsor_set: frozenset[str]) -> FilteredResult | None:
+def _check_sponsor(
+    job: JobListing, sponsor_set: frozenset[str], remote_ok: bool = False
+) -> FilteredResult | None:
     if job.source == "nhs":
         return None
 
@@ -144,6 +155,8 @@ def _check_sponsor(job: JobListing, sponsor_set: frozenset[str]) -> FilteredResu
         return None
 
     if len(normalized) < _MIN_COMPANY_CHARS or len(words) < _MIN_COMPANY_WORDS:
+        if remote_ok:
+            return FilteredResult(job=job, flags=["sponsor_unverified"], rejected=False, reject_reason=None)
         return FilteredResult(
             job=job,
             flags=[],
@@ -165,10 +178,16 @@ def _check_location(
     within_locations: frozenset[str] = frozenset(),
     remote_verdicts: dict[str, str] | None = None,
 ) -> FilteredResult | None:
+    # The verdict sets are keyed by the normalised location (see main.py's
+    # unique_locations), so the lookup must normalise too — otherwise postcode
+    # and whitespace variants are classified but never matched. Reject reasons
+    # still quote the original string for readability.
+    loc = normalise_location(job.location) if job.location else ""
+
     if remote_verdicts is None:
         # Legacy behaviour (include_remote off): only definite "outside"
         # verdicts reject; vague/uncertain locations pass through.
-        if not job.location or job.location not in rejected_locations:
+        if not loc or loc not in rejected_locations:
             return None
         return FilteredResult(
             job=job, flags=[], rejected=True,
@@ -178,7 +197,7 @@ def _check_location(
     # Remote gate (include_remote on): anything not confirmed within the
     # radius must be positively confirmed fully remote. A non-rejected
     # result signals pass-with-flags.
-    if job.location and job.location in within_locations:
+    if loc and loc in within_locations:
         return None
 
     verdict = remote_verdicts.get(job.url, "unverified")
@@ -186,11 +205,15 @@ def _check_location(
         return FilteredResult(
             job=job, flags=[_REMOTE_CONFIRMED_FLAG], rejected=False, reject_reason=None,
         )
+    if verdict == "remote_with_travel":
+        return FilteredResult(
+            job=job, flags=[_REMOTE_WITH_TRAVEL_FLAG], rejected=False, reject_reason=None,
+        )
 
     loc_label = job.location or "not stated"
     if verdict == "unverified":
         reason = f"remote check unavailable — cannot confirm fully remote ({loc_label})"
-    elif job.location and job.location in rejected_locations:
+    elif loc and loc in rejected_locations:
         reason = f"location outside radius and not confirmed fully remote: {job.location}"
     else:
         reason = f"location uncertain and not confirmed fully remote: {loc_label}"
@@ -216,6 +239,7 @@ def filter_jobs(
             results.append(loc_result)
             continue
         loc_flags = loc_result.flags if loc_result is not None else []
+        remote_ok = bool({_REMOTE_CONFIRMED_FLAG, _REMOTE_WITH_TRAVEL_FLAG} & set(loc_flags))
 
         et_result = _check_employment_type(job)
         if et_result.rejected:
@@ -237,21 +261,28 @@ def filter_jobs(
             results.append(salary_result)
             continue
 
+        carve_flags: list[str] = []
+        recruitment_carved = False
         if recruitment_set is not None:
-            recruitment_result = _check_recruitment(job, recruitment_set)
+            recruitment_result = _check_recruitment(job, recruitment_set, remote_ok)
             if recruitment_result is not None:
-                results.append(recruitment_result)
-                continue
+                if recruitment_result.rejected:
+                    results.append(recruitment_result)
+                    continue
+                carve_flags += recruitment_result.flags
+                recruitment_carved = True
 
-        if sponsor_set is not None:
-            sponsor_result = _check_sponsor(job, sponsor_set)
+        if sponsor_set is not None and not recruitment_carved:
+            sponsor_result = _check_sponsor(job, sponsor_set, remote_ok)
             if sponsor_result is not None:
-                results.append(sponsor_result)
-                continue
+                if sponsor_result.rejected:
+                    results.append(sponsor_result)
+                    continue
+                carve_flags += sponsor_result.flags
 
         results.append(FilteredResult(
             job=job,
-            flags=loc_flags + et_result.flags,
+            flags=loc_flags + et_result.flags + carve_flags,
             rejected=False,
             reject_reason=None,
         ))

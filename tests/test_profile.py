@@ -221,3 +221,39 @@ def test_marc_profile_has_sponsor_filter_off():
     assert profile.filter_sponsors is False
     assert profile.filter_recruitment is True
     assert profile.min_salary == 80000
+
+
+def test_remote_block_absent_defaults(tmp_path: Path):
+    p = _write(tmp_path, FULL_YAML)
+    profile = load_profile(p)
+    assert profile.remote_uk_wide is False
+    assert profile.remote_hubs == []
+    assert profile.include_remote is False
+
+
+def test_remote_block_uk_wide_and_hubs(tmp_path: Path):
+    p = _write(tmp_path, FULL_YAML + "\nremote:\n  uk_wide: true\n  hubs: [London, Manchester]\n")
+    profile = load_profile(p)
+    assert profile.remote_uk_wide is True
+    assert profile.remote_hubs == ["London", "Manchester"]
+    assert profile.include_remote is True
+
+
+def test_remote_block_hubs_only(tmp_path: Path):
+    p = _write(tmp_path, FULL_YAML + "\nremote:\n  hubs: [London]\n")
+    profile = load_profile(p)
+    assert profile.remote_uk_wide is False
+    assert profile.remote_hubs == ["London"]
+    assert profile.include_remote is True
+
+
+def test_legacy_include_remote_key_raises(tmp_path: Path):
+    p = _write(tmp_path, FULL_YAML + "\ninclude_remote: true\n")
+    with pytest.raises(ValueError, match="remote:"):
+        load_profile(p)
+
+
+def test_remote_hubs_must_be_strings(tmp_path: Path):
+    p = _write(tmp_path, FULL_YAML + "\nremote:\n  hubs: [1, 2]\n")
+    with pytest.raises(ValueError, match="hubs"):
+        load_profile(p)

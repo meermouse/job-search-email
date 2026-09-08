@@ -6,10 +6,10 @@ from ..models import JobListing, Profile
 _REED_URL = "https://www.reed.co.uk/api/1.0/search"
 
 
-def _fetch(params: dict, api_key: str) -> list[JobListing]:
+def _fetch(params: dict, api_key: str, leg: str) -> list[JobListing]:
     response = requests.get(_REED_URL, params=params, auth=(api_key, ""), timeout=30)
     response.raise_for_status()
-    return [_to_listing(item) for item in response.json().get("results", [])]
+    return [_to_listing(item, leg) for item in response.json().get("results", [])]
 
 
 def search(query: str, profile: Profile) -> list[JobListing]:
@@ -23,9 +23,9 @@ def search(query: str, profile: Profile) -> list[JobListing]:
         "distancefromLocation": 50,
         "minimumSalary": profile.min_salary,
         "resultsToTake": 100,
-    }, api_key)
+    }, api_key, "reed:radius")
 
-    if profile.include_remote:
+    if profile.remote_uk_wide:
         # UK-wide remote leg: no location constraint, keyword-biased towards
         # remote listings. Failure here must not lose the radius results.
         try:
@@ -33,14 +33,14 @@ def search(query: str, profile: Profile) -> list[JobListing]:
                 "keywords": f"{query} remote",
                 "minimumSalary": profile.min_salary,
                 "resultsToTake": 100,
-            }, api_key)
+            }, api_key, "reed:uk-remote")
         except Exception as exc:
             print(f"[reed] remote leg failed for {query!r}: {exc}", file=sys.stderr)
 
     return listings
 
 
-def _to_listing(item: dict) -> JobListing:
+def _to_listing(item: dict, leg: str = "") -> JobListing:
     return JobListing(
         title=item.get("jobTitle", ""),
         company=item.get("employerName", ""),
@@ -51,6 +51,7 @@ def _to_listing(item: dict) -> JobListing:
         source="reed",
         employment_type=_parse_employment_type(item),
         posted_by_agency=item.get("postedByRecruitmentAgency"),
+        search_legs=[leg] if leg else [],
     )
 
 

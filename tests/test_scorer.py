@@ -934,3 +934,19 @@ def test_user_message_schema_puts_analysis_fields_before_score():
     assert schema.index('"missing_essentials"') < schema.index('"score"')
     assert schema.index('"gatekeeping_gaps"') < schema.index('"score"')
     assert schema.index('"verdict"') < schema.index('"score"')
+
+
+def test_system_prompt_mentions_remote_when_configured():
+    from job_search_email.scorer import _build_system_prompt
+    from profile_helpers import make_profile
+    p = make_profile(remote_hubs=["London"])
+    prompt = _build_system_prompt(p)
+    assert "remote" in prompt.lower()
+    assert "outside" in prompt.lower()
+
+
+def test_system_prompt_no_remote_line_when_not_configured():
+    from job_search_email.scorer import _build_system_prompt
+    from profile_helpers import make_profile
+    prompt = _build_system_prompt(make_profile())
+    assert "actively wants fully-remote" not in prompt

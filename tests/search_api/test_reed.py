@@ -198,3 +198,16 @@ def test_search_remote_leg_failure_keeps_radius_results(monkeypatch, capsys):
     assert len(result) == 1
     assert result[0].title == "Digital Transformation Manager"
     assert "remote leg failed" in capsys.readouterr().err
+
+
+def test_reed_tags_radius_leg(monkeypatch):
+    monkeypatch.setenv("REED_API_KEY", "test-key")
+    with patch("job_search_email.search_api.reed.requests.get") as mock_get:
+        mock_get.return_value.json.return_value = {"results": [
+            {"jobTitle": "M", "employerName": "C", "locationName": "Bristol",
+             "minimumSalary": 65000, "jobDescription": "d", "jobUrl": "u",
+             "fullTime": True}
+        ]}
+        mock_get.return_value.raise_for_status = lambda: None
+        results = search("manager", PROFILE)
+    assert results and results[0].search_legs == ["reed:radius"]

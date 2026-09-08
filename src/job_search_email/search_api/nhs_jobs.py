@@ -46,6 +46,7 @@ def search(query: str, profile: Profile) -> list[JobListing]:
             url=f"https://jobs.nhs.uk{href}" if href else "",
             source="nhs",
             employment_type=None,
+            search_legs=["nhs:radius"],
         ))
 
     return results

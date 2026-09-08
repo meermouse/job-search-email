@@ -12,10 +12,13 @@ dist/
 .env
 search_plan.json
 search_plan_cache.json
+location_cache.json
+job_score_cache.json
 job_results.json
 job_results_filtered.json
 job_results_scored.json
 debug_report.html
+debug_run*.log
 runs/
 email_preview.html
 remote_check_cache.json

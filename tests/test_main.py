@@ -5,6 +5,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 from unittest.mock import patch as _patch
 
+import pytest
+
 from job_search_email.evaluator_notes import get_evaluator_notes
 from job_search_email.queries import generate_queries
 from job_search_email.exclusions import get_exclusions
@@ -436,19 +438,30 @@ def test_load_profile_filter_sponsors_reads_false(tmp_path: Path) -> None:
     assert profile.filter_sponsors is False
 
 
-def test_load_profile_include_remote_defaults_false(tmp_path: Path) -> None:
+def test_load_profile_remote_defaults_absent(tmp_path: Path) -> None:
     profile_path = tmp_path / "profile.yaml"
     profile_path.write_text(PROFILE_YAML, encoding="utf-8")
     profile = load_profile(path=profile_path)
+    assert profile.remote_uk_wide is False
+    assert profile.remote_hubs == []
     assert profile.include_remote is False
 
 
-def test_load_profile_include_remote_reads_true(tmp_path: Path) -> None:
+def test_load_profile_remote_block_read(tmp_path: Path) -> None:
+    yaml_with_block = PROFILE_YAML + "remote:\n  uk_wide: true\n  hubs: [London]\n"
+    profile_path = tmp_path / "profile.yaml"
+    profile_path.write_text(yaml_with_block, encoding="utf-8")
+    profile = load_profile(path=profile_path)
+    assert profile.remote_uk_wide is True
+    assert profile.remote_hubs == ["London"]
+
+
+def test_load_profile_legacy_include_remote_key_raises(tmp_path: Path) -> None:
     yaml_with_flag = PROFILE_YAML + "include_remote: true\n"
     profile_path = tmp_path / "profile.yaml"
     profile_path.write_text(yaml_with_flag, encoding="utf-8")
-    profile = load_profile(path=profile_path)
-    assert profile.include_remote is True
+    with pytest.raises(ValueError, match="remote:"):
+        load_profile(path=profile_path)
 
 
 def _run_main_with_toggles(tmp_path: Path, monkeypatch, send_main: bool, send_debug: bool):

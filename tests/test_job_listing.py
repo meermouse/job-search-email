@@ -31,3 +31,10 @@ def test_job_listing_optional_fields_accept_none():
     )
     assert job.salary_min is None
     assert job.employment_type is None
+
+
+def test_job_listing_search_legs_defaults_empty():
+    from job_search_email.models import JobListing
+    j = JobListing(title="t", company="c", location="l", salary_min=None,
+                   description="", url="u", source="reed", employment_type=None)
+    assert j.search_legs == []

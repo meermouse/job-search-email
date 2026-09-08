@@ -1,4 +1,5 @@
 import argparse
+import sys
 from pathlib import Path
 
 from .debug_email import build_debug_email_html
@@ -9,6 +10,13 @@ from .profile import load_profile
 DEBUG_REPORT_PATH = Path.cwd() / "debug_report.html"
 
 
+def _safe(text: str | None) -> str:
+    """Encode text through stdout's encoding with fallback to UTF-8, never raising."""
+    text = "" if text is None else str(text)
+    enc = getattr(sys.stdout, "encoding", None) or "utf-8"
+    return text.encode(enc, "replace").decode(enc, "replace")
+
+
 def _print_decisions(scored: list[ScoredResult]) -> None:
     kept = [r for r in scored if not r.rejected]
     rejected = [r for r in scored if r.rejected]
@@ -16,9 +24,9 @@ def _print_decisions(scored: list[ScoredResult]) -> None:
     print(f"  {len(kept)} kept, {len(rejected)} rejected")
     for r in sorted(kept, key=lambda r: (r.analysis.score if r.analysis else 0), reverse=True):
         score = str(r.analysis.score) if r.analysis else "—"
-        print(f"  [keep] {score:>3}  {r.job.title} — {r.job.company}")
+        print(f"  [keep] {score:>3}  {_safe(r.job.title)} — {_safe(r.job.company)}")
     for r in rejected:
-        print(f"  [drop]      {r.job.title} — {r.job.company}  ({r.reject_reason})")
+        print(f"  [drop]      {_safe(r.job.title)} — {_safe(r.job.company)}  ({_safe(r.reject_reason)})")
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -78,3 +78,21 @@ def test_debug_run_writes_report_summary_and_never_emails(tmp_path, capsys, monk
     assert "Nurse" in out and "employment type: contract" in out  # rejected job + reason
     mock_send.assert_not_called()
     mock_debug.assert_not_called()
+
+
+def test_print_decisions_handles_narrow_nbsp(capsys):
+    from job_search_email.debug_run import _print_decisions
+    from job_search_email.models import JobListing, JobAnalysis, ScoredResult
+    job = JobListing(title="Programme Lead PMO", company="X", location="London",
+                     salary_min=None, description="", url="u", source="reed",
+                     employment_type=None)
+    scored = [ScoredResult(job=job, flags=[], rejected=False, reject_reason=None,
+                           analysis=JobAnalysis(score=7, matched_skills=[], missing_essentials=[],
+                                                employment_type_note="", verdict="ok"))]
+    _print_decisions(scored)  # must not raise
+    assert "Lead PMO" in capsys.readouterr().out
+
+
+def test_safe_replaces_unencodable(monkeypatch):
+    import job_search_email.debug_run as dr
+    assert dr._safe("a b")  # returns a string, no raise
