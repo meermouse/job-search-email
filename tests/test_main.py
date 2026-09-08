@@ -13,6 +13,7 @@ from job_search_email.exclusions import get_exclusions
 from job_search_email.nhs_rules import get_nhs_rules
 from job_search_email.cache import fingerprint_profile
 from job_search_email.main import (
+    force_send_requested,
     generate_search_plan,
     load_cached_plan,
     process_profile,
@@ -840,3 +841,34 @@ def test_process_profile_skips_pipeline_on_non_send_day(tmp_path, monkeypatch):
 
     process_profile(profile_path)
     assert ran["pipeline"] is False
+
+    # force=True overrides the cadence gate and runs the pipeline anyway.
+    process_profile(profile_path, force=True)
+    assert ran["pipeline"] is True
+
+
+class TestForceSendRequested:
+    def test_false_by_default(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["job-search-email"])
+        monkeypatch.delenv("JOB_SEARCH_FORCE_SEND", raising=False)
+        assert force_send_requested() is False
+
+    def test_cli_flag(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["job-search-email", "--force"])
+        monkeypatch.delenv("JOB_SEARCH_FORCE_SEND", raising=False)
+        assert force_send_requested() is True
+
+    def test_env_var_truthy(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["job-search-email"])
+        monkeypatch.setenv("JOB_SEARCH_FORCE_SEND", "true")
+        assert force_send_requested() is True
+
+    def test_env_var_false_string(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["job-search-email"])
+        monkeypatch.setenv("JOB_SEARCH_FORCE_SEND", "false")
+        assert force_send_requested() is False
+
+    def test_env_var_empty(self, monkeypatch):
+        monkeypatch.setattr("sys.argv", ["job-search-email"])
+        monkeypatch.setenv("JOB_SEARCH_FORCE_SEND", "")
+        assert force_send_requested() is False
