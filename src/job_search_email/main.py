@@ -43,6 +43,9 @@ _WEEKLY_SEND_DAY = 0  # Monday
 _TWICE_WEEKLY_SEND_DAYS = frozenset({0, 4})  # Monday and Friday
 
 
+_TRUTHY = {"1", "true", "yes", "on"}
+
+
 def should_send_today(email_frequency: str, weekday: int) -> bool:
     """Return whether a profile's cadence includes the given weekday.
 
@@ -53,6 +56,17 @@ def should_send_today(email_frequency: str, weekday: int) -> bool:
     if email_frequency == "twice-weekly":
         return weekday in _TWICE_WEEKLY_SEND_DAYS
     return True  # daily (and any unrecognised value) sends every day
+
+
+def force_send_requested() -> bool:
+    """Whether this run should ignore the per-profile cadence and send anyway.
+
+    Triggered by ``--force`` / ``--ignore-cadence`` on the command line or the
+    ``JOB_SEARCH_FORCE_SEND`` env var (used by the manual GitHub Action run).
+    """
+    if {"--force", "--ignore-cadence"} & set(sys.argv[1:]):
+        return True
+    return os.getenv("JOB_SEARCH_FORCE_SEND", "").strip().lower() in _TRUTHY
 
 
 def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:
@@ -257,15 +271,20 @@ def discover_profiles(profiles_dir: Path) -> list[Path]:
     return sorted(profiles_dir.glob("*.yaml"))
 
 
-def process_profile(profile_path: Path) -> None:
+def process_profile(profile_path: Path, force: bool = False) -> None:
     profile = load_profile(profile_path)
 
     if not should_send_today(profile.email_frequency, date.today().weekday()):
+        if not force:
+            print(
+                f"[main] skipping {profile.name}: email_frequency="
+                f"{profile.email_frequency!r} does not send today"
+            )
+            return
         print(
-            f"[main] skipping {profile.name}: email_frequency="
-            f"{profile.email_frequency!r} does not send today"
+            f"[main] {profile.name}: email_frequency={profile.email_frequency!r} "
+            f"would skip today, but force send was requested — running anyway"
         )
-        return
 
     classification, scored = run_pipeline(profile, RUNS_DIR / profile_path.stem)
 
@@ -292,11 +311,15 @@ def main() -> None:
         print(f"[main] no profiles found in {PROFILES_DIR}", file=sys.stderr)
         raise SystemExit(1)
 
+    force = force_send_requested()
+    if force:
+        print("[main] force send requested — per-profile cadence will be ignored")
+
     failed: list[str] = []
     for profile_path in profile_paths:
         print(f"\n=== Profile: {profile_path.stem} ===")
         try:
-            process_profile(profile_path)
+            process_profile(profile_path, force=force)
         except Exception:
             print(f"[main] profile {profile_path.name} failed:", file=sys.stderr)
             traceback.print_exc()

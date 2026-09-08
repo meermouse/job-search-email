@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Ignore each profile''s email_frequency and send regardless of weekday'
+        type: boolean
+        default: true
 
 jobs:
   build:
@@ -43,6 +48,7 @@ jobs:
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          JOB_SEARCH_FORCE_SEND: ${{ inputs.force }}
         run: job-search-email
 
       - name: Save cache
