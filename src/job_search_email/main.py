@@ -203,7 +203,10 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
     remote_verdicts: dict[str, str] | None = None
     if profile.include_remote:
         print("Checking remote confirmation for far-afield jobs...")
-        far_jobs = [j for j in jobs if not (j.location and j.location in within_locations)]
+        far_jobs = [
+            j for j in jobs
+            if not (j.location and normalise_location(j.location) in within_locations)
+        ]
         remote_cache = load_remote_cache(REMOTE_CACHE_PATH)
         remote_verdicts = classify_remote(far_jobs, cache=remote_cache)
         save_remote_cache(remote_cache, REMOTE_CACHE_PATH)

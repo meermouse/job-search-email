@@ -15,15 +15,27 @@ _LONDON_OUTWARD_AREAS = frozenset({"EC", "WC", "E", "N", "NW", "SE", "SW", "W"})
 _UK_POSTCODE_RE = re.compile(
     r"^([A-Z]{1,2})(\d[A-Z\d]?)\s*(\d[A-Z]{2})?$", re.IGNORECASE
 )
+# LinkedIn/Indeed metro strings: "Greater Bristol Area, United Kingdom",
+# "Bristol Area, United Kingdom". Collapse to the bare city so the distance
+# classifier judges it from the city centre instead of defaulting to uncertain.
+_METRO_AREA_RE = re.compile(
+    r"^(?:Greater\s+)?(.+?)\s+Area(?:,\s*United Kingdom)?$", re.IGNORECASE
+)
 
 
 def normalise_location(raw: str) -> str:
-    """Collapse whitespace; map bare London postcodes to ``"London"``.
+    """Collapse whitespace; resolve strings the distance classifier cannot place.
 
-    Non-London postcodes and any non-postcode string are returned unchanged
-    (aside from whitespace normalisation).
+    - ``"Greater <City> Area[, United Kingdom]"`` / ``"<City> Area, ..."`` → ``"<City>"``
+    - bare London-district postcodes → ``"London"``
+
+    Every other postcode and non-postcode string is returned unchanged (aside
+    from whitespace normalisation).
     """
     cleaned = " ".join((raw or "").split())
+    m = _METRO_AREA_RE.match(cleaned)
+    if m:
+        return m.group(1).strip()
     m = _UK_POSTCODE_RE.match(cleaned)
     if not m:
         return cleaned
