@@ -56,6 +56,19 @@ def test_generate_queries_prompt_contains_rendered_profile():
     assert "nursing" in prompt
 
 
+def test_generate_queries_prompt_anchors_to_industry():
+    profile = make_profile(industry="NHS / Healthcare / Business")
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps([f"q{i}" for i in range(8)]))]
+    with patch("job_search_email.queries.client") as mock_client:
+        mock_client.messages.create.return_value = mock_response
+        generate_queries(profile)
+    prompt = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+    assert "NHS / Healthcare / Business" in prompt
+    assert "domain or specialism anchor" in prompt
+    assert "single-concept terms" in prompt
+
+
 def test_generate_queries_prompt_mentions_remote_when_configured():
     mock_response = MagicMock()
     mock_response.content = [MagicMock(text=json.dumps([f"q{i}" for i in range(8)]))]
