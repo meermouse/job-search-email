@@ -80,9 +80,38 @@ def test_classify_remote_invalid_verdict_defaults_not_remote():
 def test_classify_remote_api_failure_returns_unverified_and_does_not_cache():
     jobs = [make_job("https://x.com/1")]
     cache: dict[str, str] = {}
-    with patch("job_search_email.remote_filter.client") as mock_client:
+    with patch("job_search_email.remote_filter.client") as mock_client, \
+            patch("job_search_email.remote_filter.time.sleep"):
         mock_client.messages.create.side_effect = ConnectionError("api down")
         result = classify_remote(jobs, cache=cache)
+    assert result["https://x.com/1"] == "unverified"
+    assert cache == {}
+
+
+def test_classify_remote_retries_then_succeeds():
+    jobs = [make_job("https://x.com/1")]
+    cache: dict[str, str] = {}
+    with patch("job_search_email.remote_filter.client") as mock_client, \
+            patch("job_search_email.remote_filter.time.sleep") as mock_sleep:
+        mock_client.messages.create.side_effect = [
+            ConnectionError("api down"),
+            _mock_claude_response({"0": "remote"}),
+        ]
+        result = classify_remote(jobs, cache=cache)
+    assert mock_client.messages.create.call_count == 2
+    assert mock_sleep.called
+    assert result["https://x.com/1"] == "remote"
+    assert cache["https://x.com/1"] == "remote"
+
+
+def test_classify_remote_retry_exhausted_returns_unverified():
+    jobs = [make_job("https://x.com/1")]
+    cache: dict[str, str] = {}
+    with patch("job_search_email.remote_filter.client") as mock_client, \
+            patch("job_search_email.remote_filter.time.sleep"):
+        mock_client.messages.create.side_effect = ConnectionError("api down")
+        result = classify_remote(jobs, cache=cache)
+    assert mock_client.messages.create.call_count == 3
     assert result["https://x.com/1"] == "unverified"
     assert cache == {}
 

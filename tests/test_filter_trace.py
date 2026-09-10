@@ -122,7 +122,7 @@ def test_gates_remote_verdict_not_remote_rejects_location():
     assert loc.detail == "location outside radius and not confirmed fully remote: Manchester"
 
 
-def test_gates_remote_verdict_unverified_fails_closed():
+def test_gates_remote_verdict_unverified_kept_as_unconfirmed():
     gates = run_filter_gates(
         _remote_job(), make_profile(),
         location_verdict="uncertain", sponsor_set=None,
@@ -130,8 +130,8 @@ def test_gates_remote_verdict_unverified_fails_closed():
         remote_verdict="unverified",
     )
     loc = next(g for g in gates if g.name == "Location")
-    assert loc.passed is False
-    assert "remote check unavailable" in loc.detail
+    assert loc.passed is True
+    assert "remote not confirmed" in loc.detail.lower()
 
 
 def test_trace_location_detail_for_remote_with_travel():

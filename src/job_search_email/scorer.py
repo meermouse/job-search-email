@@ -1,7 +1,7 @@
-import json
 import os
 import statistics
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -9,6 +9,7 @@ from pathlib import Path
 import anthropic
 
 from .cache import fingerprint_profile, fingerprint_prompt, make_score_key, save_score_cache
+from .location_filter import _extract_json_object
 from .models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
 from .profile import render_profile
 
@@ -18,6 +19,12 @@ client = anthropic.Anthropic()
 # section in the second half, after the company blurb and responsibilities. The
 # cap must be generous enough to reach it: real Indeed postings run ~5k chars.
 _DESCRIPTION_LIMIT = 8000
+
+# The JSON schema has six list fields plus a free-text verdict; 768 tokens
+# truncates it often enough that ~1 in 8 haiku calls returned unparseable JSON
+# ("Unterminated string"). Give it room, and retry the rest.
+_MAX_TOKENS = 1536
+_ANALYSIS_ATTEMPTS = 3
 
 
 @dataclass
@@ -56,12 +63,24 @@ def _build_system_prompt(profile: Profile) -> str:
         "requirement the candidate lacks in gatekeeping_gaps (use an empty list "
         "if there are none). If the candidate lacks any gatekeeping requirement, "
         "the job is at best a partial match: score it 6 or below, however strong "
-        "the remaining overlap.\n"
+        "the remaining overlap. Then weigh how central that missing requirement "
+        "is: a peripheral gap sits at 5-6; when the missing requirement is a "
+        "core competency the role is built around (managing client accounts for "
+        "an account-management role, a security-cleared defence delivery record "
+        "for an MoD programme), the candidate would not clear the initial sift — "
+        "score it 2-4.\n"
         "If the role's core discipline (e.g. HR, finance, legal, clinical, "
-        "engineering) is a profession the candidate has never held a post in, "
-        "transferable skills do not survive the sift for a specialist role: "
-        "score it 1-4 regardless of keyword overlap, and normally set "
-        "exclude=true with exclude_reason \"Different profession\".\n\n"
+        "engineering, qualified accountancy, or a sales/business-development role "
+        "carrying revenue accountability) is a profession the candidate has "
+        "never held a post in, transferable skills do not survive the sift for a "
+        "specialist role: score it 1-4 regardless of keyword overlap, and "
+        "normally set exclude=true with exclude_reason \"Different profession\". "
+        "Judge this on the discipline of the role, not the employer's industry: "
+        "a general management, governance, transformation, programme/project, or "
+        "operations role is not a different profession merely because the "
+        "employer's sector (retail, legal, energy, defence, and so on) is one "
+        "the candidate has not worked in — score those on transferable fit using "
+        "the normal scale.\n\n"
         "Qualification analysis instructions:\n"
         "- Extract any explicitly stated qualification requirements from the job description\n"
         "- Compare each against the candidate's education and certifications using exact or near-exact matching only\n"
@@ -79,6 +98,10 @@ def _build_system_prompt(profile: Profile) -> str:
         "interim, maternity cover, locum, bank, or seasonal); the salary is clearly "
         "below the stated minimum; or the location is clearly outside the candidate's "
         "area.\n"
+        "- A missing salary or unstated employment type is not itself grounds for "
+        "exclusion — the upstream filters pass those through deliberately. Note the "
+        "uncertainty in the verdict and rank on the score; only exclude when the "
+        "posting states terms that fail a hard requirement.\n"
         "- \"FTC\" means fixed-term contract. Treat any posting that offers "
         "fixed-term as a possibility, including dual \"Permanent / FTC\" "
         "listings, as not a guaranteed permanent role: set exclude=true with "
@@ -129,17 +152,12 @@ def _build_user_message(job: JobListing) -> str:
     )
 
 
-def _strip_code_fence(text: str) -> str:
-    stripped = text.strip()
-    if stripped.startswith("```"):
-        lines = stripped.split("\n")
-        end = len(lines) - 1 if lines[-1].strip() == "```" else len(lines)
-        return "\n".join(lines[1:end]).strip()
-    return stripped
-
-
 def _parse_analysis(text: str) -> JobAnalysis:
-    data = json.loads(_strip_code_fence(text))
+    # _extract_json_object tolerates a code fence or trailing prose around the
+    # object ("Extra data" from json.loads), which haiku emits intermittently.
+    data = _extract_json_object(text)
+    if not isinstance(data, dict):
+        raise ValueError(f"expected a JSON object from the scorer, got {type(data).__name__}")
     score = int(data["score"])
     gatekeeping_gaps = data.get("gatekeeping_gaps", [])
     if gatekeeping_gaps:
@@ -162,40 +180,49 @@ def _parse_analysis(text: str) -> JobAnalysis:
     )
 
 
+def _request_analysis(system_prompt: str, user_message: str, model: str) -> tuple[JobAnalysis, str]:
+    """Call the scorer model, retrying transient API and parse failures.
+
+    haiku intermittently truncates the JSON or wraps it in prose; a retry
+    clears both, and the wider max_tokens stops the truncation at source.
+    """
+    last_exc: Exception | None = None
+    for attempt in range(1, _ANALYSIS_ATTEMPTS + 1):
+        try:
+            response = client.messages.create(
+                model=model,
+                max_tokens=_MAX_TOKENS,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_message}],
+            )
+            if not response.content:
+                raise ValueError(f"empty content list from Claude (stop_reason={response.stop_reason})")
+            block = response.content[0]
+            raw_text = getattr(block, "text", "")
+            if not raw_text.strip():
+                raise ValueError(f"empty text block from Claude (stop_reason={response.stop_reason}, type={type(block).__name__})")
+            return _parse_analysis(raw_text), raw_text
+        except Exception as exc:
+            last_exc = exc
+            if attempt < _ANALYSIS_ATTEMPTS:
+                print(f"[scorer] analysis attempt {attempt}/{_ANALYSIS_ATTEMPTS} failed: {exc}", file=sys.stderr)
+                time.sleep(2 ** attempt)
+    assert last_exc is not None  # the loop runs at least once
+    raise last_exc
+
+
 def _analyse_job(job: JobListing, system_prompt: str, model: str) -> JobAnalysis:
-    response = client.messages.create(
-        model=model,
-        max_tokens=768,
-        system=system_prompt,
-        messages=[{"role": "user", "content": _build_user_message(job)}],
-    )
-    if not response.content:
-        raise ValueError(f"empty content list from Claude (stop_reason={response.stop_reason})")
-    block = response.content[0]
-    text = getattr(block, "text", "")
-    if not text.strip():
-        raise ValueError(f"empty text block from Claude (stop_reason={response.stop_reason}, type={type(block).__name__})")
-    return _parse_analysis(text)
+    analysis, _ = _request_analysis(system_prompt, _build_user_message(job), model)
+    return analysis
 
 
 def analyse_job(job: JobListing, profile: Profile) -> AnalysisTrace:
     system_prompt = _build_system_prompt(profile)
     user_message = _build_user_message(job)
     model = os.getenv("SCORER_MODEL", "claude-haiku-4-5-20251001")
-    response = client.messages.create(
-        model=model,
-        max_tokens=768,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_message}],
-    )
-    if not response.content:
-        raise ValueError(f"empty content list from Claude (stop_reason={response.stop_reason})")
-    block = response.content[0]
-    raw_text = getattr(block, "text", "")
-    if not raw_text.strip():
-        raise ValueError(f"empty text block from Claude (stop_reason={response.stop_reason}, type={type(block).__name__})")
+    analysis, raw_text = _request_analysis(system_prompt, user_message, model)
     return AnalysisTrace(
-        analysis=_parse_analysis(raw_text),
+        analysis=analysis,
         system_prompt=system_prompt,
         user_message=user_message,
         raw_text=raw_text,

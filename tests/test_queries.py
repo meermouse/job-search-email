@@ -69,6 +69,34 @@ def test_generate_queries_prompt_anchors_to_industry():
     assert "single-concept terms" in prompt
 
 
+def test_generate_queries_prompt_reserves_slots_for_exact_target_roles():
+    profile = make_profile(target_roles=["Business Manager", "Digital Transformation"])
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps([f"q{i}" for i in range(8)]))]
+    with patch("job_search_email.queries.client") as mock_client:
+        mock_client.messages.create.return_value = mock_response
+        generate_queries(profile)
+    prompt = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+    # Two of eight phrases must be the exact target-role titles, and they are
+    # exempt from the "no bare generic terms" restriction.
+    assert "Two of the eight phrases must be the candidate's exact target-role titles" in prompt
+    assert "Business Manager, Digital Transformation" in prompt
+
+
+def test_generate_queries_prompt_softens_anchor_requirement_to_a_count():
+    profile = make_profile()
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text=json.dumps([f"q{i}" for i in range(8)]))]
+    with patch("job_search_email.queries.client") as mock_client:
+        mock_client.messages.create.return_value = mock_response
+        generate_queries(profile)
+    prompt = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+    # Was "Most phrases must carry ..."; now a concrete lower bound so the
+    # generator keeps room for broad on-target titles.
+    assert "At least four of the eight phrases must carry a domain or specialism anchor" in prompt
+    assert "Most phrases must carry" not in prompt
+
+
 def test_generate_queries_prompt_mentions_remote_when_configured():
     mock_response = MagicMock()
     mock_response.content = [MagicMock(text=json.dumps([f"q{i}" for i in range(8)]))]
