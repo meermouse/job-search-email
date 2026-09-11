@@ -8,7 +8,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from .cache import fingerprint_profile, load_score_cache
+from .cache import fingerprint_profile, fingerprint_prompt, load_score_cache
 from .email import build_email_html, send_email, send_debug_report
 from .debug_email import build_debug_email_html
 from .evaluator_notes import get_evaluator_notes
@@ -20,7 +20,7 @@ from .models import FilteredResult, JobListing, Profile, SearchPlan, ScoredResul
 from .nhs_rules import get_nhs_rules
 from .profile import load_profile
 from .scorer import score_jobs
-from .queries import generate_queries
+from .queries import QUERY_GENERATION_PROMPT, generate_queries
 from .search_api.fetcher import fetch_all_jobs
 from .sponsor_filter import load_sponsor_set
 from .recruitment_filter import load_recruitment_set
@@ -67,6 +67,19 @@ def force_send_requested() -> bool:
     if {"--force", "--ignore-cadence"} & set(sys.argv[1:]):
         return True
     return os.getenv("JOB_SEARCH_FORCE_SEND", "").strip().lower() in _TRUTHY
+
+
+def _plan_cache_key(profile: Profile) -> str:
+    """Cache key for a generated search plan.
+
+    Combines the profile fingerprint with a fingerprint of the query-generation
+    prompt, so tuning the prompt invalidates every cached plan — the same
+    contract the score cache uses for the scorer prompt.
+    """
+    return (
+        f"{fingerprint_profile(profile)}"
+        f"_{fingerprint_prompt(QUERY_GENERATION_PROMPT)[:12]}"
+    )
 
 
 def generate_search_plan(profile: Profile, fingerprint: str) -> SearchPlan:
@@ -175,19 +188,19 @@ def run_pipeline(profile: Profile, output_dir: Path) -> tuple[dict[str, Any], li
     filtered_results_path = output_dir / "job_results_filtered.json"
     scored_results_path = output_dir / "job_results_scored.json"
 
-    fingerprint = fingerprint_profile(profile)
-    cached = load_cached_plan(cache_path=CACHE_PATH, fingerprint=fingerprint)
+    cache_key = _plan_cache_key(profile)
+    cached = load_cached_plan(cache_path=CACHE_PATH, fingerprint=cache_key)
 
     if cached:
         plan = SearchPlan(**cached)
     else:
-        plan = generate_search_plan(profile, fingerprint)
+        plan = generate_search_plan(profile, cache_key)
         save_cached_plan(plan, cache_path=CACHE_PATH)
     write_search_plan(plan, plan_path)
 
     print("Job search plan ready:")
     print(f"- profile: {profile.name}")
-    print(f"- plan fingerprint: {fingerprint}")
+    print(f"- plan cache key: {cache_key}")
     print(f"- queries: {len(plan.queries)}")
 
     print("Fetching jobs...")
@@ -290,6 +303,14 @@ def process_profile(profile_path: Path, force: bool = False) -> None:
 
     print("Sending emails...")
     main_html, top_n = build_email_html(scored, profile)
+
+    if top_n == 0:
+        print(
+            f"[main] WARNING: {profile.name} main email section is EMPTY (0 matches) — "
+            "this usually means a scraping or scoring failure upstream, not a genuine "
+            "absence of suitable jobs. Check the filter/score counts above.",
+            file=sys.stderr,
+        )
 
     if profile.send_main_email:
         send_email(main_html, profile, n=top_n)

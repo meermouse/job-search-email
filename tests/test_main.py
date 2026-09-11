@@ -124,6 +124,53 @@ def test_fingerprint_and_cache(tmp_path: Path) -> None:
     assert len(cached["queries"]) == 8
 
 
+def test_plan_cache_key_changes_with_query_prompt(monkeypatch) -> None:
+    import sys as _sys
+
+    main_mod = _sys.modules["job_search_email.main"]
+    profile = make_profile()
+    key_before = main_mod._plan_cache_key(profile)
+
+    monkeypatch.setattr(
+        main_mod, "QUERY_GENERATION_PROMPT",
+        "an entirely different query-generation prompt",
+    )
+    key_after = main_mod._plan_cache_key(profile)
+
+    assert key_before != key_after
+    # The profile-hash portion is unchanged; only the prompt portion moved.
+    assert key_before.split("_")[0] == key_after.split("_")[0]
+
+
+def test_run_pipeline_ignores_plan_cached_under_bare_profile_fingerprint(tmp_path, monkeypatch) -> None:
+    import sys as _sys
+    from dataclasses import asdict
+
+    main_mod = _sys.modules["job_search_email.main"]
+    cache_path = tmp_path / "plan_cache.json"
+    monkeypatch.setattr(main_mod, "CACHE_PATH", cache_path)
+
+    profile = make_profile()
+    bare_fp = fingerprint_profile(profile)
+    # A plan cached the OLD way — keyed on the profile fingerprint alone.
+    stale = SearchPlan(profile_fingerprint=bare_fp, queries=["STALE QUERY"],
+                       exclusions={"roles": []}, nhs_rules={}, evaluator_notes=[])
+    cache_path.write_text(json.dumps({bare_fp: asdict(stale)}), encoding="utf-8")
+
+    fresh = SearchPlan(profile_fingerprint="x", queries=["FRESH QUERY"],
+                       exclusions={"roles": []}, nhs_rules={}, evaluator_notes=[])
+    with patch.object(main_mod, "load_profile", return_value=profile), \
+         patch.object(main_mod, "generate_search_plan", return_value=fresh) as gen, \
+         patch.object(main_mod, "fetch_all_jobs", return_value=[]), \
+         patch.object(main_mod, "classify_locations", return_value={}), \
+         patch.object(main_mod, "score_jobs", return_value=[]), \
+         patch.object(main_mod, "LOCATION_CACHE_PATH", tmp_path / "loc.json"), \
+         patch.object(main_mod, "SCORE_CACHE_PATH", tmp_path / "score.json"):
+        main_mod.run_pipeline(profile, tmp_path / "out")
+
+    gen.assert_called_once()  # stale entry was not reused
+
+
 def test_get_exclusions_merges_not_open_to() -> None:
     profile = make_profile()  # not_open_to: ["clinical roles", "nursing"]
 
@@ -812,6 +859,40 @@ class TestShouldSendToday:
 
     def test_unknown_frequency_falls_back_to_sending(self):
         assert should_send_today("fortnightly", 2) is True
+
+
+def test_process_profile_warns_on_empty_main_section(tmp_path, monkeypatch, capsys):
+    profile_path = tmp_path / "p.yaml"
+    profile_path.write_text(PROFILE_YAML + "\nsend_main_email: true\n", encoding="utf-8")
+
+    import sys as _sys
+
+    main_mod = _sys.modules["job_search_email.main"]
+    monkeypatch.setattr(main_mod, "run_pipeline", lambda profile, output_dir: ({}, []))
+    monkeypatch.setattr(main_mod, "build_email_html", lambda scored, profile: ("<html/>", 0))
+    monkeypatch.setattr(main_mod, "send_email", lambda *a, **k: None)
+
+    process_profile(profile_path, force=True)
+
+    err = capsys.readouterr().err
+    assert "main email section is EMPTY" in err
+
+
+def test_process_profile_no_warning_when_main_section_populated(tmp_path, monkeypatch, capsys):
+    profile_path = tmp_path / "p.yaml"
+    profile_path.write_text(PROFILE_YAML + "\nsend_main_email: true\n", encoding="utf-8")
+
+    import sys as _sys
+
+    main_mod = _sys.modules["job_search_email.main"]
+    monkeypatch.setattr(main_mod, "run_pipeline", lambda profile, output_dir: ({}, []))
+    monkeypatch.setattr(main_mod, "build_email_html", lambda scored, profile: ("<html/>", 3))
+    monkeypatch.setattr(main_mod, "send_email", lambda *a, **k: None)
+
+    process_profile(profile_path, force=True)
+
+    err = capsys.readouterr().err
+    assert "main email section is EMPTY" not in err
 
 
 def test_process_profile_skips_pipeline_on_non_send_day(tmp_path, monkeypatch):

@@ -88,7 +88,15 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
         return bool({"remote_confirmed", "remote_with_travel"} & set(r.flags))
 
     unverified = [r for r in eligible if "sponsor_unverified" in r.flags]
-    rest = [r for r in eligible if "sponsor_unverified" not in r.flags]
+    unconfirmed = [
+        r for r in eligible
+        if "remote_unconfirmed" in r.flags and "sponsor_unverified" not in r.flags
+    ]
+    unconfirmed_ids = {id(r) for r in unconfirmed}
+    rest = [
+        r for r in eligible
+        if "sponsor_unverified" not in r.flags and id(r) not in unconfirmed_ids
+    ]
     london = [r for r in rest if _is_confirmed_remote(r) and hubs and job_hub(r.job, hubs)]
     # Identity, not URL: two distinct results can share a URL (e.g. "" for NHS
     # listings missing an href), which would drop unrelated jobs from the email.
@@ -98,6 +106,7 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
     main.sort(key=lambda r: r.analysis.score, reverse=True)
     london.sort(key=lambda r: r.analysis.score, reverse=True)
     unverified.sort(key=lambda r: r.analysis.score, reverse=True)
+    unconfirmed.sort(key=lambda r: r.analysis.score, reverse=True)
     top = main[:20]
 
     th = 'style="padding:8px 6px; text-align:left; border-bottom:2px solid #dddddd; background:#f0f0f0;"'
@@ -145,13 +154,28 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
     n = len(top)
     today = date.today().strftime("%Y-%m-%d")
 
+    if main:
+        intro = (
+            f'<p style="font-size:14px; color:#666666; margin-bottom:16px;">Here are your '
+            f"top {n} jobs from today's search, ranked by suitability.</p>"
+        )
+    else:
+        # A zero-length main table almost always means a scraping or scoring
+        # failure upstream, not a genuine absence of jobs — say so loudly.
+        intro = (
+            '<p style="font-size:14px; color:#b00020; font-weight:bold; margin-bottom:16px;">'
+            "⚠ The main search returned 0 matches today. This usually points to a "
+            "scraping or scoring problem rather than there being no suitable jobs. "
+            "Any remote sections below are unaffected.</p>"
+        )
+
     parts = [
         f"""<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"></head>
 <body style="font-family:Arial,sans-serif; background:#ffffff; color:#333333; max-width:920px; margin:0 auto; padding:20px;">
   <p style="font-size:16px; margin-bottom:20px;">{_escape(profile.preamble)}</p>
-  <p style="font-size:14px; color:#666666; margin-bottom:16px;">Here are your top {n} jobs from today's search, ranked by suitability.</p>
+  {intro}
   """,
         _table(top),
     ]
@@ -170,6 +194,10 @@ def build_email_html(results: list[ScoredResult], profile: Profile) -> tuple[str
         parts.append('<h2 style="font-size:16px; margin-top:28px;">Remote &#8212; sponsor not verified</h2>')
         parts.append('<p style="font-size:12px; color:#666;">Sponsor status could not be verified from the listing — check the employer manually.</p>')
         parts.append(_table(unverified))
+    if unconfirmed:
+        parts.append('<h2 style="font-size:16px; margin-top:28px;">Remote &#8212; not confirmed</h2>')
+        parts.append('<p style="font-size:12px; color:#666;">The remote-working check could not run for these and the location is outside the search radius — verify remote status manually.</p>')
+        parts.append(_table(unconfirmed[:15]))
 
     parts.append(
         f"""

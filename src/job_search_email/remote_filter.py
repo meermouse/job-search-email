@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 import anthropic
@@ -42,24 +43,30 @@ def _classify_batch(batch: list[JobListing]) -> dict | None:
         }
         for i, job in enumerate(batch)
     ]
-    try:
-        response = client.messages.create(
-            model=_MODEL,
-            max_tokens=1024,
-            system=_SYSTEM_PROMPT,
-            messages=[{
-                "role": "user",
-                "content": "Classify these jobs:\n" + json.dumps(payload, ensure_ascii=False),
-            }],
-        )
-        text = response.content[0].text if response.content else ""
-        raw = _extract_json_object(text)
-        if not isinstance(raw, dict):
-            raise ValueError(f"expected dict, got {type(raw).__name__}")
-        return raw
-    except Exception as exc:
-        print(f"[remote_filter] classify call failed: {exc}", file=sys.stderr)
-        return None
+    # Retry transient failures (API errors, garbled output): a far-afield job
+    # whose check never runs is kept only as "unverified", so a flaky call
+    # otherwise silently narrows the results.
+    for attempt in range(1, 4):
+        try:
+            response = client.messages.create(
+                model=_MODEL,
+                max_tokens=1024,
+                system=_SYSTEM_PROMPT,
+                messages=[{
+                    "role": "user",
+                    "content": "Classify these jobs:\n" + json.dumps(payload, ensure_ascii=False),
+                }],
+            )
+            text = response.content[0].text if response.content else ""
+            raw = _extract_json_object(text)
+            if not isinstance(raw, dict):
+                raise ValueError(f"expected dict, got {type(raw).__name__}")
+            return raw
+        except Exception as exc:
+            print(f"[remote_filter] classify call failed (attempt {attempt}/3): {exc}", file=sys.stderr)
+            if attempt < 3:
+                time.sleep(2 ** attempt)
+    return None
 
 
 def classify_remote(jobs: list[JobListing], cache: dict[str, str]) -> dict[str, str]:

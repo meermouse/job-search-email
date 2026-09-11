@@ -3,10 +3,18 @@ import os
 from dataclasses import asdict
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from job_search_email.models import FilteredResult, JobAnalysis, JobListing, Profile, ScoredResult
 from profile_helpers import make_profile as shared_profile
 from job_search_email.models import EducationEntry, ExperienceEntry
 from job_search_email.scorer import _build_system_prompt
+
+
+@pytest.fixture(autouse=True)
+def _no_retry_sleep(monkeypatch):
+    """Keep the scorer's retry backoff from actually sleeping in tests."""
+    monkeypatch.setattr("job_search_email.scorer.time.sleep", lambda *_a, **_k: None)
 
 
 def make_job(**kwargs) -> JobListing:
@@ -276,10 +284,57 @@ def test_score_jobs_api_failure_adds_flag():
 
 def test_score_jobs_bad_json_adds_flag():
     results = [make_kept()]
-    with patch("job_search_email.scorer.client", _mock_client("not valid json")):
+    m = _mock_client("not valid json")
+    with patch("job_search_email.scorer.client", m):
         scored = score_jobs(results, make_profile())
     assert scored[0].analysis is None
     assert "analysis_failed" in scored[0].flags
+    assert m.messages.create.call_count == 3  # retried before giving up
+
+
+def test_score_jobs_retries_transient_truncated_json_then_succeeds():
+    results = [make_kept()]
+    m = MagicMock()
+    m.messages.create.side_effect = [
+        MagicMock(content=[MagicMock(text='{"score": 7, "verdict": "cut off here')]),  # truncated
+        MagicMock(content=[MagicMock(text=_GOOD_RESPONSE)]),
+    ]
+    with patch("job_search_email.scorer.client", m):
+        scored = score_jobs(results, make_profile())
+    assert m.messages.create.call_count == 2
+    assert scored[0].analysis is not None
+    assert scored[0].analysis.score == 8
+    assert "analysis_failed" not in scored[0].flags
+
+
+def test_score_jobs_api_failure_retries_then_succeeds():
+    results = [make_kept()]
+    m = MagicMock()
+    m.messages.create.side_effect = [
+        ConnectionError("blip"),
+        MagicMock(content=[MagicMock(text=_GOOD_RESPONSE)]),
+    ]
+    with patch("job_search_email.scorer.client", m):
+        scored = score_jobs(results, make_profile())
+    assert m.messages.create.call_count == 2
+    assert scored[0].analysis is not None
+    assert "analysis_failed" not in scored[0].flags
+
+
+def test_parse_analysis_tolerates_trailing_prose():
+    from job_search_email.scorer import _parse_analysis
+    text = _GOOD_RESPONSE + "\n\nLet me know if you need more detail!"
+    analysis = _parse_analysis(text)
+    assert analysis.score == 8
+
+
+def test_analyse_job_requests_generous_max_tokens():
+    from job_search_email.scorer import _analyse_job, _MAX_TOKENS
+    m = _mock_client()
+    with patch("job_search_email.scorer.client", m):
+        _analyse_job(make_job(), "sys", "model")
+    assert _MAX_TOKENS >= 1200
+    assert m.messages.create.call_args.kwargs["max_tokens"] == _MAX_TOKENS
 
 
 def test_score_jobs_sorts_kept_by_score_desc():

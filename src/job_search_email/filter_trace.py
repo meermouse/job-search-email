@@ -50,6 +50,8 @@ def run_filter_gates(
         loc_detail = f"{location_verdict} radius, confirmed fully remote ({job.location or 'not stated'})"
     elif loc is not None and "remote_with_travel" in loc.flags:
         loc_detail = f"{location_verdict} radius, remote with regular travel ({job.location or 'not stated'})"
+    elif loc is not None and "remote_unconfirmed" in loc.flags:
+        loc_detail = f"{location_verdict} radius, kept — remote not confirmed (check could not run) ({job.location or 'not stated'})"
     else:
         loc_detail = f"{location_verdict} radius ({job.location or 'not stated'})"
     gates.append(GateResult("Location", loc is None or not loc.rejected, loc_detail, False))

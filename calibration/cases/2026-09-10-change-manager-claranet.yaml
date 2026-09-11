@@ -1,0 +1,15 @@
+title: Change Manager
+company: Claranet Limited
+location: Gloucester
+salary_min: null
+description: |
+  The Role The Change Manager is an individual contributor responsible for planning, coordinating, and overseeing the implementation of changes across client environments. This role ensures all changes are delivered in a controlled, compliant, and efficient manner, aligned to financial services regulations and operational best practice. As a hands-on practitioner, you will drive robust change governance, minimise risk, and support business continu...
+url: https://www.reed.co.uk/jobs/change-manager/57173022
+source: reed
+employment_type: null
+calibration:
+  profile: jie-zhou
+  scored: 5
+  expected_min: 4
+  reason: "Excluded (exclude=true) on 'salary and employment type not stated' plus 'different sector (FS vs NHS)'. Neither is grounds for exclusion; rank as a partial match instead."
+  date: 2026-09-10

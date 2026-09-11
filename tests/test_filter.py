@@ -814,11 +814,13 @@ def test_remote_gate_blank_location_treated_as_uncertain():
     assert result.reject_reason == "location uncertain and not confirmed fully remote: not stated"
 
 
-def test_remote_gate_missing_verdict_fails_closed():
+def test_remote_gate_missing_verdict_kept_as_unconfirmed():
+    # No verdict for this job (check could not run): keep it with a flag rather
+    # than drop it, so a remote-check outage does not silently zero the results.
     job = make_job(location="Manchester", url="https://x.com/1")
     result = _check_location(job, _OUTSIDE, within_locations=_WITHIN, remote_verdicts={})
-    assert result is not None and result.rejected is True
-    assert result.reject_reason == "remote check unavailable — cannot confirm fully remote (Manchester)"
+    assert result is not None and result.rejected is False
+    assert result.flags == ["remote_unconfirmed"]
 
 
 def test_remote_with_travel_is_kept_with_flag():
@@ -836,14 +838,14 @@ def test_not_remote_still_rejected_under_gate():
     assert res is not None and res.rejected is True
 
 
-def test_remote_gate_unverified_verdict_fails_closed():
+def test_remote_gate_unverified_verdict_kept_as_unconfirmed():
     job = make_job(location="Manchester", url="https://x.com/1")
     result = _check_location(
         job, _OUTSIDE, within_locations=_WITHIN,
         remote_verdicts={"https://x.com/1": "unverified"},
     )
-    assert result is not None and result.rejected is True
-    assert "remote check unavailable" in result.reject_reason
+    assert result is not None and result.rejected is False
+    assert result.flags == ["remote_unconfirmed"]
 
 
 def test_remote_gate_none_verdicts_keeps_legacy_behaviour():
@@ -936,6 +938,42 @@ def test_confirmed_remote_named_non_sponsor_still_rejected():
     res = _check_sponsor(job, frozenset(), remote_ok=True)
     assert res is not None and res.rejected is True
     assert "not on approved sponsor list" in res.reject_reason
+
+
+def test_filter_jobs_unverified_kept_with_flag_when_sponsor_ok():
+    # Remote check could not run, but the employer is on the sponsor list:
+    # keep the job, tagged remote_unconfirmed for its own email section.
+    job = make_job(company="Big Approved Employer Ltd", location="Manchester",
+                   url="https://x/uv1", salary_min=90000, employment_type="permanent")
+    plan = SearchPlan(profile_fingerprint="", queries=[], exclusions={"roles": []},
+                      nhs_rules={}, evaluator_notes=[])
+    out = filter_jobs(
+        [job], plan, make_profile(),
+        recruitment_set=frozenset(),
+        sponsor_set=frozenset({"big approved employer"}),
+        within_locations=frozenset({"Bristol"}),
+        remote_verdicts={"https://x/uv1": "unverified"},
+    )
+    assert len(out) == 1 and out[0].rejected is False
+    assert "remote_unconfirmed" in out[0].flags
+
+
+def test_filter_jobs_unverified_still_enforces_sponsor_gate():
+    # remote_unconfirmed does NOT earn the sponsor carve-out that confirmed
+    # remote does: an unknown employer is still rejected.
+    job = make_job(company="Definitely Not A Sponsor Ltd", location="Manchester",
+                   url="https://x/uv2", salary_min=90000, employment_type="permanent")
+    plan = SearchPlan(profile_fingerprint="", queries=[], exclusions={"roles": []},
+                      nhs_rules={}, evaluator_notes=[])
+    out = filter_jobs(
+        [job], plan, make_profile(),
+        recruitment_set=frozenset(),
+        sponsor_set=frozenset(),
+        within_locations=frozenset({"Bristol"}),
+        remote_verdicts={"https://x/uv2": "unverified"},
+    )
+    assert len(out) == 1 and out[0].rejected is True
+    assert "not on approved sponsor list" in out[0].reject_reason
 
 
 def test_filter_jobs_end_to_end_sponsor_unverified_flag():

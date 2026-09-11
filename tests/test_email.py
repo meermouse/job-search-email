@@ -139,10 +139,11 @@ def test_build_email_html_includes_verdict():
     assert "Good match for MyJob" in html
 
 
-def test_build_email_html_zero_results_shows_count():
+def test_build_email_html_zero_results_shows_warning():
     profile = _make_profile()
     html, n = build_email_html([], profile)
-    assert "0 jobs" in html
+    assert n == 0
+    assert "returned 0 matches today" in html
 
 
 def test_send_email_skips_and_warns_when_no_credentials(monkeypatch, capsys):
@@ -426,6 +427,52 @@ def test_email_no_remote_sections_when_no_hubs():
     assert "Remote &#8212; London" not in html
     assert "sponsor not verified" not in html.lower()
     assert n == 1
+
+
+def test_email_remote_unconfirmed_section_separate():
+    profile = _make_profile(remote_hubs=["London"])
+    results = [
+        _make_result(6, title="Local Job", url="https://x/local"),
+        _remote_result("Unchecked Remote Job", "https://x/uc",
+                       flags=["remote_unconfirmed"], location="Manchester"),
+    ]
+    html, n = build_email_html(results, profile)
+    assert "not confirmed" in html.lower()
+    assert "Unchecked Remote Job" in html
+    assert n == 1  # only the local job is in the main table
+
+
+def test_email_remote_unconfirmed_capped():
+    profile = _make_profile()
+    results = [
+        _remote_result(f"Unchecked{i:02d}", f"https://x/uc{i}",
+                       flags=["remote_unconfirmed"], location="Leeds")
+        for i in range(20)
+    ]
+    html, n = build_email_html(results, profile)
+    assert "Unchecked00" in html
+    assert "Unchecked14" in html
+    assert "Unchecked15" not in html
+    assert n == 0
+
+
+def test_email_empty_main_shows_warning():
+    profile = _make_profile()
+    results = [
+        _remote_result("Only Unchecked", "https://x/uc",
+                       flags=["remote_unconfirmed"], location="Leeds"),
+    ]
+    html, n = build_email_html(results, profile)
+    assert n == 0
+    assert "returned 0 matches today" in html
+    assert "Only Unchecked" in html  # other sections still render
+
+
+def test_email_non_empty_main_has_no_warning():
+    profile = _make_profile()
+    results = [_make_result(7, title="Plain Job", url="https://x/p")]
+    html, n = build_email_html(results, profile)
+    assert "returned 0 matches today" not in html
 
 
 def test_email_heading_per_hub():

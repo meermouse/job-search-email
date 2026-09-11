@@ -20,13 +20,18 @@ Rules:
 - Short keyword phrases, 3–6 words
 - Vary the angle: exact target titles, adjacent titles, skills-led searches, seniority variants
 - Reflect the candidate's seniority ({seniority}) — do not generate junior or entry-level terms
-- Most phrases must carry a domain or specialism anchor — the candidate's sector ({industry}) \
-or a named function drawn from their profile (e.g. governance, workforce planning, information \
-governance, assurance) — not just a bare seniority word plus a generic verb
-- Do not use broad single-concept terms on their own ("consultant", "manager", "lead", \
-"strategy", "operations", "transformation", "project management", "analytics", "change"): \
-alone they match a wide pool of unrelated management-consultancy and vendor-implementation \
-roles. Each must be qualified by something specific to this candidate
+- Two of the eight phrases must be the candidate's exact target-role titles ({target_roles}) \
+— verbatim or near-verbatim — even if they read as generic. These are known-good anchors for \
+this candidate and are exempt from the single-concept restriction below.
+- At least four of the eight phrases must carry a domain or specialism anchor — the \
+candidate's sector ({industry}) or a named function drawn from their profile (e.g. governance, \
+workforce planning, information governance, assurance) — not just a bare seniority word plus a \
+generic verb
+- Aside from the two exact target-role phrases above, do not use broad single-concept terms \
+on their own ("consultant", "manager", "lead", "strategy", "operations", "transformation", \
+"project management", "analytics", "change"): alone they match a wide pool of unrelated \
+management-consultancy and vendor-implementation roles. Each must be qualified by something \
+specific to this candidate
 - A hiring manager reading the phrase should be able to picture this exact person applying
 - Avoid terms from their exclusion list: {not_open_to}
 {remote_rule}- No duplicates or near-duplicates

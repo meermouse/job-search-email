@@ -32,6 +32,7 @@ _MIN_COMPANY_WORDS = 2
 _RECRUITMENT_REASON = "recruitment agency — client company not disclosed, cannot verify sponsor"
 _REMOTE_CONFIRMED_FLAG = "remote_confirmed"
 _REMOTE_WITH_TRAVEL_FLAG = "remote_with_travel"
+_REMOTE_UNCONFIRMED_FLAG = "remote_unconfirmed"
 
 
 def _check_employment_type(job: JobListing) -> FilteredResult:
@@ -209,11 +210,17 @@ def _check_location(
         return FilteredResult(
             job=job, flags=[_REMOTE_WITH_TRAVEL_FLAG], rejected=False, reject_reason=None,
         )
+    if verdict == "unverified":
+        # The remote check could not run (retries exhausted) or produced no
+        # verdict for this job. Keep it, flagged, rather than drop it — a
+        # transient outage should not silently narrow the results. It does not
+        # earn the sponsor carve-out that a confirmed-remote job gets.
+        return FilteredResult(
+            job=job, flags=[_REMOTE_UNCONFIRMED_FLAG], rejected=False, reject_reason=None,
+        )
 
     loc_label = job.location or "not stated"
-    if verdict == "unverified":
-        reason = f"remote check unavailable — cannot confirm fully remote ({loc_label})"
-    elif loc and loc in rejected_locations:
+    if loc and loc in rejected_locations:
         reason = f"location outside radius and not confirmed fully remote: {job.location}"
     else:
         reason = f"location uncertain and not confirmed fully remote: {loc_label}"
